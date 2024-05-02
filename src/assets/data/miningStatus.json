@@ -1,0 +1,16 @@
+[
+  { "label": "Explorer" },
+  { "label": "Diamond Drilling" },
+  { "label": "Feasibility (PFS)" },
+  { "label": "Discovery (DFS)" },
+  { "label": "Resource" },
+  { "label": "Ore Reserve" },
+  { "label": "JORC Resource" },
+  { "label": "Work permit (Process Plant)" },
+  { "label": "Transition To producer" },
+  { "label": "Investor" },
+  { "label": "Producer" },
+  { "label": "Profitable" },
+  { "label": "Dividends" },
+  { "label": "Franking Credits" }
+]
