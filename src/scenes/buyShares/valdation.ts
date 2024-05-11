@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useState } from "react";
-import { MainData } from "../../../electron/types";
+import { CompanyData } from "../../../electron/types";
 import * as yup from "yup";
 
 // Used in validateASXCode
@@ -13,10 +13,10 @@ export const cleanUpValidation = () => {
 };
 
 export const validateASXCode = (
-  data: MainData[],
+  data: CompanyData[],
   setCompanyName: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
-  setUnitCost: Dispatch<SetStateAction<string>>
+  setUnitPrice: Dispatch<SetStateAction<string>>
 ) => {
   return async (value: string, context: yup.TestContext) => {
     const { path, createError } = context;
@@ -30,7 +30,7 @@ export const validateASXCode = (
 
     // If ASX Code is missing
     if (value === undefined) {
-      setUnitCost(undefined);
+      setUnitPrice(undefined);
       prevValue = undefined;
       return sendError("ASX Code Required");
     }
@@ -58,7 +58,7 @@ export const validateASXCode = (
 
         // Update states
         if (res.quote.longName) setCompanyName(res.quote.longName.toUpperCase());
-        if (res.quote.regularMarketPrice) setUnitCost(res.quote.regularMarketPrice.toString());
+        if (res.quote.regularMarketPrice) setUnitPrice(res.quote.regularMarketPrice.toString());
         prevErrorMsg = undefined;
         return true;
       } catch (error) {

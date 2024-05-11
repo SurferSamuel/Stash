@@ -6,7 +6,7 @@ import * as yup from "yup";
 import dayjs from "dayjs";
 
 import { cleanUpValidation, validateASXCode } from "./valdation";
-import AutoUpdateUnitCost from "./autoUpdateUnitCost";
+import AutoUpdateUnitPrice from "./autoUpdateUnitPrice";
 import CostBreakdownHandler from "./costBreakdown";
 import LoadBrokerage from "./loadBrokerage";
 
@@ -29,14 +29,20 @@ import SelectInput from "../../components/select";
 import Header from "../../components/header";
 
 // Types
-import { MainData, Option, Settings } from "../../../electron/types";
+import { CompanyData, Option } from "../../../electron/types";
+
+interface Settings {
+  unitPriceAutoFill: boolean;
+  gstPercent: string;
+  brokerageAutoFill: string;
+}
 
 export interface BuySharesFormValues {
   asxcode: string;
   user: string;
   date: dayjs.Dayjs;
   quantity: string;
-  unitCost: string;
+  unitPrice: string;
   brokerage: string;
 }
 
@@ -46,9 +52,9 @@ const BuyShares = () => {
   const isNonMobile = useMediaQuery("(min-width:800px)");
 
   // Core data related states
-  const [data, setData] = useState<MainData[]>([]);
+  const [data, setData] = useState<CompanyData[]>([]);
   const [settings, setSettings] = useState<Settings>({
-    unitCostAutoFill: false,
+    unitPriceAutoFill: false,
     gstPercent: "0",
     brokerageAutoFill: "",
   });
@@ -56,7 +62,7 @@ const BuyShares = () => {
   // ASX Code related states
   const [loading, setLoading] = useState<boolean>(false);
   const [companyName, setCompanyName] = useState<string>("");
-  const [unitCost, setUnitCost] = useState<string>(undefined);
+  const [unitPrice, setUnitPrice] = useState<string>(undefined);
 
   // Dropdown data states
   const [asxCodeList, setAsxCodeList] = useState<Option[]>([]);
@@ -81,7 +87,7 @@ const BuyShares = () => {
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      const data = await window.electronAPI.getData("data");
+      const data = await window.electronAPI.getData("companies");
       const users = await window.electronAPI.getData("users");
       const settings = await window.electronAPI.getData("settings");
       if (isMounted) {
@@ -106,7 +112,7 @@ const BuyShares = () => {
     user: "",
     date: dayjs(),
     quantity: "",
-    unitCost: "",
+    unitPrice: "",
     brokerage: "",
   };
 
@@ -114,11 +120,11 @@ const BuyShares = () => {
     yup.object().shape({
       asxcode: yup
         .string()
-        .test("asxcode", "", validateASXCode(data, setCompanyName, setLoading, setUnitCost)),
+        .test("asxcode", "", validateASXCode(data, setCompanyName, setLoading, setUnitPrice)),
       user: yup.string().required("User Required"),
       date: yup.date().typeError("Invalid Date").required("Date Required"),
       quantity: yup.number().required("Quantity Requried"),
-      unitCost: yup.number().required("Unit Cost Requried"),
+      unitPrice: yup.number().required("Unit Price Requried"),
       brokerage: yup.number().required("Brokerage Requried"),
     });
 
@@ -242,17 +248,17 @@ const BuyShares = () => {
                 helperText={touched.quantity && errors.quantity}
                 sx={{ gridColumn: "span 4" }}
               />
-              {/* Unit Cost Input */}
+              {/* Unit Price Input */}
               <CustomTextField
                 currencyInput
                 type="text"
-                name="unitCost"
-                label="Unit Cost"
-                value={values.unitCost}
+                name="unitPrice"
+                label="Unit Price"
+                value={values.unitPrice}
                 onBlur={handleBlur}
                 onChange={handleChange}
-                error={!!touched.unitCost && !!errors.unitCost}
-                helperText={touched.unitCost && errors.unitCost}
+                error={!!touched.unitPrice && !!errors.unitPrice}
+                helperText={touched.unitPrice && errors.unitPrice}
                 sx={{ gridColumn: "span 4" }}
               />
               {/* Brokerage Input */}
@@ -311,8 +317,8 @@ const BuyShares = () => {
               setGst={setGst}
               setTotal={setTotal}
             />
-            {/* Automatically set unit cost using current market price */}
-            {settings.unitCostAutoFill && <AutoUpdateUnitCost unitCost={unitCost} />}
+            {/* Automatically set unit price using current market price */}
+            {settings.unitPriceAutoFill && <AutoUpdateUnitPrice unitPrice={unitPrice} />}
             {/* Snackbar shown on success/error */}
             <Snackbar
               open={openSnackbar}

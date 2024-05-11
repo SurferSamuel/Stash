@@ -19,12 +19,12 @@ const CostBreakdownHandler = (props: Props): null => {
     let total = 0;
 
     // If quantity or unit cost is empty, then set share vlaue to default $0.00
-    if (values.quantity === "" || values.unitCost === "") {
+    if (values.quantity === "" || values.unitPrice === "") {
       setShareValue(0);
     }
     // Otherwise update the share value
     else {
-      const shareValue = parseFloat(values.quantity) * parseFloat(values.unitCost);
+      const shareValue = parseFloat(values.quantity) * parseFloat(values.unitPrice);
       setShareValue(shareValue);
       total += shareValue;
     }
