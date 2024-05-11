@@ -30,7 +30,7 @@ export const validateASXCode = (
     }
 
     // ASX Code must be new and not in the existing data
-    const existingData = await window.electronAPI.getData("data");
+    const existingData = await window.electronAPI.getData("companies");
     if (existingData.some((obj) => obj.asxcode === value.toUpperCase())) {
       return sendError("ASX Code Already Exists");
     }
