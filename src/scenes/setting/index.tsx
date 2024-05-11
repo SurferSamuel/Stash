@@ -45,7 +45,7 @@ const Settings = () => {
   }, []);
 
   const initialValues: Settings = {
-    unitCostAutoFill: true,
+    unitPriceAutoFill: true,
     gstPercent: "",
     brokerageAutoFill: "",
   };
@@ -108,15 +108,14 @@ const Settings = () => {
             >
               {/* Left Side */}
               <RowLabel
-                title="Unit Cost Auto Fill"
+                title="Unit Price Auto Fill"
                 subtitle="Automatically prefill forms using the current share price"
               />
               {/* Right Side */}
-
               <Switch
                 color="secondary"
-                name="unitCostAutoFill"
-                checked={values.unitCostAutoFill}
+                name="unitPriceAutoFill"
+                checked={values.unitPriceAutoFill}
                 onChange={handleChange}
                 inputProps={{ "aria-label": "controlled" }}
               />

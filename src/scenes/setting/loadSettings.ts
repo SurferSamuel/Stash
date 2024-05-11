@@ -10,7 +10,7 @@ const LoadSettings = (): null => {
     (async () => {
       const settings = await window.electronAPI.getData("settings");
       if (isMounted) {
-        setFieldValue("unitCostAutoFill", settings.unitCostAutoFill);
+        setFieldValue("unitPriceAutoFill", settings.unitPriceAutoFill);
         setFieldValue("gstPercent", settings.gstPercent);
         setFieldValue("brokerageAutoFill", settings.brokerageAutoFill);
       }

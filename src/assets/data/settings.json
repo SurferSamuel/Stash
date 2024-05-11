@@ -1,5 +1,5 @@
 {
-  "unitCostAutoFill": true,
+  "unitPriceAutoFill": true,
   "gstPercent": "10",
   "brokerageAutoFill": "10.00"
 }
