@@ -318,7 +318,7 @@ const AddTrade = () => {
                 {/* Brokerage */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 12px 10px">
                   <Typography variant="h5">Brokerage</Typography>
-                  <Typography variant="h5">{"$" + brokerage.toFixed(2)}</Typography>
+                  <Typography variant="h5">{(brokerage < 0 ? "-$" : "$") + Math.abs(brokerage).toFixed(2)}</Typography>
                 </Box>
                 {/* GST */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 16px 10px">
@@ -327,13 +327,13 @@ const AddTrade = () => {
                       ({settings.gstPercent}%)
                     </span>
                   </Typography>
-                  <Typography variant="h5">{"$" + gst.toFixed(2)}</Typography>
+                  <Typography variant="h5">{(gst < 0 ? "-$" : "$") + Math.abs(gst).toFixed(2)}</Typography>
                 </Box>
                 <Divider />
                 {/* Total */}
                 <Box display="flex" justifyContent="space-between" p="12px 10px 12px 10px">
                   <Typography variant="h5">Total</Typography>
-                  <Typography variant="h5">{"$" + total.toFixed(2)}</Typography>
+                  <Typography variant="h5">{(total < 0 ? "-$" : "$") + Math.abs(total).toFixed(2)}</Typography>
                 </Box>
                 <Divider />
               </Box>

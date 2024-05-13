@@ -10,7 +10,7 @@ interface Props {
   setTotal: Dispatch<SetStateAction<number>>;
 }
 
-// Updates the cost breakdown values with the form values
+// Updates the price breakdown values with the form values
 const PriceBreakdownHandler = (props: Props): null => {
   const { gstPercent, setShareValue, setBrokerage, setGst, setTotal } = props;
   const { values } = useFormikContext<AddTradeFormValues>();
@@ -18,7 +18,7 @@ const PriceBreakdownHandler = (props: Props): null => {
   useEffect(() => {
     let total = 0;
 
-    // If quantity or unit cost is empty, then set share vlaue to default $0.00
+    // If quantity or unit price is empty, then set share value to default $0.00
     if (values.quantity === "" || values.unitPrice === "") {
       setShareValue(0);
     }
@@ -36,7 +36,8 @@ const PriceBreakdownHandler = (props: Props): null => {
     }
     // Otherwise update the brokerage and gst
     else {
-      const brokerage = parseFloat(values.brokerage);
+      // Brokerage and gst is positive when buying, negative when selling
+      const brokerage = (values.type === "BUY" ? 1 : -1) * parseFloat(values.brokerage);
       const gst = brokerage * (parseFloat(gstPercent) / 100);
       setBrokerage(brokerage);
       setGst(gst);
