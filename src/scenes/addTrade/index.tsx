@@ -76,7 +76,7 @@ const AddTrade = () => {
   const [gst, setGst] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
 
-  // Success alert states
+  // Alert states
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [transition, setTransition] = useState(undefined);
   const [severity, setSeverity] = useState<"success" | "error">("success");
@@ -309,7 +309,11 @@ const AddTrade = () => {
                 <Divider />
                 {/* Share Value */}
                 <Box display="flex" justifyContent="space-between" p="16px 10px 12px 10px">
-                  <Typography variant="h5">Shares</Typography>
+                  <Typography variant="h5">
+                    Shares <span style={{ color: 'grey' }}>
+                      ({values.quantity ? values.quantity : 0} x ${values.unitPrice ? values.unitPrice : 0})
+                    </span>
+                  </Typography>
                   <Typography variant="h5">{"$" + shareValue.toFixed(2)}</Typography>
                 </Box>
                 {/* Brokerage */}
@@ -319,7 +323,11 @@ const AddTrade = () => {
                 </Box>
                 {/* GST */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 16px 10px">
-                  <Typography variant="h5">GST</Typography>
+                  <Typography variant="h5">
+                    GST <span style={{ color: 'grey' }}>
+                      ({settings.gstPercent}%)
+                    </span>
+                  </Typography>
                   <Typography variant="h5">{"$" + gst.toFixed(2)}</Typography>
                 </Box>
                 <Divider />
