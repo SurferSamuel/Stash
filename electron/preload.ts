@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { Data, FetchQuote, Key } from "./types";
-import { BuySharesFormValues } from "../src/scenes/buyShares";
+import { AddTradeFormValues } from "../src/scenes/addTrade";
 import { AddCompanyFormValues } from "../src/scenes/addCompany";
 
 contextBridge.exposeInMainWorld("electronAPI", {
@@ -10,5 +10,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   getStoragePath: (): Promise<string> => ipcRenderer.invoke("getStoragePath"),
   openStoragePath: (): Promise<void> => ipcRenderer.invoke("openStoragePath"),
   addCompany: (values: AddCompanyFormValues) => ipcRenderer.invoke("addCompany", values),
-  buyShare: (values: BuySharesFormValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
+  buyShare: (values: AddTradeFormValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
 });

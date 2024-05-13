@@ -6,7 +6,7 @@ import fs from "fs";
 
 // Types
 import { CompanyData, Data, FetchQuote, Key, Option, OptionKey, ShareEntry } from "./types";
-import { BuySharesFormValues } from "../src/scenes/buyShares";
+import { AddTradeFormValues } from "../src/scenes/addTrade";
 import { AddCompanyFormValues } from "../src/scenes/addCompany";
 
 /*
@@ -167,7 +167,7 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
  * Assumes form values can be parsed as floats (checked prior by validation)
  * Returns true if successful, false otherwise.
  */
-export const buyShare = (event: IpcMainEvent, values: BuySharesFormValues, gstPercent: string): boolean => {
+export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPercent: string): boolean => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 

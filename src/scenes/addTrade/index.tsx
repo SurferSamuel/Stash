@@ -36,7 +36,7 @@ interface Settings {
   brokerageAutoFill: string;
 }
 
-export interface BuySharesFormValues {
+export interface AddTradeFormValues {
   asxcode: string;
   user: string;
   date: dayjs.Dayjs;
@@ -45,7 +45,7 @@ export interface BuySharesFormValues {
   brokerage: string;
 }
 
-const BuyShares = () => {
+const AddTrade = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:800px)");
@@ -106,7 +106,7 @@ const BuyShares = () => {
     };
   }, []);
 
-  const initialValues: BuySharesFormValues = {
+  const initialValues: AddTradeFormValues = {
     asxcode: "",
     user: "",
     date: dayjs(),
@@ -129,9 +129,9 @@ const BuyShares = () => {
 
   return (
     <Box m="25px 30px 15px 30px">
-      <Header title="Buy Shares" subtitle="Record purchased shares for a company" />
+      <Header title="Add Trade" subtitle="Record a share trade for a company" />
       <Formik
-        onSubmit={(values: BuySharesFormValues) => {
+        onSubmit={(values: AddTradeFormValues) => {
           handleFormSubmit(
             values,
             settings.gstPercent,
@@ -337,4 +337,4 @@ const BuyShares = () => {
   );
 };
 
-export default BuyShares;
+export default AddTrade;

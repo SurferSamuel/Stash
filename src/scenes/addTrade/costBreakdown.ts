@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction, useEffect } from "react";
-import { BuySharesFormValues } from "./index";
+import { AddTradeFormValues } from "./index";
 import { useFormikContext } from "formik";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 // Updates the cost breakdown values with the form values
 const CostBreakdownHandler = (props: Props): null => {
   const { gstPercent, setShareValue, setBrokerage, setGst, setTotal } = props;
-  const { values } = useFormikContext<BuySharesFormValues>();
+  const { values } = useFormikContext<AddTradeFormValues>();
 
   useEffect(() => {
     let total = 0;

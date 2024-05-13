@@ -1,9 +1,9 @@
 import { Dispatch, SetStateAction } from "react";
-import { BuySharesFormValues } from "./index";
+import { AddTradeFormValues } from "./index";
 import Slide from "@mui/material/Slide";
 
 const handleFormSubmit = async (
-  values: BuySharesFormValues,
+  values: AddTradeFormValues,
   gstPercent: string,
   setOpenSnackbar: Dispatch<SetStateAction<boolean>>,
   setTransition: Dispatch<any>,
