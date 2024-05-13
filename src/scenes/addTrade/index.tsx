@@ -7,7 +7,7 @@ import dayjs from "dayjs";
 
 import { cleanUpValidation, validateASXCode } from "./valdation";
 import AutoUpdateUnitPrice from "./autoUpdateUnitPrice";
-import CostBreakdownHandler from "./costBreakdown";
+import PriceBreakdownHandler from "./priceBreakdown";
 import LoadBrokerage from "./loadBrokerage";
 
 // Material UI
@@ -308,8 +308,8 @@ const AddTrade = () => {
                 Confirm
               </Button>
             </Box>
-            {/* Calculate cost breakdown using form values (handled in ./costBreakdown.ts) */}
-            <CostBreakdownHandler
+            {/* Calculate price breakdown using form values (handled in ./costBreakdown.ts) */}
+            <PriceBreakdownHandler
               gstPercent={settings.gstPercent}
               setShareValue={setShareValue}
               setBrokerage={setBrokerage}

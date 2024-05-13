@@ -11,7 +11,7 @@ interface Props {
 }
 
 // Updates the cost breakdown values with the form values
-const CostBreakdownHandler = (props: Props): null => {
+const PriceBreakdownHandler = (props: Props): null => {
   const { gstPercent, setShareValue, setBrokerage, setGst, setTotal } = props;
   const { values } = useFormikContext<AddTradeFormValues>();
 
@@ -50,4 +50,4 @@ const CostBreakdownHandler = (props: Props): null => {
   return null;
 };
 
-export default CostBreakdownHandler;
+export default PriceBreakdownHandler;
