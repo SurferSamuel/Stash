@@ -38,6 +38,7 @@ interface Settings {
 
 export interface AddTradeFormValues {
   asxcode: string;
+  type: string;
   user: string;
   date: dayjs.Dayjs;
   quantity: string;
@@ -67,10 +68,7 @@ const AddTrade = () => {
   const [asxCodeList, setAsxCodeList] = useState<Option[]>([]);
   const [usersList, setUsersList] = useState<Option[]>([]);
 
-  // Type state
-  const [type, setType] = useState<"BUY" | "SELL">("BUY");
-
-  // Cost breakdown box states
+  // Price breakdown box states
   const [shareValue, setShareValue] = useState<number>(0);
   const [brokerage, setBrokerage] = useState<number>(0);
   const [gst, setGst] = useState<number>(0);
@@ -111,6 +109,7 @@ const AddTrade = () => {
 
   const initialValues: AddTradeFormValues = {
     asxcode: "",
+    type: "BUY",
     user: "",
     date: dayjs(),
     quantity: "",
@@ -213,10 +212,10 @@ const AddTrade = () => {
               </Typography>
               {/* Type Buttons */}
               <Button
-                variant={type === "BUY" ? "contained" : "outlined"}
+                variant={values.type === "BUY" ? "contained" : "outlined"}
                 color="success"
                 size="large"
-                onClick={() => setType("BUY")} 
+                onClick={() => handleChange({ target: { name: "type", value: "BUY" } })} 
                 sx={{ 
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
@@ -225,10 +224,10 @@ const AddTrade = () => {
                 <Typography variant="h5" fontWeight={500}>BUY</Typography>
               </Button>
               <Button
-                variant={type === "SELL" ? "contained" : "outlined"} 
+                variant={values.type === "SELL" ? "contained" : "outlined"} 
                 color="error"
                 size="large"
-                onClick={() => setType("SELL")}
+                onClick={() => handleChange({ target: { name: "type", value: "SELL" } })}
                 sx={{ 
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
