@@ -165,10 +165,16 @@ export const themeSettings = (mode: PaletteMode) => {
             },
             success: {
               light: "#00ff38",
-              main: "#00cc2d",
+              main: "#007d1c",
               dark: "#004f11",
               contrastText: "#ffffff",
             },
+            error: {
+              light: "#e57373",
+              main: "#d43a2f",
+              dark: "#d32f2f",
+              contrastText: "#ffffff"
+            }
           }
         : {
             primary: {
@@ -187,10 +193,16 @@ export const themeSettings = (mode: PaletteMode) => {
             },
             success: {
               light: "#00ff38",
-              main: "#00cc2d",
+              main: "#007d1c",
               dark: "#004f11",
               contrastText: "#ffffff",
             },
+            error: {
+              light: "#e57373",
+              main: "#d43a2f",
+              dark: "#d32f2f",
+              contrastText: "#ffffff"
+            }
           }),
     },
     typography: {
