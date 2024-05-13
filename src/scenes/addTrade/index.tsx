@@ -67,6 +67,9 @@ const AddTrade = () => {
   const [asxCodeList, setAsxCodeList] = useState<Option[]>([]);
   const [usersList, setUsersList] = useState<Option[]>([]);
 
+  // Type state
+  const [type, setType] = useState<"BUY" | "SELL">("BUY");
+
   // Cost breakdown box states
   const [shareValue, setShareValue] = useState<number>(0);
   const [brokerage, setBrokerage] = useState<number>(0);
@@ -146,8 +149,6 @@ const AddTrade = () => {
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
-            {/* Load brokerage from settings in storage */}
-            <LoadBrokerage />
             <Box
               display="grid"
               pb="30px"
@@ -206,8 +207,38 @@ const AddTrade = () => {
                 },
               }}
             >
+              {/* Type Header */}
               <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Buyer Details
+                Type
+              </Typography>
+              {/* Type Buttons */}
+              <Button
+                variant={type === "BUY" ? "contained" : "outlined"}
+                color="success"
+                size="large"
+                onClick={() => setType("BUY")} 
+                sx={{ 
+                  gridColumn: isNonMobile ? "span 2" : "span 4",
+                  height: "50px",
+                }}
+              >
+                <Typography variant="h5" fontWeight={500}>BUY</Typography>
+              </Button>
+              <Button
+                variant={type === "SELL" ? "contained" : "outlined"} 
+                color="error"
+                size="large"
+                onClick={() => setType("SELL")}
+                sx={{ 
+                  gridColumn: isNonMobile ? "span 2" : "span 4",
+                  height: "50px",
+                }}
+              >
+                <Typography variant="h5" fontWeight={500}>SELL</Typography>
+              </Button>
+              {/* Details Header */}
+              <Typography variant="h4" ml="6px" gridColumn="span 4">
+                Details
               </Typography>
               {/* User Input */}
               <SelectInput
@@ -231,9 +262,6 @@ const AddTrade = () => {
                 colors={colors}
                 span={2}
               />
-              <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Price Information
-              </Typography>
               {/* Quantity Input */}
               <CustomTextField
                 numberInput
@@ -274,30 +302,30 @@ const AddTrade = () => {
                 sx={{ gridColumn: "span 4" }}
               />
               <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Cost Breakdown
+                Price Breakdown
               </Typography>
-              {/* Cost Breakdown Box */}
+              {/* Price Breakdown Box */}
               <Box display="flex" flexDirection="column" gridColumn="span 4">
                 <Divider />
                 {/* Share Value */}
                 <Box display="flex" justifyContent="space-between" p="16px 10px 12px 10px">
-                  <Typography variant="h5">Share Value:</Typography>
+                  <Typography variant="h5">Shares</Typography>
                   <Typography variant="h5">{"$" + shareValue.toFixed(2)}</Typography>
                 </Box>
                 {/* Brokerage */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 12px 10px">
-                  <Typography variant="h5">Brokerage:</Typography>
+                  <Typography variant="h5">Brokerage</Typography>
                   <Typography variant="h5">{"$" + brokerage.toFixed(2)}</Typography>
                 </Box>
                 {/* GST */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 16px 10px">
-                  <Typography variant="h5">GST:</Typography>
+                  <Typography variant="h5">GST</Typography>
                   <Typography variant="h5">{"$" + gst.toFixed(2)}</Typography>
                 </Box>
                 <Divider />
                 {/* Total */}
                 <Box display="flex" justifyContent="space-between" p="12px 10px 12px 10px">
-                  <Typography variant="h5">Total:</Typography>
+                  <Typography variant="h5">Total</Typography>
                   <Typography variant="h5">{"$" + total.toFixed(2)}</Typography>
                 </Box>
                 <Divider />
@@ -316,6 +344,8 @@ const AddTrade = () => {
               setGst={setGst}
               setTotal={setTotal}
             />
+            {/* Load brokerage from settings in storage */}
+            <LoadBrokerage />
             {/* Automatically set unit price using current market price */}
             {settings.unitPriceAutoFill && <AutoUpdateUnitPrice unitPrice={unitPrice} />}
             {/* Snackbar shown on success/error */}
