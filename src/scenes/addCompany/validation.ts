@@ -5,7 +5,7 @@ import React from "react";
 // Used in validateASXCode
 let prevErrorMsg: string = undefined;
 
-/** Reset local variables when screen is unmounted */
+// Reset local variables when screen is unmounted
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
 };
@@ -17,7 +17,7 @@ export const validateASXCode = (
   return async (value: string, context: yup.TestContext) => {
     const { path, createError } = context;
 
-    // Helper function.
+    // Helper function
     const sendError = (message: string) => {
       setCompanyName("");
       prevErrorMsg = message;

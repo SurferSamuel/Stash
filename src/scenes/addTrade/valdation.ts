@@ -6,7 +6,7 @@ import * as yup from "yup";
 let prevErrorMsg: string = undefined;
 let prevValue: string = undefined;
 
-/** Reset local variables when screen is unmounted */
+// Reset local variables when screen is unmounted
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
   prevValue = undefined;
@@ -21,7 +21,7 @@ export const validateASXCode = (
   return async (value: string, context: yup.TestContext) => {
     const { path, createError } = context;
 
-    // A helper function.
+    // Helper function
     const sendError = (message: string) => {
       setCompanyName("");
       prevErrorMsg = message;
