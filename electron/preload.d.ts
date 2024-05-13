@@ -15,7 +15,7 @@ export interface IElectronAPI {
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
   addCompany: (values: AddCompanyFormValues) => Promise<void>;
-  buyShare: (values: AddTradeFormValues, gstPercent: string) => Promise<boolean>;
+  buyShare: (values: AddTradeFormValues, gstPercent: string) => Promise<void>;
 }
 
 declare global {

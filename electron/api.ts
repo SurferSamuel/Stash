@@ -164,17 +164,17 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
 
 /*
  * Saves buy share form values into the datastore. 
- * Assumes form values can be parsed as floats (checked prior by validation)
- * Returns true if successful, false otherwise.
+ * Assumes form values can be parsed as floats (checked prior by validation).
+ * Throws an error if unsuccessful.
  */
-export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPercent: string): boolean => {
+export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPercent: string) => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 
   // If the company's data could not be found...
   const companyData = data.find((obj) => obj.asxcode === values.asxcode);
   if (companyData === undefined) {
-    return false;
+    throw new Error(`ERROR: Could not find data for '${values.asxcode}'`);
   }
 
   // Calculate values
@@ -204,6 +204,4 @@ export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPer
 
   // Save data to datastore
   setData(null, "companies", data);
-
-  return true;
 }

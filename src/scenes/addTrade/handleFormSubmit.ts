@@ -10,21 +10,28 @@ const handleFormSubmit = async (
   setSeverity: Dispatch<SetStateAction<"success" | "error">>,
   setAlertMessage: Dispatch<SetStateAction<string>>
 ) => {
-  // Attempt to save the form values
-  const success = await window.electronAPI.buyShare(values, gstPercent);
-  if (success) {
-    // Open accordion to show success message
+  try {
+    // Attempt to save the form values
+    if (values.type === "BUY") {
+      await window.electronAPI.buyShare(values, gstPercent);
+    } else {
+      // TODO: Handle when type is SELL
+    }
+    // Set success message
     setSeverity("success");
     setAlertMessage("Successfully saved!");
-    setOpenSnackbar(true);
-    setTransition(() => Slide);
-  } else {
-    // Open accordion to show error message
+  } catch (error) {
+    // Set error message
     setSeverity("error");
-    setAlertMessage(`ERROR: Could not find data for '${values.asxcode}'`);
-    setOpenSnackbar(true);
-    setTransition(() => Slide);
+    // Need to split message since Electron wraps the original error message with additional text.
+    const errorMessage = error.message.split('Error: ')[1];
+    console.error(errorMessage);
+    setAlertMessage(errorMessage); 
   }
+  
+  // Open accordion to show message
+  setOpenSnackbar(true);
+  setTransition(() => Slide);
 };
 
 export default handleFormSubmit;
