@@ -120,11 +120,11 @@ const BuyShares = () => {
       asxcode: yup
         .string()
         .test("asxcode", "", validateASXCode(data, setCompanyName, setLoading, setUnitPrice)),
-      user: yup.string().required("User Required"),
-      date: yup.date().typeError("Invalid Date").required("Date Required"),
-      quantity: yup.number().required("Quantity Requried"),
-      unitPrice: yup.number().required("Unit Price Requried"),
-      brokerage: yup.number().required("Brokerage Requried"),
+      user: yup.string().required("Required"),
+      date: yup.date().typeError("Invalid Date").required("Required"),
+      quantity: yup.number().required("Requried"),
+      unitPrice: yup.number().required("Requried"),
+      brokerage: yup.number().required("Requried"),
     });
 
   return (

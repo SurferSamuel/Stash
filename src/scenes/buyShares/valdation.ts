@@ -32,7 +32,7 @@ export const validateASXCode = (
     if (value === undefined) {
       setUnitPrice(undefined);
       prevValue = undefined;
-      return sendError("ASX Code Required");
+      return sendError("Required");
     }
 
     // Only run test if asxcode is being actively edited (and has been changed since last call)
@@ -42,7 +42,7 @@ export const validateASXCode = (
 
       // ASX Code must be a valid option (ie. in data)
       if (!data.some((element) => element.asxcode === value)) {
-        return sendError("Invalid ASX Code");
+        return sendError("ASX Code Not Found");
       }
 
       try {

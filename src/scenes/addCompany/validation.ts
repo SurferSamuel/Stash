@@ -26,13 +26,13 @@ export const validateASXCode = (
 
     // ASX Code must be 3-5 characters long
     if (!/^[a-zA-Z0-9]{3,5}$/.test(value)) {
-      return sendError("Invalid Code Format");
+      return sendError("Invalid Format");
     }
 
     // ASX Code must be new and not in the existing data
     const existingData = await window.electronAPI.getData("companies");
     if (existingData.some((obj) => obj.asxcode === value.toUpperCase())) {
-      return sendError("ASX Code Already Exists");
+      return sendError("Already Exists");
     }
 
     // Only call API if asxcode is being actively edited (to reduce number of API calls)
@@ -45,7 +45,7 @@ export const validateASXCode = (
 
         // If quote is empty (no results), then it is invalid
         if (!res.quote) {
-          return sendError("Invalid ASX Code");
+          return sendError("Invalid");
         }
 
         // Otherwise if asxcode is valid...

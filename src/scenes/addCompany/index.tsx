@@ -145,19 +145,19 @@ const AddCompany = () => {
     yup.object().shape({
       asxcode: yup
         .string()
-        .required("ASX Code Required")
+        .required("Required")
         .test("asxcode", "", validateASXCode(setCompanyName, setLoading)),
-      noteTitle: yup.string().test("noteTitle", "Title Required", noteTitleRequired),
+      noteTitle: yup.string().test("noteTitle", "Required", noteTitleRequired),
       noteDate: yup
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("noteDate", "Date Required", noteDateRequired),
+        .test("noteDate", "Required", noteDateRequired),
       notificationDate: yup
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("notifDate1", "Date Required", notificationDateRequired)
+        .test("notifDate1", "Required", notificationDateRequired)
         .test("notifDate2", "Date must be in the future", futureDate),
       notificationPriceHigh: yup
         .number()
