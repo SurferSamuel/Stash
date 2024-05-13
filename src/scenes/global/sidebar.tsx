@@ -18,7 +18,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import HomeIcon from "@mui/icons-material/Home";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import StorefrontIcon from '@mui/icons-material/Storefront';
+import AddchartIcon from '@mui/icons-material/Addchart';
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 interface Props {
@@ -154,7 +154,7 @@ const Sidebar = () => {
               <Item
                 title="Add Trade"
                 to="/addTrade"
-                icon={<StorefrontIcon />}
+                icon={<AddchartIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
