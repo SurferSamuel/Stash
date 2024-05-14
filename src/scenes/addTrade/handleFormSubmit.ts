@@ -10,23 +10,36 @@ const handleFormSubmit = async (
   setSeverity: Dispatch<SetStateAction<"success" | "error">>,
   setAlertMessage: Dispatch<SetStateAction<string>>
 ) => {
+  // Convert dates Dayjs objects to strings (since can't send "Dayjs" types over IPC)
+  const sendValues = {
+    ...values,
+    date: values.date.format("DD/MM/YYYY"),
+  };
+
+  // Attempt to save the form values
   try {
-    // Attempt to save the form values
     if (values.type === "BUY") {
-      await window.electronAPI.buyShare(values, gstPercent);
+      await window.electronAPI.buyShare(sendValues, gstPercent);
     } else {
-      // TODO: Handle when type is SELL
+      await window.electronAPI.sellShare(sendValues, gstPercent);
     }
+
     // Set success message
     setSeverity("success");
     setAlertMessage("Successfully saved!");
-  } catch (error) {
+  }
+  // If IPC threw an error
+  catch (error) {
     // Set error message
     setSeverity("error");
-    // Need to split message since Electron wraps the original error message with additional text.
-    const errorMessage = error.message.split('Error: ')[1];
-    console.error(errorMessage);
-    setAlertMessage(errorMessage); 
+
+    // Split message since Electron wraps the original error message with additional text.
+    const splitMsg = error.message.split('Error: ');
+    const msg = (splitMsg.length === 2) ? splitMsg[1] : error.message;
+
+    // Display error message in both console and accordion
+    console.error(msg);
+    setAlertMessage(msg); 
   }
   
   // Open accordion to show message
