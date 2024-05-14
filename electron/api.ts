@@ -4,10 +4,24 @@ import yahooFinance from "yahoo-finance2";
 import path from "path";
 import fs from "fs";
 
+// Dayjs
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
+dayjs.extend(customParseFormat);
+
 // Types
-import { CompanyData, Data, FetchQuote, Key, Option, OptionKey, ShareEntry } from "./types";
-import { AddTradeFormValues } from "../src/scenes/addTrade";
-import { AddCompanyFormValues } from "../src/scenes/addCompany";
+import { 
+  AddCompanyValues, 
+  AddTradeValues,
+  CompanyData, 
+  CurrentShareEntry, 
+  Data, 
+  FetchQuote, 
+  Key, 
+  Option, 
+  OptionKey,
+  SellHistoryEntry, 
+} from "./types";
 
 /*
  * Fetches the quote for the given asxcode, using yahoo-finance2.
@@ -72,7 +86,7 @@ export const openStoragePath = () => {
 /*
  * Saves add company form values into the datastore.
  */
-export const addCompany = (event: IpcMainEvent, values: AddCompanyFormValues) => {
+export const addCompany = (event: IpcMainEvent, values: AddCompanyValues) => {
   // Save any new options that the user has inputted
   saveNewOptions("miningStatus", values.miningStatus);
   saveNewOptions("financialStatus", values.financialStatus);
@@ -84,26 +98,23 @@ export const addCompany = (event: IpcMainEvent, values: AddCompanyFormValues) =>
   // Construct new company data object
   const newCompany: CompanyData = {
     asxcode: values.asxcode.toUpperCase(),
-    details: {
-      operatingCountries: values.operatingCountries,
-      financialStatus: values.financialStatus,
-      miningStatus: values.miningStatus,
-      resources: values.resources,
-      products: values.products,
-      recommendations: values.recommendations,
-      monitor: values.monitor,
-      reasonsToBuy: values.noteToBuy,
-      reasonsNotToBuy: values.noteNotToBuy,
-      positives: values.notePositives,
-      negatives: values.noteNegatives,
-    },
+    operatingCountries: values.operatingCountries,
+    financialStatus: values.financialStatus,
+    miningStatus: values.miningStatus,
+    resources: values.resources,
+    products: values.products,
+    recommendations: values.recommendations,
+    monitor: values.monitor,
+    reasonsToBuy: values.noteToBuy,
+    reasonsNotToBuy: values.noteNotToBuy,
+    positives: values.notePositives,
+    negatives: values.noteNegatives,
     notes: [],
     dateNotifications: [],
     priceNotifications: [],
-    shares: {
-      current: [],
-      history: [],
-    },
+    currentShares: [],
+    buyHistory: [],
+    sellHistory: [],
   };
 
   // If a note was provided
@@ -163,16 +174,18 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
 }
 
 /*
- * Saves buy share form values into the datastore. 
+ * Saves form values for a BUY trade into the datastore.
  * Assumes form values can be parsed as floats (checked prior by validation).
+ * Creates 1 "BUY" history record of the trade. 
+ * Creates 1 "CURRENT" record of the trade.
  * Throws an error if unsuccessful.
  */
-export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPercent: string) => {
+export const buyShare = (event: IpcMainEvent, values: AddTradeValues, gstPercent: string) => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 
   // If the company's data could not be found...
-  const companyData = data.find((obj) => obj.asxcode === values.asxcode);
+  const companyData = data.find((entry) => entry.asxcode === values.asxcode);
   if (companyData === undefined) {
     throw new Error(`ERROR: Could not find data for '${values.asxcode}'`);
   }
@@ -181,27 +194,136 @@ export const buyShare = (event: IpcMainEvent, values: AddTradeFormValues, gstPer
   const quantity = parseFloat(values.quantity);
   const unitPrice = parseFloat(values.unitPrice);
   const brokerage = parseFloat(values.brokerage);
-  const gst = ((brokerage * parseFloat(gstPercent)) / 100);
+  const gst = brokerage * (parseFloat(gstPercent) / 100);
   const total = quantity * unitPrice + brokerage + gst;
 
-  // Construct new share object
-  const newShare: ShareEntry = {
+  // Construct new share entry
+  const shareEntry: CurrentShareEntry = {
     user: values.user,
     date: values.date,
-    quantity: quantity.toString(),
-    unitPrice: unitPrice.toString(),
-    brokerage: brokerage.toString(),
-    gst: gst.toString(),
-    total: total.toString(),
+    quantity: quantity.toFixed(2).toString(),
+    unitPrice: unitPrice.toFixed(2).toString(),
+    brokerage: brokerage.toFixed(2).toString(),
+    gst: gst.toFixed(2).toString(),
   }
 
-  // Add new share into company
-  companyData.shares.current.push(newShare);
-  companyData.shares.history.push({
-    type: "BUY",
-    ...newShare,
+  // Add new share entry into company data
+  companyData.currentShares.push(shareEntry);
+  companyData.buyHistory.push({
+    ...shareEntry,
+    total: total.toFixed(2).toString(),
   });
 
-  // Save data to datastore
+  // Save datastore
+  setData(null, "companies", data);
+}
+
+/*
+ * Saves form values for a SELL trade into the datastore.
+ * Assumes form values can be parsed as floats (checked prior by validation).
+ * Creates 1, or more, "SELL" history records of the trade. 
+ * May remove/modify multiple "CURRENT" records.
+ * Throws an error if unsuccessful.
+ */
+export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercent: string) => {
+  // Get existing data from storage
+  const data = getData(null, "companies") as CompanyData[];
+
+  // If the company's data could not be found...
+  const companyData = data.find((entry) => entry.asxcode === values.asxcode);
+  if (companyData === undefined) {
+    throw new Error(`ERROR: Could not find data for '${values.asxcode}'`);
+  }
+
+  // Retrieve all of the current shares for the user, removing any entries with buy dates
+  // after the sell date, sorted in date ascending order
+  const currentShares = companyData.currentShares
+    .filter((entry) => entry.user === values.user && !dayjs(entry.date, "DD/MM/YYYY").isAfter(dayjs(values.date, "DD/MM/YYYY")))
+    .sort((a, b) => dayjs(a.date, "DD/MM/YYYY").isBefore(dayjs(b.date, "DD/MM/YYYY")) ? -1 : 1);
+
+  // If the user has no shares
+  if (currentShares.length === 0) {
+    throw new Error(`ERROR: User '${values.user}' has no outstanding shares for '${values.asxcode}'`);
+  }
+
+  // Check that the user owns enough shares for the trade
+  const totalOwned = currentShares.reduce((acc, cur) => acc + parseFloat(cur.quantity), 0);
+  if (totalOwned < parseFloat(values.quantity)) {
+    throw new Error(`ERROR: Insufficient quantity. Required: ${values.quantity}. Owned: ${totalOwned}`);
+  }
+
+  // Calculate the total gst of the sale
+  const totalSellGst = parseFloat(values.brokerage) * (parseFloat(gstPercent) / 100);
+
+  // Keep looping until all quantity is accounted for
+  let remainingQuantity = parseFloat(values.quantity);
+  while (remainingQuantity > 0) {
+    // Retrieve next (oldest) share entry
+    const entry = currentShares[0];
+    const entryQuantity = parseFloat(entry.quantity);
+    const entryBuyPrice = parseFloat(entry.unitPrice);
+
+    // Calculate the quantity sold
+    const sellQuantity = Math.min(entryQuantity, remainingQuantity);
+    remainingQuantity -= sellQuantity;
+
+    // Calculate the buy/sell ratios
+    const buyRatio = sellQuantity / entryQuantity;
+    const sellRatio = sellQuantity / parseFloat(values.quantity);
+
+    // Calculate applied buy/sell brokerage and GST
+    const appliedBuyBrokerage = buyRatio * parseFloat(entry.brokerage);
+    const appliedSellBrokerage = sellRatio * parseFloat(values.brokerage);
+    const appliedBuyGst = buyRatio * parseFloat(entry.gst);
+    const appliedSellGst = sellRatio * totalSellGst;
+
+    // Calculate profit/loss
+    const totalCost = (sellQuantity * entryBuyPrice) + appliedBuyBrokerage + appliedBuyGst;
+    const totalRevenue = (sellQuantity * parseFloat(values.unitPrice)) - appliedSellBrokerage - appliedSellGst;
+    const profitOrLoss = totalRevenue - totalCost;
+
+    // Check if CGT discount (50%) applies
+    // This applies if the owner has held onto the asset for more than 12 months (1 year) & made a capital gain
+    const cgtDiscount = profitOrLoss > 0 && dayjs(values.date, "DD/MM/YYYY").diff(dayjs(entry.date, "DD/MM/YYYY"), "year", true) > 1;
+
+    // Calculate the capital gain/loss
+    // Only apply CGT discount if a capital gain is made & asset was held for >12 months
+    const capitalGainOrLoss = (cgtDiscount) ? profitOrLoss / 2 : profitOrLoss;
+
+    // Add new entry into sell history
+    companyData.sellHistory.push({
+      user: values.user,
+      buyDate: entry.date,
+      sellDate: values.date,
+      quantity: sellQuantity.toFixed(2).toString(),
+      buyPrice: parseFloat(entry.unitPrice).toFixed(2).toString(),
+      sellPrice: values.unitPrice,
+      appliedBuyBrokerage: appliedBuyBrokerage.toFixed(2).toString(),
+      appliedSellBrokerage: appliedSellBrokerage.toFixed(2).toString(),
+      appliedBuyGst: appliedBuyGst.toFixed(2).toString(),
+      appliedSellGst: appliedSellGst.toFixed(2).toString(),
+      total: totalRevenue.toFixed(2).toString(),
+      profitOrLoss: profitOrLoss.toFixed(2).toString(),
+      capitalGainOrLoss: capitalGainOrLoss.toFixed(2).toString(),
+      cgtDiscount,
+    });
+
+    // If the full quantity of the current entry was sold...
+    if (sellQuantity === entryQuantity) {
+      // Remove the share entry from the current shares
+      currentShares.shift();
+      const index = companyData.currentShares.indexOf(entry);
+      if (index != -1) {
+        companyData.currentShares.splice(index, 1);
+      }
+    } else {
+      // ...Otherwise, remove only the amount of shares sold from the current entry
+      entry.quantity = (parseFloat(entry.quantity) - sellQuantity).toFixed(2).toString();
+      entry.brokerage = ((1 - buyRatio) * parseFloat(entry.brokerage)).toFixed(2).toString();
+      entry.gst = ((1 - buyRatio) * parseFloat(entry.gst)).toFixed(2).toString();
+    }
+  }
+
+  // Save datastore
   setData(null, "companies", data);
 }
