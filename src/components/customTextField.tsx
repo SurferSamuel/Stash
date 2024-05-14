@@ -1,6 +1,6 @@
 import { InputAdornment, TextField, TextFieldProps } from "@mui/material";
-import { forwardRef } from "react";
 import { NumericFormat, NumericFormatProps } from "react-number-format";
+import { forwardRef } from "react";
 
 type Props = TextFieldProps & {
   currencyInput?: boolean;

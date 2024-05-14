@@ -1,15 +1,15 @@
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { FormikErrors, FormikTouched } from "formik";
 import { ColorType } from "../theme";
-import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 
 interface Props {
   label: string;
   valueName: string;
-  value: dayjs.Dayjs;
-  handleChange: (e: { target: { name: string; value: dayjs.Dayjs } }) => void;
+  value: Dayjs;
+  handleChange: (e: { target: { name: string; value: Dayjs } }) => void;
   touched: FormikTouched<any>;
   errors: FormikErrors<any>;
   colors: ColorType;
