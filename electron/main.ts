@@ -58,3 +58,4 @@ ipcMain.handle("getStoragePath", api.getStoragePath);
 ipcMain.handle("openStoragePath", api.openStoragePath);
 ipcMain.handle("addCompany", api.addCompany);
 ipcMain.handle("buyShare", api.buyShare);
+ipcMain.handle("sellShare", api.sellShare);
