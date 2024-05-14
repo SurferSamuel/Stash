@@ -1,7 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { Data, FetchQuote, Key } from "./types";
-import { AddTradeFormValues } from "../src/scenes/addTrade";
-import { AddCompanyFormValues } from "../src/scenes/addCompany";
+import { Data, FetchQuote, Key, AddCompanyValues, AddTradeValues } from "./types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   fetchQuote: (asxcode: string): Promise<FetchQuote> => ipcRenderer.invoke("fetchQuote", asxcode),
@@ -9,6 +7,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setData: (key: Key, data: Data): Promise<void> => ipcRenderer.invoke("setData", key, data),
   getStoragePath: (): Promise<string> => ipcRenderer.invoke("getStoragePath"),
   openStoragePath: (): Promise<void> => ipcRenderer.invoke("openStoragePath"),
-  addCompany: (values: AddCompanyFormValues) => ipcRenderer.invoke("addCompany", values),
-  buyShare: (values: AddTradeFormValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
+  addCompany: (values: AddCompanyValues) => ipcRenderer.invoke("addCompany", values),
+  buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
+  sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
 });

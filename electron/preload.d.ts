@@ -1,6 +1,15 @@
-import { AddCompanyFormValues } from "../src/scenes/addCompany";
-import { AddTradeFormValues } from "../src/scenes/addTrade";
-import { Country, Data, FetchQuote, Key, CompanyData, Option, OptionKey, Settings } from "./types";
+import { 
+  AddCompanyValues, 
+  AddTradeValues,
+  CompanyData, 
+  Country, 
+  Data, 
+  FetchQuote, 
+  Key, 
+  Option, 
+  OptionKey, 
+  Settings, 
+} from "./types";
 
 export interface IElectronAPI {
   fetchQuote: (asxcode: string) => Promise<FetchQuote>;
@@ -14,8 +23,9 @@ export interface IElectronAPI {
   setData: (key: Key, data: Data) => Promise<void>;
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
-  addCompany: (values: AddCompanyFormValues) => Promise<void>;
-  buyShare: (values: AddTradeFormValues, gstPercent: string) => Promise<void>;
+  addCompany: (values: AddCompanyValues) => Promise<void>;
+  buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
+  sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
 }
 
 declare global {

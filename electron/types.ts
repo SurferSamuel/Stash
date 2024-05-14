@@ -1,5 +1,6 @@
-import { Dayjs } from "dayjs";
 import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
+import { AddCompanyFormValues } from "../src/scenes/addCompany";
+import { AddTradeFormValues } from "../src/scenes/addTrade";
 
 // Fetched quote return type from yahoo-finance2
 export type FetchQuote = { quote: Quote };
@@ -33,14 +34,14 @@ export interface Country {
 // Written note type
 export interface Note {
   title: string;
-  date: Dayjs;
+  date: string;
   description: string;
 }
 
 // Date notification type
 export interface DateNotification {
   title: string;
-  date: Dayjs;
+  date: string;
 }
 
 // Price notification type
@@ -50,52 +51,64 @@ export interface PriceNotification {
   lowPrice: string;
 }
 
-// Share entry type
-export interface ShareEntry {
-  user: string;
-  date: Dayjs;
-  quantity: string;
-  unitPrice: string;
-  brokerage: string;
-  gst: string;
-  total: string;
+// CURRENT share entry type
+export interface CurrentShareEntry {
+  user: string;                 // User who brought the shares
+  date: string;                  // Date of when the shares were originally brought
+  quantity: string;             // Number of current outstanding shares
+  unitPrice: string;            // Price paid for 1 share at the time of purchase
+  brokerage: string;            // Remaining brokerage for the trade
+  gst: string;                  // Remaining GST for the trade
 }
 
-// Transaction entry type
-export interface TransactionEntry {
-  type: "BUY" | "SELL";
-  user: string;
-  date: Dayjs;
-  quantity: string;
-  unitPrice: string;
-  brokerage: string;
-  gst: string;
-  total: string;
+// BUY history entry type
+export interface BuyHistoryEntry {
+  user: string;                 // User who brought the shares
+  date: string;                 // Date of when the shares were brought
+  quantity: string;             // Number of shares brought
+  unitPrice: string;            // Price paid for 1 share at the time of purchase
+  brokerage: string;            // Brokerage paid for the trade
+  gst: string;                  // GST paid for the trade
+  total: string;                // Total amount paid for the trade
+}
+
+// SELL history entry type
+export interface SellHistoryEntry {
+  user: string;                 // User who sold the shares
+  buyDate: string;              // Date of when the shares were brought
+  sellDate: string;             // Date of when the shares were sold
+  quantity: string;             // Number of shares sold
+  unitPrice: string;            // Price sold for 1 share at the time of sale
+  appliedBuyBrokerage: string;  // Proportion of brokerage paid when brought
+  appliedSellBrokerage: string; // Proportion of brokerage paid when sold
+  appliedBuyGst: string;        // Proportion of GST paid when brought 
+  appliedSellGst: string;       // Proportion of GST paid when sold
+  total: string;                // Total amount received for the trade (negative = loss)
+  netProfit: string;            // Net profit made from the trade (includes brokerage and GST fees)
+  capitalGainOrLoss: string;    // Capital gain/loss made by trade
+  cgtDiscount: boolean;         // Whether the CGT discount (50%) was applied to the capital gain.
 }
 
 // All data for a given company
 export interface CompanyData {
   asxcode: string;
-  details: {
-    operatingCountries: Country[];
-    financialStatus: Option[];
-    miningStatus: Option[];
-    resources: Option[];
-    products: Option[];
-    recommendations: Option[];
-    monitor: Option[];
-    reasonsToBuy: string;
-    reasonsNotToBuy: string;
-    positives: string;
-    negatives: string;
-  };
+  operatingCountries: Country[];
+  financialStatus: Option[];
+  miningStatus: Option[];
+  resources: Option[];
+  products: Option[];
+  recommendations: Option[];
+  monitor: Option[];
+  reasonsToBuy: string;
+  reasonsNotToBuy: string;
+  positives: string;
+  negatives: string;
   notes: Note[];
   dateNotifications: DateNotification[];
   priceNotifications: PriceNotification[];
-  shares: {
-    current: ShareEntry[];
-    history: TransactionEntry[];
-  };
+  currentShares: CurrentShareEntry[];
+  buyHistory: BuyHistoryEntry[];
+  sellHistory: SellHistoryEntry[];
 }
 
 // Settings type
@@ -107,3 +120,16 @@ export interface Settings {
 
 // Any data type, returned from getData
 export type Data = Option[] | Country[] | CompanyData[] | Settings;
+
+// Values type for AddCompany function in ./api.ts
+// Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
+export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" | "notificationDate"> {
+  noteDate: string;
+  notificationDate: string;
+}
+
+// Values type for BuyShares & SelShares function in ./api.ts
+// Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
+export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
+  date: string;
+}
