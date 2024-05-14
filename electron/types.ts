@@ -78,13 +78,14 @@ export interface SellHistoryEntry {
   buyDate: string;              // Date of when the shares were brought
   sellDate: string;             // Date of when the shares were sold
   quantity: string;             // Number of shares sold
-  unitPrice: string;            // Price sold for 1 share at the time of sale
+  buyPrice: string;             // Price paid for 1 share at the time of purchase
+  sellPrice: string;            // Price sold for 1 share at the time of sale
   appliedBuyBrokerage: string;  // Proportion of brokerage paid when brought
   appliedSellBrokerage: string; // Proportion of brokerage paid when sold
   appliedBuyGst: string;        // Proportion of GST paid when brought 
   appliedSellGst: string;       // Proportion of GST paid when sold
   total: string;                // Total amount received for the trade (negative = loss)
-  netProfit: string;            // Net profit made from the trade (includes brokerage and GST fees)
+  profitOrLoss: string;         // Profit/loss made from the trade (includes brokerage and GST fees)
   capitalGainOrLoss: string;    // Capital gain/loss made by trade (positive = gain, negative = loss)
   cgtDiscount: boolean;         // Whether the CGT discount (50%) was applied to the capital gain.
 }
