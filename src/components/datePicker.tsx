@@ -48,14 +48,20 @@ const DatePicker = (props: Props) => {
               ".MuiDateCalendar-root": {
                 backgroundColor: colors.grey[900],
               },
-              ".MuiPickersDay-root.Mui-selected": {
+              ".MuiMultiSectionDigitalClock-root": {
+                backgroundColor: colors.grey[900],
+              },
+              ".MuiDialogActions-root": {
+                backgroundColor: colors.grey[900],
+              },
+              ".MuiButtonBase-root.Mui-selected": {
                 backgroundColor: colors.blueAccent[400],
               },
-              ".MuiPickersDay-root.Mui-selected:hover": {
+              ".MuiButtonBase-root.Mui-selected:hover": {
                 backgroundColor: colors.blueAccent[400],
                 color: "black",
               },
-              ".MuiPickersDay-root.Mui-selected:focus": {
+              ".MuiButtonBase-root.Mui-selected:focus": {
                 backgroundColor: colors.blueAccent[400],
               },
             },
