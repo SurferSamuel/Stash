@@ -14,13 +14,13 @@ const ShowAvailableUnits = (props: Props) => {
   const [show, setShow] = useState<boolean>(false);
   const [units, setUnits] = useState<number>(0);
 
-  // Update units state when values are modified
+  // Update units state when the required values are modified
   useEffect(() => {
     (async () => {
       // Show available shares only when trade type is SELL and asxcode/user is non-empty
       let show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
 
-      // Skip API call if current call is not going to show the available shares
+      // Skip API call if not going to show the available shares
       if (!show) {
         setShow(false);
         return;
