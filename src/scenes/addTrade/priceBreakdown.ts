@@ -24,7 +24,7 @@ const PriceBreakdownHandler = (props: Props): null => {
     }
     // Otherwise update the share value
     else {
-      const shareValue = parseFloat(values.quantity) * parseFloat(values.unitPrice);
+      const shareValue = Number(values.quantity) * Number(values.unitPrice);
       setShareValue(shareValue);
       total += shareValue;
     }
@@ -37,8 +37,8 @@ const PriceBreakdownHandler = (props: Props): null => {
     // Otherwise update the brokerage and gst
     else {
       // Brokerage and gst is positive when buying, negative when selling
-      const brokerage = (values.type === "BUY" ? 1 : -1) * parseFloat(values.brokerage);
-      const gst = brokerage * (parseFloat(gstPercent) / 100);
+      const brokerage = (values.type === "BUY" ? 1 : -1) * Number(values.brokerage);
+      const gst = brokerage * (Number(gstPercent) / 100);
       setBrokerage(brokerage);
       setGst(gst);
       total += brokerage + gst;
