@@ -189,7 +189,7 @@ export const buyShare = (event: IpcMainEvent, values: AddTradeValues, gstPercent
   // If the company's data could not be found...
   const companyData = data.find((entry) => entry.asxcode === values.asxcode);
   if (companyData === undefined) {
-    throw new Error(`ERROR: Could not find data for '${values.asxcode}'`);
+    throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
   }
 
   // Calculate values
@@ -234,7 +234,7 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
   // If the company's data could not be found...
   const companyData = data.find((entry) => entry.asxcode === values.asxcode);
   if (companyData === undefined) {
-    throw new Error(`ERROR: Could not find data for '${values.asxcode}'`);
+    throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
   }
 
   // Retrieve all of the current shares for the user, removing any entries with buy dates
@@ -245,7 +245,7 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 
   // If the user has no shares
   if (currentShares.length === 0) {
-    throw new Error(`ERROR: User '${values.user}' has no outstanding shares for '${values.asxcode}'`);
+    throw new Error(`ERROR: ${values.user} has no units for ${values.asxcode}`);
   }
 
   // Check that the user owns enough shares for the trade
