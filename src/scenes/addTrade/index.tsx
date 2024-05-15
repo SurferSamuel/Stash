@@ -7,6 +7,7 @@ import dayjs from "dayjs";
 
 import { cleanUpValidation, validateASXCode } from "./valdation";
 import AutoUpdateUnitPrice from "./autoUpdateUnitPrice";
+import ShowAvailableUnits from "./showAvailableUnits";
 import PriceBreakdownHandler from "./priceBreakdown";
 import LoadBrokerage from "./loadBrokerage";
 
@@ -38,7 +39,7 @@ interface Settings {
 
 export interface AddTradeFormValues {
   asxcode: string;
-  type: string;
+  type: "BUY" | "SELL";
   user: string;
   date: dayjs.Dayjs;
   quantity: string;
@@ -261,6 +262,8 @@ const AddTrade = () => {
                 colors={colors}
                 span={2}
               />
+              {/* Show available units if type is SELL */}
+              <ShowAvailableUnits/>
               {/* Quantity Input */}
               <CustomTextField
                 numberInput
