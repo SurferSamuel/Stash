@@ -20,8 +20,10 @@ import {
   Key, 
   Option, 
   OptionKey,
-  SellHistoryEntry, 
 } from "./types";
+
+// Dayjs parser helper function
+const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm:ss A");
 
 /*
  * Fetches the quote for the given asxcode, using yahoo-finance2.
@@ -175,7 +177,7 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
 
 /*
  * Saves form values for a BUY trade into the datastore.
- * Assumes form values can be parsed as floats (checked prior by validation).
+ * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1 "BUY" history record of the trade. 
  * Creates 1 "CURRENT" record of the trade.
  * Throws an error if unsuccessful.
@@ -191,27 +193,27 @@ export const buyShare = (event: IpcMainEvent, values: AddTradeValues, gstPercent
   }
 
   // Calculate values
-  const quantity = parseFloat(values.quantity);
-  const unitPrice = parseFloat(values.unitPrice);
-  const brokerage = parseFloat(values.brokerage);
-  const gst = brokerage * (parseFloat(gstPercent) / 100);
+  const quantity = Number(values.quantity);
+  const unitPrice = Number(values.unitPrice);
+  const brokerage = Number(values.brokerage);
+  const gst = brokerage * (Number(gstPercent) / 100);
   const total = quantity * unitPrice + brokerage + gst;
 
   // Construct new share entry
   const shareEntry: CurrentShareEntry = {
     user: values.user,
     date: values.date,
-    quantity: quantity.toFixed(2).toString(),
-    unitPrice: unitPrice.toFixed(2).toString(),
-    brokerage: brokerage.toFixed(2).toString(),
-    gst: gst.toFixed(2).toString(),
+    quantity: values.quantity,
+    unitPrice: values.unitPrice,
+    brokerage: values.brokerage,
+    gst: gst.toString(),
   }
 
   // Add new share entry into company data
   companyData.currentShares.push(shareEntry);
   companyData.buyHistory.push({
     ...shareEntry,
-    total: total.toFixed(2).toString(),
+    total: total.toString(),
   });
 
   // Save datastore
@@ -220,7 +222,7 @@ export const buyShare = (event: IpcMainEvent, values: AddTradeValues, gstPercent
 
 /*
  * Saves form values for a SELL trade into the datastore.
- * Assumes form values can be parsed as floats (checked prior by validation).
+ * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1, or more, "SELL" history records of the trade. 
  * May remove/modify multiple "CURRENT" records.
  * Throws an error if unsuccessful.
@@ -238,8 +240,8 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
   // Retrieve all of the current shares for the user, removing any entries with buy dates
   // after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
-    .filter((entry) => entry.user === values.user && !dayjs(entry.date, "DD/MM/YYYY").isAfter(dayjs(values.date, "DD/MM/YYYY")))
-    .sort((a, b) => dayjs(a.date, "DD/MM/YYYY").isBefore(dayjs(b.date, "DD/MM/YYYY")) ? -1 : 1);
+    .filter((entry) => entry.user === values.user && !toDate(entry.date).isAfter(toDate(values.date)))
+    .sort((a, b) => toDate(a.date).isBefore(toDate(b.date)) ? -1 : 1);
 
   // If the user has no shares
   if (currentShares.length === 0) {
@@ -247,21 +249,21 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
   }
 
   // Check that the user owns enough shares for the trade
-  const totalOwned = currentShares.reduce((acc, cur) => acc + parseFloat(cur.quantity), 0);
-  if (totalOwned < parseFloat(values.quantity)) {
+  const totalOwned = currentShares.reduce((acc, cur) => acc + Number(cur.quantity), 0);
+  if (totalOwned < Number(values.quantity)) {
     throw new Error(`ERROR: Insufficient quantity. Required: ${values.quantity}. Owned: ${totalOwned}`);
   }
 
   // Calculate the total gst of the sale
-  const totalSellGst = parseFloat(values.brokerage) * (parseFloat(gstPercent) / 100);
+  const totalSellGst = Number(values.brokerage) * (Number(gstPercent) / 100);
 
   // Keep looping until all quantity is accounted for
-  let remainingQuantity = parseFloat(values.quantity);
+  let remainingQuantity = Number(values.quantity);
   while (remainingQuantity > 0) {
     // Retrieve next (oldest) share entry
     const entry = currentShares[0];
-    const entryQuantity = parseFloat(entry.quantity);
-    const entryBuyPrice = parseFloat(entry.unitPrice);
+    const entryQuantity = Number(entry.quantity);
+    const entryBuyPrice = Number(entry.unitPrice);
 
     // Calculate the quantity sold
     const sellQuantity = Math.min(entryQuantity, remainingQuantity);
@@ -269,22 +271,22 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 
     // Calculate the buy/sell ratios
     const buyRatio = sellQuantity / entryQuantity;
-    const sellRatio = sellQuantity / parseFloat(values.quantity);
+    const sellRatio = sellQuantity / Number(values.quantity);
 
     // Calculate applied buy/sell brokerage and GST
-    const appliedBuyBrokerage = buyRatio * parseFloat(entry.brokerage);
-    const appliedSellBrokerage = sellRatio * parseFloat(values.brokerage);
-    const appliedBuyGst = buyRatio * parseFloat(entry.gst);
+    const appliedBuyBrokerage = buyRatio * Number(entry.brokerage);
+    const appliedSellBrokerage = sellRatio * Number(values.brokerage);
+    const appliedBuyGst = buyRatio * Number(entry.gst);
     const appliedSellGst = sellRatio * totalSellGst;
 
     // Calculate profit/loss
     const totalCost = (sellQuantity * entryBuyPrice) + appliedBuyBrokerage + appliedBuyGst;
-    const totalRevenue = (sellQuantity * parseFloat(values.unitPrice)) - appliedSellBrokerage - appliedSellGst;
+    const totalRevenue = (sellQuantity * Number(values.unitPrice)) - appliedSellBrokerage - appliedSellGst;
     const profitOrLoss = totalRevenue - totalCost;
 
     // Check if CGT discount (50%) applies
     // This applies if the owner has held onto the asset for more than 12 months (1 year) & made a capital gain
-    const cgtDiscount = profitOrLoss > 0 && dayjs(values.date, "DD/MM/YYYY").diff(dayjs(entry.date, "DD/MM/YYYY"), "year", true) > 1;
+    const cgtDiscount = profitOrLoss > 0 && toDate(values.date).diff(toDate(entry.date), "year", true) > 1;
 
     // Calculate the capital gain/loss
     // Only apply CGT discount if a capital gain is made & asset was held for >12 months
@@ -295,16 +297,16 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
       user: values.user,
       buyDate: entry.date,
       sellDate: values.date,
-      quantity: sellQuantity.toFixed(2).toString(),
-      buyPrice: parseFloat(entry.unitPrice).toFixed(2).toString(),
+      quantity: sellQuantity.toString(),
+      buyPrice: entry.unitPrice,
       sellPrice: values.unitPrice,
-      appliedBuyBrokerage: appliedBuyBrokerage.toFixed(2).toString(),
-      appliedSellBrokerage: appliedSellBrokerage.toFixed(2).toString(),
-      appliedBuyGst: appliedBuyGst.toFixed(2).toString(),
-      appliedSellGst: appliedSellGst.toFixed(2).toString(),
-      total: totalRevenue.toFixed(2).toString(),
-      profitOrLoss: profitOrLoss.toFixed(2).toString(),
-      capitalGainOrLoss: capitalGainOrLoss.toFixed(2).toString(),
+      appliedBuyBrokerage: appliedBuyBrokerage.toString(),
+      appliedSellBrokerage: appliedSellBrokerage.toString(),
+      appliedBuyGst: appliedBuyGst.toString(),
+      appliedSellGst: appliedSellGst.toString(),
+      total: totalRevenue.toString(),
+      profitOrLoss: profitOrLoss.toString(),
+      capitalGainOrLoss: capitalGainOrLoss.toString(),
       cgtDiscount,
     });
 
@@ -318,9 +320,9 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
       }
     } else {
       // ...Otherwise, remove only the amount of shares sold from the current entry
-      entry.quantity = (parseFloat(entry.quantity) - sellQuantity).toFixed(2).toString();
-      entry.brokerage = ((1 - buyRatio) * parseFloat(entry.brokerage)).toFixed(2).toString();
-      entry.gst = ((1 - buyRatio) * parseFloat(entry.gst)).toFixed(2).toString();
+      entry.quantity = (Number(entry.quantity) - sellQuantity).toString();
+      entry.brokerage = ((1 - buyRatio) * Number(entry.brokerage)).toString();
+      entry.gst = ((1 - buyRatio) * Number(entry.gst)).toString();
     }
   }
 

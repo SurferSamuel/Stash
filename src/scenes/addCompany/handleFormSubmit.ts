@@ -10,8 +10,8 @@ const handleFormSubmit = async (
   // Convert dates Dayjs objects to strings (since can't send "Dayjs" types over IPC)
   const sendValues = {
     ...values,
-    noteDate: values.noteDate.format("DD/MM/YYYY"),
-    notificationDate: values.notificationDate.format("DD/MM/YYYY"),
+    noteDate: values.noteDate.format("DD/MM/YYYY hh:mm:ss A"),
+    notificationDate: values.notificationDate.format("DD/MM/YYYY hh:mm:ss A"),
   };
 
   // Save new company form values
