@@ -129,7 +129,7 @@ export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" 
   notificationDate: string;
 }
 
-// Values type for BuyShares & SelShares function in ./api.ts
+// Values type for BuyShares & SellShares function in ./api.ts
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
