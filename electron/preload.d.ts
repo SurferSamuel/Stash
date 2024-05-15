@@ -24,6 +24,7 @@ export interface IElectronAPI {
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
   addCompany: (values: AddCompanyValues) => Promise<void>;
+  availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
 }

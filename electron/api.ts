@@ -176,6 +176,26 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
 }
 
 /*
+ * Returns the number of available shares for the given asxcode and user.
+ * Throws an error if the asxcode does not exist in the datastore
+ */
+export const availableShares = (event: IpcMainEvent, asxcode: string, user: string): number => {
+  // Get existing data from storage
+  const data = getData(null, "companies") as CompanyData[];
+
+  // If the company's data could not be found...
+  const companyData = data.find((entry) => entry.asxcode === asxcode);
+  if (companyData === undefined) {
+    throw new Error(`ERROR: Could not find data for ${asxcode}`);
+  }
+
+  // Return the number of available shares for the user (0 if the user does not exist)
+  return companyData.currentShares
+    .filter((entry) => entry.user === user)
+    .reduce((acc, cur) => acc + Number(cur.quantity), 0);
+}
+
+/*
  * Saves form values for a BUY trade into the datastore.
  * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1 "BUY" history record of the trade. 
