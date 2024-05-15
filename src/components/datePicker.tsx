@@ -1,5 +1,5 @@
+import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { FormikErrors, FormikTouched } from "formik";
 import { ColorType } from "../theme";
@@ -22,9 +22,9 @@ const DatePicker = (props: Props) => {
     props;
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DesktopDatePicker
+      <DesktopDateTimePicker
         {...(disablePast && { disablePast: true })}
-        format="DD/MM/YYYY"
+        format="DD/MM/YYYY hh:mm:ss A"
         value={value}
         onChange={(newValue) => {
           handleChange({

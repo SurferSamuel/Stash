@@ -13,7 +13,7 @@ const handleFormSubmit = async (
   // Convert dates Dayjs objects to strings (since can't send "Dayjs" types over IPC)
   const sendValues = {
     ...values,
-    date: values.date.format("DD/MM/YYYY"),
+    date: values.date.format("DD/MM/YYYY hh:mm:ss A"),
   };
 
   // Attempt to save the form values

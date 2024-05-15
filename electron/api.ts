@@ -20,8 +20,10 @@ import {
   Key, 
   Option, 
   OptionKey,
-  SellHistoryEntry, 
 } from "./types";
+
+// Dayjs parser helper function
+const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm:ss A");
 
 /*
  * Fetches the quote for the given asxcode, using yahoo-finance2.
@@ -238,8 +240,8 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
   // Retrieve all of the current shares for the user, removing any entries with buy dates
   // after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
-    .filter((entry) => entry.user === values.user && !dayjs(entry.date, "DD/MM/YYYY").isAfter(dayjs(values.date, "DD/MM/YYYY")))
-    .sort((a, b) => dayjs(a.date, "DD/MM/YYYY").isBefore(dayjs(b.date, "DD/MM/YYYY")) ? -1 : 1);
+    .filter((entry) => entry.user === values.user && !toDate(entry.date).isAfter(toDate(values.date)))
+    .sort((a, b) => toDate(a.date).isBefore(toDate(b.date)) ? -1 : 1);
 
   // If the user has no shares
   if (currentShares.length === 0) {
@@ -284,7 +286,7 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 
     // Check if CGT discount (50%) applies
     // This applies if the owner has held onto the asset for more than 12 months (1 year) & made a capital gain
-    const cgtDiscount = profitOrLoss > 0 && dayjs(values.date, "DD/MM/YYYY").diff(dayjs(entry.date, "DD/MM/YYYY"), "year", true) > 1;
+    const cgtDiscount = profitOrLoss > 0 && toDate(values.date).diff(toDate(entry.date), "year", true) > 1;
 
     // Calculate the capital gain/loss
     // Only apply CGT discount if a capital gain is made & asset was held for >12 months
