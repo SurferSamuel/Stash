@@ -23,7 +23,7 @@ import {
 } from "./types";
 
 // Dayjs parser helper function
-const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm:ss A");
+const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
 
 /*
  * Fetches the quote for the given asxcode, using yahoo-finance2.

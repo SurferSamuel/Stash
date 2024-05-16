@@ -18,13 +18,12 @@ interface Props {
 }
 
 const DatePicker = (props: Props) => {
-  const { label, valueName, value, handleChange, touched, errors, colors, disablePast, span } =
-    props;
+  const { label, valueName, value, handleChange, touched, errors, colors, disablePast, span } = props;
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DesktopDateTimePicker
         {...(disablePast && { disablePast: true })}
-        format="DD/MM/YYYY hh:mm:ss A"
+        format="DD/MM/YYYY hh:mm A"
         value={value}
         onChange={(newValue) => {
           handleChange({
