@@ -456,7 +456,7 @@ const AddCompany = () => {
                   />
                   {/* Notification (Date) Date Input */}
                   <DatePicker
-                    label="Date"
+                    label="Future Date"
                     valueName="notificationDate"
                     value={values.notificationDate}
                     handleChange={handleChange}
