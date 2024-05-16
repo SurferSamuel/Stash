@@ -6,7 +6,7 @@ import * as yup from "yup";
 let prevErrorMsg: string = undefined;
 let prevValue: string = undefined;
 
-/** Reset local variables when screen is unmounted */
+// Reset local variables when screen is unmounted
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
   prevValue = undefined;
@@ -21,7 +21,7 @@ export const validateASXCode = (
   return async (value: string, context: yup.TestContext) => {
     const { path, createError } = context;
 
-    // A helper function.
+    // Helper function
     const sendError = (message: string) => {
       setCompanyName("");
       prevErrorMsg = message;
@@ -32,7 +32,7 @@ export const validateASXCode = (
     if (value === undefined) {
       setUnitPrice(undefined);
       prevValue = undefined;
-      return sendError("ASX Code Required");
+      return sendError("Required");
     }
 
     // Only run test if asxcode is being actively edited (and has been changed since last call)
@@ -42,7 +42,7 @@ export const validateASXCode = (
 
       // ASX Code must be a valid option (ie. in data)
       if (!data.some((element) => element.asxcode === value)) {
-        return sendError("Invalid ASX Code");
+        return sendError("ASX Code Not Found");
       }
 
       try {

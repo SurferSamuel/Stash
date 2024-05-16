@@ -130,7 +130,7 @@ const Settings = () => {
               {/* Left Side */}
               <RowLabel
                 title="GST Percentage"
-                subtitle="The % of brokerage used to calculate GST"
+                subtitle="% of brokerage used to calculate GST"
               />
               {/* Right Side */}
               <CustomTextField

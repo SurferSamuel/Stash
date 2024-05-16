@@ -5,8 +5,7 @@ import { Routes, Route } from "react-router-dom";
 // Scenes
 import Sidebar from "./scenes/global/sidebar";
 import AddCompany from "./scenes/addCompany";
-import SellShares from "./scenes/sellShares";
-import BuyShares from "./scenes/buyShares";
+import AddTrade from "./scenes/addTrade";
 import Settings from "./scenes/setting";
 
 type UseMode = [Theme, { toggleColorMode: () => void }];
@@ -23,9 +22,8 @@ function App() {
           <main className="content">
             <Routes>
               <Route path="/" element={<p>Root</p>} />
-              <Route path="/add" element={<AddCompany />} />
-              <Route path="/buy" element={<BuyShares />} />
-              <Route path="/sell" element={<SellShares />} />
+              <Route path="/addCompany" element={<AddCompany />} />
+              <Route path="/addTrade" element={<AddTrade />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>

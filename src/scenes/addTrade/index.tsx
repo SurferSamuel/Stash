@@ -7,7 +7,8 @@ import dayjs from "dayjs";
 
 import { cleanUpValidation, validateASXCode } from "./valdation";
 import AutoUpdateUnitPrice from "./autoUpdateUnitPrice";
-import CostBreakdownHandler from "./costBreakdown";
+import ShowAvailableUnits from "./showAvailableUnits";
+import PriceBreakdownHandler from "./priceBreakdown";
 import LoadBrokerage from "./loadBrokerage";
 
 // Material UI
@@ -19,7 +20,6 @@ import Snackbar from "@mui/material/Snackbar";
 import Divider from "@mui/material/Divider";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
-import Slide from "@mui/material/Slide";
 import Box from "@mui/material/Box";
 
 // Components
@@ -37,8 +37,9 @@ interface Settings {
   brokerageAutoFill: string;
 }
 
-export interface BuySharesFormValues {
+export interface AddTradeFormValues {
   asxcode: string;
+  type: "BUY" | "SELL";
   user: string;
   date: dayjs.Dayjs;
   quantity: string;
@@ -46,7 +47,7 @@ export interface BuySharesFormValues {
   brokerage: string;
 }
 
-const BuyShares = () => {
+const AddTrade = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:800px)");
@@ -68,13 +69,13 @@ const BuyShares = () => {
   const [asxCodeList, setAsxCodeList] = useState<Option[]>([]);
   const [usersList, setUsersList] = useState<Option[]>([]);
 
-  // Cost breakdown box states
+  // Price breakdown box states
   const [shareValue, setShareValue] = useState<number>(0);
   const [brokerage, setBrokerage] = useState<number>(0);
   const [gst, setGst] = useState<number>(0);
   const [total, setTotal] = useState<number>(0);
 
-  // Success alert states
+  // Alert states
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
   const [transition, setTransition] = useState(undefined);
   const [severity, setSeverity] = useState<"success" | "error">("success");
@@ -107,8 +108,9 @@ const BuyShares = () => {
     };
   }, []);
 
-  const initialValues: BuySharesFormValues = {
+  const initialValues: AddTradeFormValues = {
     asxcode: "",
+    type: "BUY",
     user: "",
     date: dayjs(),
     quantity: "",
@@ -121,18 +123,18 @@ const BuyShares = () => {
       asxcode: yup
         .string()
         .test("asxcode", "", validateASXCode(data, setCompanyName, setLoading, setUnitPrice)),
-      user: yup.string().required("User Required"),
-      date: yup.date().typeError("Invalid Date").required("Date Required"),
-      quantity: yup.number().required("Quantity Requried"),
-      unitPrice: yup.number().required("Unit Price Requried"),
-      brokerage: yup.number().required("Brokerage Requried"),
+      user: yup.string().required("Required"),
+      date: yup.date().typeError("Invalid Date").required("Required"),
+      quantity: yup.number().required("Requried"),
+      unitPrice: yup.number().required("Requried"),
+      brokerage: yup.number().required("Requried"),
     });
 
   return (
     <Box m="25px 30px 15px 30px">
-      <Header title="Buy Shares" subtitle="Record purchased shares for a company" />
+      <Header title="Add Trade" subtitle="Record a share trade for a company" />
       <Formik
-        onSubmit={(values: BuySharesFormValues) => {
+        onSubmit={(values: AddTradeFormValues) => {
           handleFormSubmit(
             values,
             settings.gstPercent,
@@ -147,8 +149,6 @@ const BuyShares = () => {
       >
         {({ values, errors, touched, handleBlur, handleChange, handleSubmit }) => (
           <form onSubmit={handleSubmit}>
-            {/* Load brokerage from settings in storage */}
-            <LoadBrokerage />
             <Box
               display="grid"
               pb="30px"
@@ -207,8 +207,38 @@ const BuyShares = () => {
                 },
               }}
             >
+              {/* Type Header */}
               <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Buyer Details
+                Type
+              </Typography>
+              {/* Type Buttons */}
+              <Button
+                variant={values.type === "BUY" ? "contained" : "outlined"}
+                color="success"
+                size="large"
+                onClick={() => handleChange({ target: { name: "type", value: "BUY" } })} 
+                sx={{ 
+                  gridColumn: isNonMobile ? "span 2" : "span 4",
+                  height: "50px",
+                }}
+              >
+                <Typography variant="h5" fontWeight={500}>BUY</Typography>
+              </Button>
+              <Button
+                variant={values.type === "SELL" ? "contained" : "outlined"} 
+                color="error"
+                size="large"
+                onClick={() => handleChange({ target: { name: "type", value: "SELL" } })}
+                sx={{ 
+                  gridColumn: isNonMobile ? "span 2" : "span 4",
+                  height: "50px",
+                }}
+              >
+                <Typography variant="h5" fontWeight={500}>SELL</Typography>
+              </Button>
+              {/* Details Header */}
+              <Typography variant="h4" ml="6px" gridColumn="span 4">
+                Details
               </Typography>
               {/* User Input */}
               <SelectInput
@@ -232,9 +262,8 @@ const BuyShares = () => {
                 colors={colors}
                 span={2}
               />
-              <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Price Information
-              </Typography>
+              {/* Show available units if type is SELL */}
+              <ShowAvailableUnits/>
               {/* Quantity Input */}
               <CustomTextField
                 numberInput
@@ -275,31 +304,39 @@ const BuyShares = () => {
                 sx={{ gridColumn: "span 4" }}
               />
               <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Cost Breakdown
+                Price Breakdown
               </Typography>
-              {/* Cost Breakdown Box */}
+              {/* Price Breakdown Box */}
               <Box display="flex" flexDirection="column" gridColumn="span 4">
                 <Divider />
                 {/* Share Value */}
                 <Box display="flex" justifyContent="space-between" p="16px 10px 12px 10px">
-                  <Typography variant="h5">Share Value:</Typography>
+                  <Typography variant="h5">
+                    Shares <span style={{ color: 'grey' }}>
+                      ({values.quantity ? values.quantity : 0} x ${values.unitPrice ? values.unitPrice : 0})
+                    </span>
+                  </Typography>
                   <Typography variant="h5">{"$" + shareValue.toFixed(2)}</Typography>
                 </Box>
                 {/* Brokerage */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 12px 10px">
-                  <Typography variant="h5">Brokerage:</Typography>
-                  <Typography variant="h5">{"$" + brokerage.toFixed(2)}</Typography>
+                  <Typography variant="h5">Brokerage</Typography>
+                  <Typography variant="h5">{(brokerage < 0 ? "-$" : "$") + Math.abs(brokerage).toFixed(2)}</Typography>
                 </Box>
                 {/* GST */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 16px 10px">
-                  <Typography variant="h5">GST:</Typography>
-                  <Typography variant="h5">{"$" + gst.toFixed(2)}</Typography>
+                  <Typography variant="h5">
+                    GST <span style={{ color: 'grey' }}>
+                      ({settings.gstPercent}%)
+                    </span>
+                  </Typography>
+                  <Typography variant="h5">{(gst < 0 ? "-$" : "$") + Math.abs(gst).toFixed(2)}</Typography>
                 </Box>
                 <Divider />
                 {/* Total */}
                 <Box display="flex" justifyContent="space-between" p="12px 10px 12px 10px">
-                  <Typography variant="h5">Total:</Typography>
-                  <Typography variant="h5">{"$" + total.toFixed(2)}</Typography>
+                  <Typography variant="h5">Total</Typography>
+                  <Typography variant="h5">{(total < 0 ? "-$" : "$") + Math.abs(total).toFixed(2)}</Typography>
                 </Box>
                 <Divider />
               </Box>
@@ -309,14 +346,16 @@ const BuyShares = () => {
                 Confirm
               </Button>
             </Box>
-            {/* Calculate cost breakdown using form values (handled in ./costBreakdown.ts) */}
-            <CostBreakdownHandler
+            {/* Calculate price breakdown using form values (handled in ./costBreakdown.ts) */}
+            <PriceBreakdownHandler
               gstPercent={settings.gstPercent}
               setShareValue={setShareValue}
               setBrokerage={setBrokerage}
               setGst={setGst}
               setTotal={setTotal}
             />
+            {/* Load brokerage from settings in storage */}
+            <LoadBrokerage />
             {/* Automatically set unit price using current market price */}
             {settings.unitPriceAutoFill && <AutoUpdateUnitPrice unitPrice={unitPrice} />}
             {/* Snackbar shown on success/error */}
@@ -338,4 +377,4 @@ const BuyShares = () => {
   );
 };
 
-export default BuyShares;
+export default AddTrade;

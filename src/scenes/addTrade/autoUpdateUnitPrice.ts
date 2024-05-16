@@ -6,7 +6,7 @@ interface Props {
 }
 
 // Automatically update the unit price using the current market value
-const AutoUpdateUnitPrice = (props: Props) => {
+const AutoUpdateUnitPrice = (props: Props): null => {
   const { unitPrice } = props;
   const { setFieldValue } = useFormikContext();
 

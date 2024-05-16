@@ -1,15 +1,15 @@
-import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
+import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
-import { DesktopDatePicker } from "@mui/x-date-pickers/DesktopDatePicker";
+import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
 import { FormikErrors, FormikTouched } from "formik";
 import { ColorType } from "../theme";
-import dayjs from "dayjs";
+import { Dayjs } from "dayjs";
 
 interface Props {
   label: string;
   valueName: string;
-  value: dayjs.Dayjs;
-  handleChange: (e: { target: { name: string; value: dayjs.Dayjs } }) => void;
+  value: Dayjs;
+  handleChange: (e: { target: { name: string; value: Dayjs } }) => void;
   touched: FormikTouched<any>;
   errors: FormikErrors<any>;
   colors: ColorType;
@@ -18,13 +18,12 @@ interface Props {
 }
 
 const DatePicker = (props: Props) => {
-  const { label, valueName, value, handleChange, touched, errors, colors, disablePast, span } =
-    props;
+  const { label, valueName, value, handleChange, touched, errors, colors, disablePast, span } = props;
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
-      <DesktopDatePicker
+      <DesktopDateTimePicker
         {...(disablePast && { disablePast: true })}
-        format="DD/MM/YYYY"
+        format="DD/MM/YYYY hh:mm A"
         value={value}
         onChange={(newValue) => {
           handleChange({
@@ -48,14 +47,20 @@ const DatePicker = (props: Props) => {
               ".MuiDateCalendar-root": {
                 backgroundColor: colors.grey[900],
               },
-              ".MuiPickersDay-root.Mui-selected": {
+              ".MuiMultiSectionDigitalClock-root": {
+                backgroundColor: colors.grey[900],
+              },
+              ".MuiDialogActions-root": {
+                backgroundColor: colors.grey[900],
+              },
+              ".MuiButtonBase-root.Mui-selected": {
                 backgroundColor: colors.blueAccent[400],
               },
-              ".MuiPickersDay-root.Mui-selected:hover": {
+              ".MuiButtonBase-root.Mui-selected:hover": {
                 backgroundColor: colors.blueAccent[400],
                 color: "black",
               },
-              ".MuiPickersDay-root.Mui-selected:focus": {
+              ".MuiButtonBase-root.Mui-selected:focus": {
                 backgroundColor: colors.blueAccent[400],
               },
             },

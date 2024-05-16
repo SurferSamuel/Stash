@@ -18,8 +18,7 @@ import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArro
 import HomeIcon from "@mui/icons-material/Home";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import ShoppingBasketIcon from "@mui/icons-material/ShoppingBasket";
-import SellIcon from "@mui/icons-material/Sell";
+import AddchartIcon from '@mui/icons-material/Addchart';
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 
 interface Props {
@@ -146,24 +145,16 @@ const Sidebar = () => {
               {/* Add Company Button */}
               <Item
                 title="Add Company"
-                to="/add"
+                to="/addCompany"
                 icon={<NoteAddIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
-              {/* Buy Shares Button */}
+              {/* Add Trade Button */}
               <Item
-                title="Buy Shares"
-                to="/buy"
-                icon={<ShoppingBasketIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              {/* Sell Shares Button */}
-              <Item
-                title="Sell Shares"
-                to="/sell"
-                icon={<SellIcon />}
+                title="Add Trade"
+                to="/addTrade"
+                icon={<AddchartIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
