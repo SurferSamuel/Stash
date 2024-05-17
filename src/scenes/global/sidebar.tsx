@@ -13,13 +13,14 @@ import { Link } from "react-router-dom";
 import { tokens } from "../../theme";
 
 // Material UI Icons
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
-import HomeIcon from "@mui/icons-material/Home";
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import AddchartIcon from '@mui/icons-material/Addchart';
+import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
+import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
+import NotificationsIcon from "@mui/icons-material/Notifications";
+import AddchartIcon from '@mui/icons-material/Addchart';
+import NoteAddIcon from "@mui/icons-material/NoteAdd";
+import HomeIcon from "@mui/icons-material/Home";
 
 interface Props {
   title: string;
@@ -155,6 +156,14 @@ const Sidebar = () => {
                 title="Add Trade"
                 to="/addTrade"
                 icon={<AddchartIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              {/* Portfolio Button */}
+              <Item
+                title="Portfolio"
+                to="/portfolio"
+                icon={<AccountBalanceIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />

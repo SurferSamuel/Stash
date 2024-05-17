@@ -7,6 +7,7 @@ import Sidebar from "./scenes/global/sidebar";
 import AddCompany from "./scenes/addCompany";
 import AddTrade from "./scenes/addTrade";
 import Settings from "./scenes/setting";
+import Portfolio from "./scenes/portfolio";
 
 type UseMode = [Theme, { toggleColorMode: () => void }];
 
@@ -24,6 +25,7 @@ function App() {
               <Route path="/" element={<p>Root</p>} />
               <Route path="/addCompany" element={<AddCompany />} />
               <Route path="/addTrade" element={<AddTrade />} />
+              <Route path="/portfolio" element={<Portfolio />} />
               <Route path="/settings" element={<Settings />} />
             </Routes>
           </main>
