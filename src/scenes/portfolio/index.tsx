@@ -4,9 +4,7 @@ import { Formik } from "formik";
 // Material UI
 import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import useMediaQuery from "@mui/material/useMediaQuery";
-import Autocomplete from "@mui/material/Autocomplete";
 import Typography from "@mui/material/Typography";
-import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 
 // Components
