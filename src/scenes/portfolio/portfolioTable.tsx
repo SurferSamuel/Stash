@@ -19,7 +19,7 @@ const makeClassName = (params: GridCellParams<any, string>) => {
   if (params.value == null || params.value === "-") return "";
   return clsx('color-cell', {
     negative: params.value[0] === '-',
-    positive: params.value[0] !== '-',
+    positive: params.value[0] !== '-' && params.value.replaceAll('0', '').length > 2,
   });
 }
 
@@ -138,11 +138,11 @@ const PortfolioTable = (props: Props) => {
           fontSize: 18, 
         },
         '& .color-cell.positive': {
-          color: "#209620",
+          color: "#049104",
           fontWeight: 600
         },
         '& .color-cell.negative': {
-          color: "#de2a2a",
+          color: "#e32020",
           fontWeight: 600
         }
       }}
