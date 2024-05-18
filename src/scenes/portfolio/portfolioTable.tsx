@@ -21,6 +21,15 @@ const makeClassName = (params: GridCellParams<any, string>) => {
   });
 }
 
+// A helper function for sorting prices and percentages
+const sortPriceOrPercent = (a: string, b: string) => {
+  const value1 = Number(a.replace('$', '').replace('%', ''));
+  const value2 = Number(b.replace('$', '').replace('%', ''));
+  if (isNaN(value1)) return -1;
+  if (isNaN(value2)) return 1;
+  return (value1 < value2) ? -1 : 1;
+}
+
 const PortfolioTable = () => {
   const { values } = useFormikContext<PortfolioFormValues>();
   const [rows, setRows] = useState<GridRowsProp>([]);
@@ -33,28 +42,30 @@ const PortfolioTable = () => {
       headerName: "Code",
       width: 100,
       align: "left",
-      headerAlign: "left"
+      headerAlign: "left",
     },
     {
       field: "units",
       headerName: "Units",
       width: 100,
       align: "right",
-      headerAlign: "right"
+      headerAlign: "right",
     },
     {
       field: "avgBuyPrice",
       headerName: "Avg Buy Price",
       width: 180,
       align: "right",
-      headerAlign: "right"
+      headerAlign: "right",
+      sortComparator: sortPriceOrPercent,
     },
     {
       field: "currentPrice",
       headerName: "Current Price",
       width: 160,
       align: "right",
-      headerAlign: "right"
+      headerAlign: "right",
+      sortComparator: sortPriceOrPercent,
     },
     {
       field: "dailyChangePerc",
@@ -62,7 +73,8 @@ const PortfolioTable = () => {
       width: 180,
       align: "right",
       headerAlign: "right",
-      cellClassName: makeClassName
+      cellClassName: makeClassName,
+      sortComparator: sortPriceOrPercent,
     },
     {
       field: "profitOrLoss",
@@ -70,7 +82,8 @@ const PortfolioTable = () => {
       width: 140,
       align: "right",
       headerAlign: "right",
-      cellClassName: makeClassName
+      cellClassName: makeClassName,
+      sortComparator: sortPriceOrPercent,
     },
     {
       field: "profitOrLossPerc",
@@ -78,7 +91,8 @@ const PortfolioTable = () => {
       width: 140,
       align: "right",
       headerAlign: "right",
-      cellClassName: makeClassName
+      cellClassName: makeClassName,
+      sortComparator: sortPriceOrPercent,
     },
   ];
 
