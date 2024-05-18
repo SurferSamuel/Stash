@@ -1,11 +1,27 @@
 import { PortfolioFormValues } from "./index";
 import { useEffect, useState } from "react";
 import { useFormikContext } from "formik";
+import clsx from 'clsx';
 
 // Material UI
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
+import {
+  DataGrid,
+  GridRowsProp,
+  GridColDef,
+  GridCellParams
+} from '@mui/x-data-grid';
 
 interface Props {}
+
+// A helper function that assigns a class whether it is a positive/negative value
+const makeClassName = (params: GridCellParams<any, string>) => {
+  // Don't assign class if no value, or value is "-"
+  if (params.value == null || params.value === "-") return "";
+  return clsx('color-cell', {
+    negative: params.value[0] === '-',
+    positive: params.value[0] !== '-',
+  });
+}
 
 const PortfolioTable = (props: Props) => {
   const { values } = useFormikContext<PortfolioFormValues>();
@@ -14,13 +30,58 @@ const PortfolioTable = (props: Props) => {
 
   // Data grid columns
   const columns: GridColDef[] = [
-    { field: "asxcode", headerName: "Code", width: 100 },
-    { field: "units", headerName: "Units", width: 100 },
-    { field: "avgBuyPrice", headerName: "Avg Buy Price", width: 160 },
-    { field: "currentPrice", headerName: "Current Price", width: 160 },
-    { field: "dailyChangePerc", headerName: "Daily Change %", width: 160 },
-    { field: "profitOrLoss", headerName: "Profit", width: 160 },
-    { field: "profitOrLossPerc", headerName: "Profit %", width: 160 },
+    {
+      field: "asxcode",
+      headerName: "Code",
+      width: 100,
+      align: "left",
+      headerAlign: "left"
+    },
+    {
+      field: "units",
+      headerName: "Units",
+      width: 100,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "avgBuyPrice",
+      headerName: "Avg Buy Price",
+      width: 180,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "currentPrice",
+      headerName: "Current Price",
+      width: 160,
+      align: "right",
+      headerAlign: "right"
+    },
+    {
+      field: "dailyChangePerc",
+      headerName: "Daily Change %",
+      width: 180,
+      align: "right",
+      headerAlign: "right",
+      cellClassName: makeClassName
+    },
+    {
+      field: "profitOrLoss",
+      headerName: "Profit",
+      width: 140,
+      align: "right",
+      headerAlign: "right",
+      cellClassName: makeClassName
+    },
+    {
+      field: "profitOrLossPerc",
+      headerName: "Profit %",
+      width: 140,
+      align: "right",
+      headerAlign: "right",
+      cellClassName: makeClassName
+    },
   ];
 
   // Update rows when values is modified
@@ -64,6 +125,9 @@ const PortfolioTable = (props: Props) => {
           borderTopColor: "#ffffff1f",
           borderBottomColor: "#ffffff1f"
         },
+        '& .MuiDataGrid-cell:focus': {
+          outline: 'none',
+        },
         '& .MuiDataGrid-columnHeaders': {
           borderBottomColor: "#ffffff1f"
         },
@@ -73,6 +137,14 @@ const PortfolioTable = (props: Props) => {
         '& .MuiDataGrid-overlay': {
           fontSize: 18, 
         },
+        '& .color-cell.positive': {
+          color: "#209620",
+          fontWeight: 600
+        },
+        '& .color-cell.negative': {
+          color: "#de2a2a",
+          fontWeight: 600
+        }
       }}
     />
   );
