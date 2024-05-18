@@ -1,8 +1,9 @@
 import { useEffect, useState } from "react";
 import { Formik } from "formik";
 
+import PortfolioTable from "./portfolioTable";
+
 // Material UI
-import { DataGrid, GridRowsProp, GridColDef } from '@mui/x-data-grid';
 import useMediaQuery from "@mui/material/useMediaQuery";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
@@ -16,7 +17,7 @@ import Header from "../../components/header";
 // Types
 import { Option } from "../../../electron/types";
 
-interface PortfolioFormValues {
+export interface PortfolioFormValues {
   user: string;
   financialStatus: Option[];
   miningStatus: Option[];
@@ -28,7 +29,7 @@ interface PortfolioFormValues {
 const Portfolio = () => {
   const isNonMobile = useMediaQuery("(min-width:800px)");
 
-  // Dropdown Data
+  // Dropdown data
   const [usersList, setUsersList] = useState<Option[]>([]);
   const [financialStatusList, setFinancialStatusList] = useState<Option[]>([]);
   const [miningStatusList, setMiningStatusList] = useState<Option[]>([]);
@@ -56,11 +57,10 @@ const Portfolio = () => {
       }
     })();
     // Clean up
-    return () => {
-      isMounted = false;
-    };
+    return () => { isMounted = false };
   }, []);
 
+  // Formik initial values
   const initialValues: PortfolioFormValues = {
     user: "",
     financialStatus: [],
@@ -154,7 +154,8 @@ const Portfolio = () => {
                 </Box>
               </AccordionDetails>
             </Accordion>
-            {/* TODO DATA GRID TABLE */}
+            {/* Data grid table */}
+            <PortfolioTable />
           </Box>
         )}
       </Formik>
