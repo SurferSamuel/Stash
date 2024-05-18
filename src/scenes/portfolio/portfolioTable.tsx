@@ -105,43 +105,59 @@ const PortfolioTable = () => {
 
   return (
     <DataGrid 
+      disableRowSelectionOnClick 
       columns={columns}
       rows={rows}
       loading={loading}
+      initialState={{
+        pagination: { paginationModel: { pageSize: 8 } },
+      }}
+      pageSizeOptions={[8, 16, 32, 64]}
       sx={{
         mt: "-20px",
-        height: 400, 
+        height: 524.5, 
         gridColumn: "span 4",
         border: 0,
         '& .MuiDataGrid-columnHeaderTitle': {
           fontWeight: 500,
           fontSize: 16,
-          color: "secondary.main"
+          color: "secondary.main",
         },
         '& .MuiDataGrid-cell': {
           fontSize: 14,
-          borderTopColor: "#ffffff1f",
-          borderBottomColor: "#ffffff1f"
+          borderBottomColor: "#ffffff1f",
         },
         '& .MuiDataGrid-cell:focus': {
           outline: 'none',
         },
+        '.MuiDataGrid-columnHeader:focus': {
+          outline: 'none',
+        },
         '& .MuiDataGrid-columnHeaders': {
-          borderBottomColor: "#ffffff1f"
+          borderBottomColor: "#ffffff1f",
         },
         '& .MuiDataGrid-footerContainer': {
-          borderTopColor: "#ffffff1f"
+          borderTopColor: "#ffffff1f",
         },
         '& .MuiDataGrid-overlay': {
           fontSize: 18, 
         },
         '& .color-cell.positive': {
           color: "#049104",
-          fontWeight: 600
+          fontWeight: 600,
         },
         '& .color-cell.negative': {
           color: "#e32020",
-          fontWeight: 600
+          fontWeight: 600,
+        },
+        '& .MuiTablePagination-selectLabel': {
+          fontSize: 14,
+        },
+        '& .MuiTablePagination-input': {
+          fontSize: 14,
+        },
+        '& .MuiTablePagination-displayedRows': {
+          fontSize: 14,
         }
       }}
     />
