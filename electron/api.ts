@@ -372,11 +372,11 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
 
   // Filter companies that match all the filter values (except for user)
   const filteredData = data.filter((entry) => 
-    filterValues.financialStatus.every((val) => entry.financialStatus.includes(val)) &&
-    filterValues.miningStatus.every((val) => entry.miningStatus.includes(val)) &&
-    filterValues.resources.every((val) => entry.resources.includes(val)) &&
-    filterValues.products.every((val) => entry.products.includes(val)) &&
-    filterValues.recommendations.every((val) => entry.recommendations.includes(val))
+    filterValues.financialStatus.every((val) => entry.financialStatus.some(obj => obj.label === val.label)) &&
+    filterValues.miningStatus.every((val) => entry.miningStatus.some(obj => obj.label === val.label)) &&
+    filterValues.resources.every((val) => entry.resources.some(obj => obj.label === val.label)) &&
+    filterValues.products.every((val) => entry.products.some(obj => obj.label === val.label)) &&
+    filterValues.recommendations.every((val) => entry.recommendations.some(obj => obj.label === val.label))
   );
 
   // If no companies match the filter values
