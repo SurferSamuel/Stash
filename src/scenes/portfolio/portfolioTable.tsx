@@ -41,7 +41,7 @@ const PortfolioTable = () => {
       field: "asxcode",
       headerName: "Code",
       minWidth: 60,
-      flex: 1,
+      flex: 2,
       align: "left",
       headerAlign: "left",
     },
@@ -49,7 +49,7 @@ const PortfolioTable = () => {
       field: "units",
       headerName: "Units",
       minWidth: 60,
-      flex: 1,
+      flex: 2,
       align: "right",
       headerAlign: "right",
     },
@@ -57,7 +57,7 @@ const PortfolioTable = () => {
       field: "avgBuyPrice",
       headerName: "Avg Buy Price",
       minWidth: 120,
-      flex: 2,
+      flex: 4,
       align: "right",
       headerAlign: "right",
       sortComparator: sortPriceOrPercent,
@@ -66,16 +66,26 @@ const PortfolioTable = () => {
       field: "currentPrice",
       headerName: "Current Price",
       minWidth: 120,
-      flex: 2,
+      flex: 4,
       align: "right",
       headerAlign: "right",
       sortComparator: sortPriceOrPercent,
     },
     {
       field: "dailyChangePerc",
-      headerName: "Daily Change %",
-      minWidth: 140,
-      flex: 2,
+      headerName: "24hr Change %",
+      minWidth: 130,
+      flex: 4,
+      align: "right",
+      headerAlign: "right",
+      cellClassName: makeClassName,
+      sortComparator: sortPriceOrPercent,
+    },
+    {
+      field: "dailyProfit",
+      headerName: "24hr Profit",
+      minWidth: 100,
+      flex: 3,
       align: "right",
       headerAlign: "right",
       cellClassName: makeClassName,
@@ -85,7 +95,7 @@ const PortfolioTable = () => {
       field: "profitOrLoss",
       headerName: "Profit",
       minWidth: 70,
-      flex: 2,
+      flex: 3,
       align: "right",
       headerAlign: "right",
       cellClassName: makeClassName,
@@ -95,7 +105,7 @@ const PortfolioTable = () => {
       field: "profitOrLossPerc",
       headerName: "Profit %",
       minWidth: 80,
-      flex: 2,
+      flex: 3,
       align: "right",
       headerAlign: "right",
       cellClassName: makeClassName,
@@ -111,8 +121,8 @@ const PortfolioTable = () => {
         // Show loading icon on table while waiting for request
         setLoading(true);
         const rows = await window.electronAPI.getTableRows(values);
-        setLoading(false);
         if (isMounted) setRows(rows);
+        setLoading(false);
       } catch (error) {
         // Split message since Electron wraps the original error message with additional text.
         const splitMsg = error.message.split('Error: ');

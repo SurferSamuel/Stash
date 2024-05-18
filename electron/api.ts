@@ -385,7 +385,12 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
   }
 
   // Only ask for these fields to save on bandwidth and latency
-  const fields = ["symbol", "regularMarketPrice", "regularMarketChangePercent"];
+  const fields = [
+    "symbol",
+    "regularMarketPrice",
+    "regularMarketChangePercent",
+    "regularMarketPreviousClose"
+  ];
 
   // Get the quotes of all the filtered companies
   const asxcodeArray = filteredData.map((entry) => `${entry.asxcode}.AX`);
@@ -404,11 +409,13 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     // Get current price and daily change % from quote
     const currentPrice = quote.regularMarketPrice ?? null;
     const dailyChangePerc = quote.regularMarketChangePercent ?? null;
+    const previousPrice = quote.regularMarketPreviousClose ?? null;
+
+    let totalQuantity = 0;    // Total units of shares owned
+    let totalCost = 0;        // Total cost (including brokerage & gst)
+    let totalCostForAvg = 0;  // Total cost (excluding brokerage & gst)
 
     // Loop for all current shares in this company
-    let totalQuantity = 0;
-    let totalCost = 0;
-    let totalCostForAvg = 0;
     for (const shareEntry of company.currentShares) {
       // Note: Empty string means don't filter for a specific user
       if (filterValues.user === "" || shareEntry.user === filterValues.user) {
@@ -424,13 +431,14 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
       }
     }
 
-    // If no quantity, don't add row
+    // If no quantity, don't add the row
     if (totalQuantity === 0) continue;
 
     // Calculate row values
     const avgBuyPrice = totalCostForAvg / totalQuantity;
     const profitOrLoss = (currentPrice != null) ? (currentPrice * totalQuantity - totalCost) : null;
-    const profitOrLossPerc = (currentPrice != null) ? (profitOrLoss / totalCost * 100) : null; 
+    const profitOrLossPerc = (currentPrice != null) ? (profitOrLoss / totalCost * 100) : null;
+    const dailyProfit = (currentPrice != null && previousPrice != null) ? (totalQuantity * (currentPrice - previousPrice)) : null;
 
     // Add the row into the array
     tableRows.push({
@@ -440,6 +448,7 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
       avgBuyPrice: currencyFormat(avgBuyPrice),
       currentPrice: (currentPrice != null) ? currencyFormat(currentPrice) : "-",
       dailyChangePerc: (dailyChangePerc != null) ? precentFormat(dailyChangePerc) : "-",
+      dailyProfit: (dailyProfit != null) ? currencyFormat(dailyProfit) : "-",
       profitOrLoss: (profitOrLoss != null) ? currencyFormat(profitOrLoss) : "-",
       profitOrLossPerc: (profitOrLossPerc != null) ? precentFormat(profitOrLossPerc) : "-",
     });

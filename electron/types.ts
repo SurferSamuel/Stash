@@ -153,6 +153,7 @@ export interface TableRow {
   avgBuyPrice: string;      // Average price of brought shares
   currentPrice: string;     // Last share price
   dailyChangePerc: string;  // Daily change in share price %
+  dailyProfit: string;      // Daily change in profit
   profitOrLoss: string;     // Profit/loss amount
   profitOrLossPerc: string; // Profit/loss %
 }
