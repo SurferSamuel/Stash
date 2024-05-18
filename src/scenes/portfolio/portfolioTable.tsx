@@ -11,8 +11,6 @@ import {
   GridCellParams
 } from '@mui/x-data-grid';
 
-interface Props {}
-
 // A helper function that assigns a class whether it is a positive/negative value
 const makeClassName = (params: GridCellParams<any, string>) => {
   // Don't assign class if no value, or value is "-"
@@ -23,7 +21,7 @@ const makeClassName = (params: GridCellParams<any, string>) => {
   });
 }
 
-const PortfolioTable = (props: Props) => {
+const PortfolioTable = () => {
   const { values } = useFormikContext<PortfolioFormValues>();
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [loading, setLoading] = useState<boolean>(false);

@@ -7,9 +7,7 @@ import Typography from "@mui/material/Typography";
 import InfoIcon from '@mui/icons-material/Info';
 import Box from "@mui/material/Box";
 
-interface Props {}
-
-const ShowAvailableUnits = (props: Props) => {
+const ShowAvailableUnits = () => {
   const { values } = useFormikContext<AddTradeFormValues>();
   const [show, setShow] = useState<boolean>(false);
   const [units, setUnits] = useState<number>(0);
