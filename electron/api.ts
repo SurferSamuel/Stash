@@ -384,9 +384,12 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     return [];
   }
 
+  // Only ask for these fields to save on bandwidth and latency
+  const fields = ["symbol", "regularMarketPrice", "regularMarketChangePercent"];
+
   // Get the quotes of all the filtered companies
   const asxcodeArray = filteredData.map((entry) => `${entry.asxcode}.AX`);
-  const quoteArray = await yahooFinance.quote(asxcodeArray);
+  const quoteArray = await yahooFinance.quote(asxcodeArray, { fields });
   
   // Loop for each filtered company
   let id = 1;
