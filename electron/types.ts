@@ -134,3 +134,25 @@ export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" 
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
 }
+
+// Filter values type for getTableRows in ./api.ts
+export interface FilterValues {
+  user: string;
+  financialStatus: Option[];
+  miningStatus: Option[];
+  resources: Option[];
+  products: Option[];
+  recommendations: Option[];
+}
+
+// Portfolio row type, returned from getTableRows in ./api.ts
+export interface TableRow {
+  id: number;               // ID, eg. 1, 2, 3, ...
+  asxcode: string;          // ASX code of the company
+  units: number;            // Number of units owned
+  avgBuyPrice: string;      // Average price of brought shares
+  currentPrice: string;     // Last share price
+  dailyChangePerc: string;  // Daily change in share price %
+  profitOrLoss: string;     // Profit/loss amount
+  profitOrLossPerc: string; // Profit/loss %
+}
