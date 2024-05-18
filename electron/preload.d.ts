@@ -5,10 +5,12 @@ import {
   Country, 
   Data, 
   FetchQuote, 
+  FilterValues, 
   Key, 
   Option, 
   OptionKey, 
-  Settings, 
+  Settings,
+  TableRow, 
 } from "./types";
 
 export interface IElectronAPI {
@@ -27,6 +29,7 @@ export interface IElectronAPI {
   availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
+  getTableRows: (filterValues: FilterValues) => Promise<TableRow[]>;
 }
 
 declare global {

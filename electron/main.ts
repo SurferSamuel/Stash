@@ -60,3 +60,4 @@ ipcMain.handle("addCompany", api.addCompany);
 ipcMain.handle("availableShares", api.availableShares);
 ipcMain.handle("buyShare", api.buyShare);
 ipcMain.handle("sellShare", api.sellShare);
+ipcMain.handle("getTableRows", api.getTableRows);

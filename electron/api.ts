@@ -16,14 +16,27 @@ import {
   CompanyData, 
   CurrentShareEntry, 
   Data, 
-  FetchQuote, 
+  FetchQuote,
+  FilterValues,
   Key, 
   Option, 
   OptionKey,
+  TableRow,
 } from "./types";
 
 // Dayjs parser helper function
 const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
+
+// Currency formatter helper function
+// Note use USD format "$" instead of AUD format "A$"
+const currencyFormat = (num: number): string => {
+  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
+}
+
+// Percent formatter helper function
+const precentFormat = (num: number): string => {
+  return num.toFixed(2) + "%";
+}
 
 /*
  * Fetches the quote for the given asxcode, using yahoo-finance2.
@@ -348,4 +361,86 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 
   // Save datastore
   setData(null, "companies", data);
+}
+
+/*
+ * Gets the table rows for the portfolio page that match the given filter values.
+ */
+export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValues): Promise<TableRow[]> => {
+  // Get existing data from storage
+  const data = getData(null, "companies") as CompanyData[];
+
+  // Filter companies that match all the filter values (except for user)
+  const filteredData = data.filter((entry) => 
+    filterValues.financialStatus.every((val) => entry.financialStatus.includes(val)) &&
+    filterValues.miningStatus.every((val) => entry.miningStatus.includes(val)) &&
+    filterValues.resources.every((val) => entry.resources.includes(val)) &&
+    filterValues.products.every((val) => entry.products.includes(val)) &&
+    filterValues.recommendations.every((val) => entry.recommendations.includes(val))
+  );
+
+  // If no companies match the filter values
+  if (filteredData.length === 0) {
+    return [];
+  }
+
+  // Get the quotes of all the filtered companies
+  const asxcodeArray = filteredData.map((entry) => `${entry.asxcode}.AX`);
+  const quoteArray = await yahooFinance.quote(asxcodeArray);
+  
+  // Loop for each filtered company
+  let id = 1;
+  const tableRows: TableRow[] = []; 
+  for (const company of filteredData) {
+    // Find the quote for this company
+    const quote = quoteArray.find((entry) => entry.symbol === `${company.asxcode}.AX`);
+    if (quote === undefined) {
+      throw new Error(`ERROR: Could not fetch quote for ${company.asxcode}`);
+    }
+
+    // Get current price and daily change % from quote
+    const currentPrice = quote.regularMarketPrice ?? null;
+    const dailyChangePerc = quote.regularMarketChangePercent ?? null;
+
+    // Loop for all current shares in this company
+    let totalQuantity = 0;
+    let totalCost = 0;
+    let totalCostForAvg = 0;
+    for (const shareEntry of company.currentShares) {
+      // Note: Empty string means don't filter for a specific user
+      if (filterValues.user === "" || shareEntry.user === filterValues.user) {
+        const quantity = Number(shareEntry.quantity);
+        const unitPrice = Number(shareEntry.unitPrice);
+        const brokerage = Number(shareEntry.brokerage);
+        const gst = Number(shareEntry.gst);
+
+        // Update totals
+        totalCost += quantity * unitPrice + brokerage + gst;
+        totalCostForAvg += quantity * unitPrice;
+        totalQuantity += quantity;
+      }
+    }
+
+    // If no quantity, don't add row
+    if (totalQuantity === 0) continue;
+
+    // Calculate row values
+    const avgBuyPrice = totalCostForAvg / totalQuantity;
+    const profitOrLoss = (currentPrice != null) ? (currentPrice * totalQuantity - totalCost) : null;
+    const profitOrLossPerc = (currentPrice != null) ? (profitOrLoss / totalCost * 100) : null; 
+
+    // Add the row into the array
+    tableRows.push({
+      id: id++,
+      asxcode: company.asxcode,
+      units: totalQuantity,
+      avgBuyPrice: currencyFormat(avgBuyPrice),
+      currentPrice: (currentPrice != null) ? currencyFormat(currentPrice) : "-",
+      dailyChangePerc: (dailyChangePerc != null) ? precentFormat(dailyChangePerc) : "-",
+      profitOrLoss: (profitOrLoss != null) ? currencyFormat(profitOrLoss) : "-",
+      profitOrLossPerc: (profitOrLossPerc != null) ? precentFormat(profitOrLossPerc) : "-",
+    });
+  }
+
+  return tableRows;
 }
