@@ -11,10 +11,8 @@ import { LineChart } from '@mui/x-charts/LineChart';
 import { styled } from '@mui/material/styles';
 import Box from "@mui/material/Box";
 
-
 // Types
 import { PortfolioDataPoint } from "../../../electron/types";
-import { Typography } from "@mui/material";
 
 const PortfolioGraph = () => {
   const theme = useTheme();
