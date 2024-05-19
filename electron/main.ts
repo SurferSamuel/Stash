@@ -61,3 +61,4 @@ ipcMain.handle("availableShares", api.availableShares);
 ipcMain.handle("buyShare", api.buyShare);
 ipcMain.handle("sellShare", api.sellShare);
 ipcMain.handle("getTableRows", api.getTableRows);
+ipcMain.handle("getPortfolioGraphData", api.getPortfolioGraphData);

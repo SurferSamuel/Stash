@@ -9,6 +9,7 @@ import {
   Key, 
   Option, 
   OptionKey, 
+  PortfolioDataPoint, 
   Settings,
   TableRow, 
 } from "./types";
@@ -30,6 +31,7 @@ export interface IElectronAPI {
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   getTableRows: (filterValues: FilterValues) => Promise<TableRow[]>;
+  getPortfolioGraphData: (filterValues: FilterValues) => Promise<PortfolioDataPoint[]>;
 }
 
 declare global {

@@ -10,22 +10,25 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
 // Types
+import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { 
   AddCompanyValues, 
   AddTradeValues,
+  BuyHistoryEntry,
   CompanyData, 
   CurrentShareEntry, 
   Data, 
-  FetchQuote,
   FilterValues,
   Key, 
   Option, 
   OptionKey,
+  PortfolioDataPoint,
+  SellHistoryEntry,
   TableRow,
 } from "./types";
 
 // Dayjs parser helper function
-const toDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
+const dayjsDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
 
 // Currency formatter helper function
 // Note use USD format "$" instead of AUD format "A$"
@@ -42,7 +45,7 @@ const precentFormat = (num: number): string => {
  * Fetches the quote for the given asxcode, using yahoo-finance2.
  * If no quote is found (eg. from invalid asxcode), then an error is thrown.
  */
-export const fetchQuote = async (event: IpcMainEvent, asxcode: string): Promise<FetchQuote> => {
+export const fetchQuote = async (event: IpcMainEvent, asxcode: string) => {
   // Send API request using yahoo-finance2
   const quote = await yahooFinance.quote(`${asxcode}.AX`);
   return { quote };
@@ -192,7 +195,7 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
  * Returns the number of available shares for the given asxcode and user.
  * Throws an error if the asxcode does not exist in the datastore
  */
-export const availableShares = (event: IpcMainEvent, asxcode: string, user: string): number => {
+export const availableShares = (event: IpcMainEvent, asxcode: string, user: string) => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 
@@ -273,8 +276,8 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
   // Retrieve all of the current shares for the user, removing any entries with buy dates
   // after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
-    .filter((entry) => entry.user === values.user && !toDate(entry.date).isAfter(toDate(values.date)))
-    .sort((a, b) => toDate(a.date).isBefore(toDate(b.date)) ? -1 : 1);
+    .filter((entry) => entry.user === values.user && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
+    .sort((a, b) => dayjsDate(a.date).isBefore(dayjsDate(b.date)) ? -1 : 1);
 
   // If the user has no shares
   if (currentShares.length === 0) {
@@ -319,7 +322,7 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 
     // Check if CGT discount (50%) applies
     // This applies if the owner has held onto the asset for more than 12 months (1 year) & made a capital gain
-    const cgtDiscount = profitOrLoss > 0 && toDate(values.date).diff(toDate(entry.date), "year", true) > 1;
+    const cgtDiscount = profitOrLoss > 0 && dayjsDate(values.date).diff(dayjsDate(entry.date), "year", true) > 1;
 
     // Calculate the capital gain/loss
     // Only apply CGT discount if a capital gain is made & asset was held for >12 months
@@ -364,19 +367,31 @@ export const sellShare = (event: IpcMainEvent, values: AddTradeValues, gstPercen
 }
 
 /*
+ * A helper function used to help filter using options arrays.
+ * Searches the given searchArray and checks if all options in the optionsArray is found.
+ */ 
+const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
+  return optionsArray.every(val => searchArray.some(obj => obj.label === val.label));
+}
+
+/*
  * Gets the table rows for the portfolio page that match the given filter values.
  */
-export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValues): Promise<TableRow[]> => {
+export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValues) => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 
-  // Filter companies that match all the filter values (except for user)
-  const filteredData = data.filter((entry) => 
-    filterValues.financialStatus.every((val) => entry.financialStatus.some(obj => obj.label === val.label)) &&
-    filterValues.miningStatus.every((val) => entry.miningStatus.some(obj => obj.label === val.label)) &&
-    filterValues.resources.every((val) => entry.resources.some(obj => obj.label === val.label)) &&
-    filterValues.products.every((val) => entry.products.some(obj => obj.label === val.label)) &&
-    filterValues.recommendations.every((val) => entry.recommendations.some(obj => obj.label === val.label))
+  // Filter companies that match all the filter values
+  const filteredData = data.filter((entry) =>
+    filterOption(filterValues.financialStatus, entry.financialStatus) &&
+    filterOption(filterValues.miningStatus, entry.miningStatus) &&
+    filterOption(filterValues.resources, entry.resources) &&
+    filterOption(filterValues.products, entry.products) &&
+    filterOption(filterValues.recommendations, entry.recommendations) && (
+      // Note: Empty user array = show all users
+      filterValues.user.length === 0 || 
+      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
+    )
   );
 
   // If no companies match the filter values
@@ -392,9 +407,9 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     "regularMarketPreviousClose"
   ];
 
-  // Get the quotes of all the filtered companies
-  const asxcodeArray = filteredData.map((entry) => `${entry.asxcode}.AX`);
-  const quoteArray = await yahooFinance.quote(asxcodeArray, { fields });
+  // Get the quotes for all the filtered companies
+  const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`);
+  const quoteArray = await yahooFinance.quote(symbols, { fields });
   
   // Loop for each filtered company
   let id = 1;
@@ -406,18 +421,18 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
       throw new Error(`ERROR: Could not fetch quote for ${company.asxcode}`);
     }
 
-    // Get current price and daily change % from quote
+    // Extract the required info from the quote
     const currentPrice = quote.regularMarketPrice ?? null;
     const dailyChangePerc = quote.regularMarketChangePercent ?? null;
     const previousPrice = quote.regularMarketPreviousClose ?? null;
 
-    let totalQuantity = 0;    // Total units of shares owned
-    let totalCost = 0;        // Total cost (including brokerage & gst)
-    let totalCostForAvg = 0;  // Total cost (excluding brokerage & gst)
+    let totalQuantity = 0;
+    let totalCost = 0;
+    let totalCostForAvg = 0;
 
     // Loop for all current shares in this company
     for (const shareEntry of company.currentShares) {
-      // Note: No users means don't filter for a specific user
+      // Note: Empty user array = show all users
       if (filterValues.user.length === 0 || filterValues.user.some((obj) => obj.label === shareEntry.user)) {
         const quantity = Number(shareEntry.quantity);
         const unitPrice = Number(shareEntry.unitPrice);
@@ -455,4 +470,114 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
   }
 
   return tableRows;
+}
+
+/*
+ * A helper function. Counts the number of units that were brought/sold by a user in
+ * the given users array before the given time. If the users array is empty, then will
+ * return the total number of units for all users.
+ */
+const countUnitsBeforeTime = (searchArray: (BuyHistoryEntry | SellHistoryEntry)[], users: Option[], time: Date) => {
+  return searchArray.reduce((acc, entry) => {
+    // If the user of the entry is correct
+    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+      // Get the date of entry
+      const entryDate = ((entry as BuyHistoryEntry).date) ?? ((entry as SellHistoryEntry).sellDate);
+      // If the entry was before the given time
+      if (dayjsDate(entryDate).toDate() < time) {
+        acc += Number(entry.quantity);
+      }
+    }
+    return acc;
+  }, 0);
+}
+
+/*
+ * Gets the data for the portfolio page graph, matching the given filter values.
+ */
+export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues) => {
+  // Get existing data from storage
+  const data = getData(null, "companies") as CompanyData[];
+
+  // Filter companies that match all the filter values
+  const filteredData = data.filter((entry) => 
+    filterOption(filterValues.financialStatus, entry.financialStatus) &&
+    filterOption(filterValues.miningStatus, entry.miningStatus) &&
+    filterOption(filterValues.resources, entry.resources) &&
+    filterOption(filterValues.products, entry.products) &&
+    filterOption(filterValues.recommendations, entry.recommendations) && (
+      // Note: Empty user array = show all users
+      filterValues.user.length === 0 || 
+      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
+    )
+  );
+
+  // If no companies match the filter values
+  if (filteredData.length === 0) {
+    return [];
+  }
+
+  // Get date 1 month ago
+  let date = new Date();
+  date.setMonth(date.getMonth() - 1);
+
+  // Get the historicals for all the filtered companies
+  const queryOptions = { period1: date };
+  const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`); 
+  const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
+
+  // Clean the data, removing any promises that were not fulfillied
+  const cleanHistoricalArray: {
+    asxcode: string;
+    historical: HistoricalHistoryResult;
+  }[] = [];
+
+  for (let i = 0; i < filteredData.length; i++) {
+    const historicalResult = historicalArray[i];
+    if (historicalResult.status === "fulfilled") {
+      cleanHistoricalArray.push({
+        asxcode: filteredData[i].asxcode,
+        historical: historicalResult.value,
+      });
+    }
+  }
+
+  // Calculate the graph data, ie. value of portfolio at each historical entry
+  const graphData: PortfolioDataPoint[] = [];
+  
+  for (const company of filteredData) {
+    // Get the historical result for the company
+    const historicalResult = cleanHistoricalArray.find(entry => entry.asxcode === company.asxcode);
+
+    // Skip if received no historical result for this company
+    if (historicalResult === undefined) {
+      continue;
+    }
+
+    // Loop for each entry of the company's historical data
+    for (const historical of historicalResult.historical) {
+      // Calculate the number of units before the time of the historical entry
+      const broughtUnits = countUnitsBeforeTime(company.buyHistory, filterValues.user, historical.date);
+      const soldUnits = countUnitsBeforeTime(company.sellHistory, filterValues.user, historical.date);
+      const units = broughtUnits - soldUnits;
+
+      // Value at the time of historical entry
+      const value = units * historical.adjClose;
+
+      // Add the value into the graph data array
+      const graphEntry = graphData.find(entry => entry.date.getTime() === historical.date.getTime());
+      if (graphEntry === undefined) {
+        // Make new entry if none exists...
+        graphData.push({
+          date: historical.date,
+          value,
+        });
+      } else {
+        // ...otherwise, add the value to the entry
+        graphEntry.value += value;
+      }
+    }
+  }
+
+  return graphData;
 }

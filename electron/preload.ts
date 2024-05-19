@@ -12,4 +12,5 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
   sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
   getTableRows: (filterValues: FilterValues) => ipcRenderer.invoke("getTableRows", filterValues),
+  getPortfolioGraphData: (filterValues: FilterValues) => ipcRenderer.invoke("getPortfolioGraphData", filterValues),
 });
