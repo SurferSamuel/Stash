@@ -11,14 +11,13 @@ import Box from "@mui/material/Box";
 // Components
 import { Accordion, AccordionSummary, AccordionDetails } from "../../components/accordion";
 import MultiSelectInput from "../../components/multiSelect";
-import SelectInput from "../../components/select";
 import Header from "../../components/header";
 
 // Types
 import { Option } from "../../../electron/types";
 
 export interface PortfolioFormValues {
-  user: string;
+  user: Option[];
   financialStatus: Option[];
   miningStatus: Option[];
   resources: Option[];
@@ -62,7 +61,7 @@ const Portfolio = () => {
 
   // Formik initial values
   const initialValues: PortfolioFormValues = {
-    user: "",
+    user: [],
     financialStatus: [],
     miningStatus: [],
     resources: [],
@@ -88,7 +87,7 @@ const Portfolio = () => {
             {/* Filter Dropdown */}
             <Accordion>
               <AccordionSummary>
-                <Typography variant="h5">Filter</Typography>
+                <Typography variant="h5">Filter Options</Typography>
               </AccordionSummary>
               <AccordionDetails>
                 <Box
@@ -103,13 +102,12 @@ const Portfolio = () => {
                   }}
                 >
                   {/* User Input */}
-                  <SelectInput
-                    label="Specifc User"
+                  <MultiSelectInput
+                    label="Specifc User(s)"
                     valueName={"user"}
                     value={values.user}
                     handleChange={handleChange}
                     options={usersList}
-                    span={2}
                   />
                   {/* Financial Status Input */}
                   <MultiSelectInput
