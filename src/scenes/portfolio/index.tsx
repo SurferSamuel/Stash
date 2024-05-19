@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Formik } from "formik";
 
 import PortfolioTable from "./portfolioTable";
+import PortfolioGraph from "./portfolioGraph";
 
 // Material UI
 import useMediaQuery from "@mui/material/useMediaQuery";
@@ -83,7 +84,8 @@ const Portfolio = () => {
             gap="30px"
             gridTemplateColumns="repeat(4, minmax(0, 1fr))"
           >
-            {/* TODO GRAPH */}
+            {/* Graph showing portfolio value */}
+            <PortfolioGraph />
             {/* Filter Dropdown */}
             <Accordion>
               <AccordionSummary>
@@ -152,7 +154,7 @@ const Portfolio = () => {
                 </Box>
               </AccordionDetails>
             </Accordion>
-            {/* Data grid table */}
+            {/* Table showing current shares */}
             <PortfolioTable />
           </Box>
         )}
