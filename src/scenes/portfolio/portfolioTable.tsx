@@ -35,6 +35,27 @@ const PortfolioTable = () => {
   const [rows, setRows] = useState<GridRowsProp>([]);
   const [loading, setLoading] = useState<boolean>(false);
 
+  // Update rows when values is modified
+  useEffect(() => {
+    let isMounted = true;
+    (async () => {
+      try {
+        // Show loading icon on table while waiting for request
+        setLoading(true);
+        const rows = await window.electronAPI.getTableRows(values);
+        if (isMounted) setRows(rows);
+        setLoading(false);
+      } catch (error) {
+        // Split message since Electron wraps the original error message with additional text.
+        const splitMsg = error.message.split('Error: ');
+        const msg = (splitMsg.length === 2) ? splitMsg[1] : error.message;
+        console.error(msg);
+      }
+    })();
+    // Clean up
+    return () => { isMounted = false };
+  }, [values]);
+
   // Data grid columns
   const columns: GridColDef[] = [
     {
@@ -112,27 +133,6 @@ const PortfolioTable = () => {
       sortComparator: sortPriceOrPercent,
     },
   ];
-
-  // Update rows when values is modified
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        // Show loading icon on table while waiting for request
-        setLoading(true);
-        const rows = await window.electronAPI.getTableRows(values);
-        if (isMounted) setRows(rows);
-        setLoading(false);
-      } catch (error) {
-        // Split message since Electron wraps the original error message with additional text.
-        const splitMsg = error.message.split('Error: ');
-        const msg = (splitMsg.length === 2) ? splitMsg[1] : error.message;
-        console.error(msg);
-      }
-    })();
-    // Clean up
-    return () => { isMounted = false };
-  }, [values]);
 
   return (
     <DataGrid 
