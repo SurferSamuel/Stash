@@ -94,7 +94,7 @@ const PortfolioTable = () => {
     {
       field: "profitOrLoss",
       headerName: "Profit",
-      minWidth: 70,
+      minWidth: 80,
       flex: 3,
       align: "right",
       headerAlign: "right",
@@ -146,7 +146,7 @@ const PortfolioTable = () => {
       pageSizeOptions={[8, 16, 32, 64]}
       sx={{
         mt: "-20px",
-        height: 524.5, 
+        height: 525, 
         gridColumn: "span 4",
         border: 0,
         '& .MuiDataGrid-columnHeaderTitle': {
