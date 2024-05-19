@@ -32,9 +32,7 @@ const dayjsDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
 
 // Currency formatter helper function
 // Note use USD format "$" instead of AUD format "A$"
-const currencyFormat = (num: number): string => {
-  return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(num);
-}
+const currencyFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format;
 
 // Percent formatter helper function
 const precentFormat = (num: number): string => {
@@ -543,6 +541,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   }
 
   // Calculate the graph data, ie. value of portfolio at each historical entry
+  let id = 1;
   const graphData: PortfolioDataPoint[] = [];
   
   for (const company of filteredData) {
@@ -569,6 +568,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
       if (graphEntry === undefined) {
         // Make new entry if none exists...
         graphData.push({
+          id: id++,
           date: historical.date,
           value,
         });

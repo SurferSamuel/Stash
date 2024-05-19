@@ -160,6 +160,8 @@ export interface TableRow {
 
 // Data point type for the portfolio graph, returned from getPortfolioGraphData() in ./api.ts
 export interface PortfolioDataPoint {
+  id: number;
   date: Date;
   value: number;
+  [key: string]: any;
 }
