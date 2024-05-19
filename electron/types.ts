@@ -137,7 +137,7 @@ export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
 
 // Filter values type for getTableRows in ./api.ts
 export interface FilterValues {
-  user: string;
+  user: Option[];
   financialStatus: Option[];
   miningStatus: Option[];
   resources: Option[];

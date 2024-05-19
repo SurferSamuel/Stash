@@ -417,8 +417,8 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
 
     // Loop for all current shares in this company
     for (const shareEntry of company.currentShares) {
-      // Note: Empty string means don't filter for a specific user
-      if (filterValues.user === "" || shareEntry.user === filterValues.user) {
+      // Note: No users means don't filter for a specific user
+      if (filterValues.user.length === 0 || filterValues.user.some((obj) => obj.label === shareEntry.user)) {
         const quantity = Number(shareEntry.quantity);
         const unitPrice = Number(shareEntry.unitPrice);
         const brokerage = Number(shareEntry.brokerage);
