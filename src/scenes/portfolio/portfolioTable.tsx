@@ -171,7 +171,7 @@ const PortfolioTable = () => {
           borderTopColor: "#ffffff1f",
         },
         '& .MuiDataGrid-overlay': {
-          fontSize: 18, 
+          fontSize: 14, 
         },
         '& .color-cell.positive': {
           color: "#049104",

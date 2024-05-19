@@ -5,12 +5,16 @@ import { tokens } from "../../theme";
 
 // Material UI
 import { AxisValueFormatterContext } from "@mui/x-charts/models/axis";
+import { useDrawingArea, useYScale } from '@mui/x-charts/hooks';
 import useTheme from "@mui/material/styles/useTheme";
 import { LineChart } from '@mui/x-charts/LineChart';
+import { styled } from '@mui/material/styles';
 import Box from "@mui/material/Box";
+
 
 // Types
 import { PortfolioDataPoint } from "../../../electron/types";
+import { Typography } from "@mui/material";
 
 const PortfolioGraph = () => {
   const theme = useTheme();
@@ -72,6 +76,28 @@ const PortfolioGraph = () => {
     return `${value / 1000000000}B`;
   }
 
+  const NoDataText = styled('text')(({ theme }) => ({
+    transform: 'translateX(-28px)',
+    fontSize: 14,
+    fill: theme.palette.text.primary,
+    shapeRendering: 'crispEdges',
+    textAnchor: 'middle',
+    dominantBaseline: 'middle',
+  }));
+
+  const NoDataOverlay = () => {
+    const yScale = useYScale();
+    const { left, width, height } = useDrawingArea();
+    const [bottom, top] = yScale.range();
+    return (
+      <g>
+        <NoDataText x={left + width / 2} y={top + height / 2}>
+          No data to display
+        </NoDataText>
+      </g>
+    );
+  }
+
   return (
     <Box gridColumn="span 4" m="-30px -5px -30px 10px">
       <LineChart
@@ -101,6 +127,7 @@ const PortfolioGraph = () => {
         dataset={dataset}
         height={400}
         grid={{ horizontal: true }}
+        slots={{ noDataOverlay: NoDataOverlay }}
         sx={{
           '& .MuiChartsAxis-directionY .MuiChartsAxis-tick': {
             stroke: "none",
