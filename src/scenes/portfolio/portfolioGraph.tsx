@@ -19,19 +19,14 @@ const PortfolioGraph = () => {
   const colors = tokens(theme.palette.mode);
   const { values } = useFormikContext<PortfolioFormValues>();
   const [dataset, setDataset] = useState<PortfolioDataPoint[]>([]);
-  const [loading, setLoading] = useState<boolean>(false);
 
   // Update dataset when values is modified
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
-        // Show loading icon while waiting for request
-        setLoading(true);
         const data = await window.electronAPI.getPortfolioGraphData(values);
-        console.log(data);
         if (isMounted) setDataset(data);
-        setLoading(false);
       } catch (error) {
         // Split message since Electron wraps the original error message with additional text.
         const splitMsg = error.message.split('Error: ');
@@ -121,7 +116,6 @@ const PortfolioGraph = () => {
             valueFormatter: currencyFormat,
           }
         ]}
-        loading={loading}
         dataset={dataset}
         height={400}
         grid={{ horizontal: true }}
