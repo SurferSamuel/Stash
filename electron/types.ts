@@ -54,7 +54,7 @@ export interface PriceNotification {
 // CURRENT share entry type
 export interface CurrentShareEntry {
   user: string;                 // User who brought the shares
-  date: string;                  // Date of when the shares were originally brought
+  date: string;                 // Date of when the shares were originally brought
   quantity: string;             // Number of current outstanding shares
   unitPrice: string;            // Price paid for 1 share at the time of purchase
   brokerage: string;            // Remaining brokerage for the trade
@@ -122,20 +122,20 @@ export interface Settings {
 // Any data type, returned from getData
 export type Data = Option[] | Country[] | CompanyData[] | Settings;
 
-// Values type for AddCompany function in ./api.ts
+// Values type for AddCompany() in ./api.ts
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" | "notificationDate"> {
   noteDate: string;
   notificationDate: string;
 }
 
-// Values type for BuyShares & SellShares function in ./api.ts
+// Values type for BuyShares() and SellShares() in ./api.ts
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
 }
 
-// Filter values type for getTableRows in ./api.ts
+// Filter values type for getTableRows() in ./api.ts
 export interface FilterValues {
   user: Option[];
   financialStatus: Option[];
@@ -145,7 +145,7 @@ export interface FilterValues {
   recommendations: Option[];
 }
 
-// Portfolio row type, returned from getTableRows in ./api.ts
+// Portfolio row type, returned from getTableRows() in ./api.ts
 export interface TableRow {
   id: number;               // ID, eg. 1, 2, 3, ...
   asxcode: string;          // ASX code of the company
@@ -156,4 +156,10 @@ export interface TableRow {
   dailyProfit: string;      // Daily change in profit
   profitOrLoss: string;     // Profit/loss amount
   profitOrLossPerc: string; // Profit/loss %
+}
+
+// Data point type for the portfolio graph, returned from getPortfolioGraphData() in ./api.ts
+export interface PortfolioDataPoint {
+  date: Date;
+  value: number;
 }
