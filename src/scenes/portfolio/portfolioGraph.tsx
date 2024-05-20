@@ -46,7 +46,7 @@ const PortfolioGraph = () => {
           setMinValue(minAxis);
           setMaxValue(maxAxis);
           setDataset(data);
-          setBottomOffset((maxAxis - minAxis) / maxAxis);
+          setBottomOffset(0.8 * (maxAxis - minAxis) / maxAxis);
         }
       } catch (error) {
         // Split message since Electron wraps the original error message with additional text.
@@ -185,7 +185,7 @@ const PortfolioGraph = () => {
       >
         <defs>
           <linearGradient id="areaGradient" gradientTransform="rotate(90)">
-            <stop offset={0} stopColor={colors.blueAccent[400]} stopOpacity={0.4} />
+            <stop offset={0} stopColor={colors.blueAccent[400]} stopOpacity={0.2} />
             <stop offset={bottomOffset} stopColor={colors.blueAccent[400]} stopOpacity={0} />
           </linearGradient>
         </defs>
