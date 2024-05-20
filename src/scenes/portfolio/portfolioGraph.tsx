@@ -20,7 +20,7 @@ const PortfolioGraph = () => {
   const { values } = useFormikContext<PortfolioFormValues>();
   const [dataset, setDataset] = useState<PortfolioDataPoint[]>([]);
   const [minValue, setMinValue] = useState<number>(0);
-  const [maxValue, setMaxValue] = useState<number>(1);
+  const [maxValue, setMaxValue] = useState<number>(0);
   const [bottomOffset, setBottomOffset] = useState<number>(1);
 
   // Update dataset when values is modified
@@ -43,9 +43,9 @@ const PortfolioGraph = () => {
           const minAxis = Math.max(Math.floor(min/padding - 1) * padding, 0);
           const maxAxis = Math.ceil(max/padding + 1) * padding;
           
+          setDataset(data);
           setMinValue(minAxis);
           setMaxValue(maxAxis);
-          setDataset(data);
           setBottomOffset(0.8 * (maxAxis - minAxis) / maxAxis);
         }
       } catch (error) {
