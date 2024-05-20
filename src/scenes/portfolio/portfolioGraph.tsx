@@ -19,6 +19,9 @@ const PortfolioGraph = () => {
   const colors = tokens(theme.palette.mode);
   const { values } = useFormikContext<PortfolioFormValues>();
   const [dataset, setDataset] = useState<PortfolioDataPoint[]>([]);
+  const [minValue, setMinValue] = useState<number>(0);
+  const [maxValue, setMaxValue] = useState<number>(1);
+  const [bottomOffset, setBottomOffset] = useState<number>(1);
 
   // Update dataset when values is modified
   useEffect(() => {
@@ -26,7 +29,25 @@ const PortfolioGraph = () => {
     (async () => {
       try {
         const data = await window.electronAPI.getPortfolioGraphData(values);
-        if (isMounted) setDataset(data);
+        if (isMounted) {
+          // Calculate min, max and range of data values
+          const valuesArray = data.map((point) => point.value);
+          const min = Math.min(...valuesArray);
+          const max = Math.max(...valuesArray);
+          const range = max - min;
+          
+          // 15% padding above and below
+          const padding = convertToNiceNumber(range * 0.15);
+          
+          // Calculate new axis limits
+          const minAxis = Math.max(Math.floor(min/padding - 1) * padding, 0);
+          const maxAxis = Math.ceil(max/padding + 1) * padding;
+          
+          setMinValue(minAxis);
+          setMaxValue(maxAxis);
+          setDataset(data);
+          setBottomOffset((maxAxis - minAxis) / maxAxis);
+        }
       } catch (error) {
         // Split message since Electron wraps the original error message with additional text.
         const splitMsg = error.message.split('Error: ');
@@ -37,6 +58,21 @@ const PortfolioGraph = () => {
     // Clean up
     return () => { isMounted = false };
   }, [values]);
+
+  // A helper function that will round the given val up to the next (1,2,5)*10^n
+  // Examples:
+  //   0.23 -> 0.5
+  //   5.5  -> 10
+  //   123  -> 200
+  const convertToNiceNumber = (val: number): number => {
+    // Get the first larger power of 10
+    let nice = Math.pow(10, Math.ceil(Math.log10(val)));
+    
+    // Scale the power to the next "nice" value
+    if (val <= 0.2 * nice) nice = 0.2 * nice;
+    else if (val <= 0.5 * nice) nice = 0.5 * nice;
+    return nice;
+  }
 
   // Currency formatter helper function
   // Note use USD format "$" instead of AUD format "A$"
@@ -105,6 +141,8 @@ const PortfolioGraph = () => {
         yAxis={[
           {
             valueFormatter: yAxisValueFormatter,
+            min: minValue,
+            max: maxValue,
           }
         ]}
         series={[
@@ -114,6 +152,7 @@ const PortfolioGraph = () => {
             showMark: false,
             color: colors.blueAccent[400],
             valueFormatter: currencyFormat,
+            area: true,
           }
         ]}
         dataset={dataset}
@@ -139,8 +178,18 @@ const PortfolioGraph = () => {
           '& .MuiChartsAxis-directionX .MuiChartsAxis-tickLabel': {
             fill: "#ffffff6f",
           },
+          '& .MuiAreaElement-root': {
+            fill: "url('#areaGradient')",
+          },
         }}
-      />
+      >
+        <defs>
+          <linearGradient id="areaGradient" gradientTransform="rotate(90)">
+            <stop offset={0} stopColor={colors.blueAccent[400]} stopOpacity={0.4} />
+            <stop offset={bottomOffset} stopColor={colors.blueAccent[400]} stopOpacity={0} />
+          </linearGradient>
+        </defs>
+      </LineChart>
     </Box>
   )
 }
