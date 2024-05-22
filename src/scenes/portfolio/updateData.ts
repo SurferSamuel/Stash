@@ -23,7 +23,7 @@ const UpdateData = (props: Props): null => {
     setTableData,
     setGraphLoading,
     setTableLoading,
-   } = props;
+  } = props;
 
   // A helper function that handles when an error is received from backend API
   const handleError = (error: any) => {
