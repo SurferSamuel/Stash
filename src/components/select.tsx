@@ -1,6 +1,5 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import { FormikErrors, FormikTouched } from "formik";
-import { AutocompleteProps } from "@mui/material";
 import TextField from "@mui/material/TextField";
 
 interface Option {
@@ -20,8 +19,17 @@ interface Props {
 }
 
 const SelectInput = (props: Props) => {
-  const { label, valueName, value, handleChange, options, errors, touched, capitaliseInput, span } =
-    props;
+  const { 
+    label,
+    valueName,
+    value,
+    handleChange,
+    options,
+    errors,
+    touched,
+    capitaliseInput,
+    span
+  } = props;
 
   return (
     <Autocomplete

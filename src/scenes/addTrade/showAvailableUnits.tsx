@@ -16,13 +16,13 @@ const ShowAvailableUnits = () => {
   useEffect(() => {
     (async () => {
       // Show available shares only when trade type is SELL and asxcode/user is non-empty
-      let show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
+      const show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
 
       // Skip API call if not going to show the available shares
       if (!show) {
         setShow(false);
         return;
-      };
+      }
       
       // Attempt to set the units state using backend API call
       try {

@@ -165,7 +165,7 @@ export interface PortfolioDataPoint {
   id: number;
   date: Date;
   value: number;
-  [key: string]: any;
+  [key: string]: number | Date; // To keep TS happy
 }
 
 // Return type of getPortfolioGraphData() in ./api.ts

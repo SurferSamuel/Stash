@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Formik } from "formik";
 
 // Page Components
-import GraphRangeButton from "./graphRangeButton";
+import GraphRangeButton, { RangeValue } from "./graphRangeButton";
 import PortfolioTable from "./portfolioTable";
 import PortfolioGraph from "./portfolioGraph";
 import UpdateData from "./updateData";
@@ -18,8 +18,7 @@ import { Accordion, AccordionSummary, AccordionDetails } from "../../components/
 import MultiSelectInput from "../../components/multiSelect";
 
 // Types
-import { Option, PortfolioDataPoint, PortfolioGraphData, PortfolioTableData, PortfolioTableRow } from "../../../electron/types";
-import { RangeValue } from "./graphRangeButton";
+import { Option, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
 import PortfolioValueText from "./portfolioValueText";
 
 export interface PortfolioFormValues {
@@ -101,7 +100,9 @@ const Portfolio = () => {
   return (
     <Box m="25px 30px 15px 30px">
       <Formik
-        onSubmit={() => {}}
+        onSubmit={() => {
+          // Do nothing on submit...
+        }}
         initialValues={initialValues}
       >
         {({values, handleChange}) => (

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction, useState } from "react";
+import { Dispatch, SetStateAction } from "react";
 import { CompanyData } from "../../../electron/types";
 import * as yup from "yup";
 

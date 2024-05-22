@@ -28,7 +28,7 @@ const OperatingCountriesInput = (props: Props) => {
           },
         });
       }}
-      renderOption={(props, option, { selected }) => (
+      renderOption={(props, option) => (
         <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
           <img
             loading="lazy"
