@@ -129,16 +129,17 @@ const Portfolio = () => {
               display="flex"
               flexDirection="row-reverse"
               gridColumn="span 4"
+              height="33px"
               mt="-5px"
             >
               {/* Graph Range Button Group */}
-              <ButtonGroup color="secondary">
+              {graphData.dataPoints.length !== 0 && <ButtonGroup color="secondary">
                 <GraphRangeButton handleChange={handleChange} value="1M" />
                 <GraphRangeButton handleChange={handleChange} value="3M" />
                 <GraphRangeButton handleChange={handleChange} value="6M" />
                 <GraphRangeButton handleChange={handleChange} value="1Y" />
                 <GraphRangeButton handleChange={handleChange} value="5Y" />
-              </ButtonGroup>
+              </ButtonGroup>}
             </Box>
             {/* Graph showing portfolio value */}
             <PortfolioGraph
