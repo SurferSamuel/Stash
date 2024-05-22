@@ -1,4 +1,6 @@
+import { useFormikContext } from "formik";
 import { tokens } from "../../theme";
+import dayjs from "dayjs";
 
 // Material UI
 import { AxisValueFormatterContext } from "@mui/x-charts/models/axis";
@@ -10,6 +12,7 @@ import Box from "@mui/material/Box";
 
 // Types
 import { PortfolioDataPoint } from "../../../electron/types";
+import { PortfolioFormValues } from "./index";
 
 interface Props {
   loading: boolean;
@@ -21,6 +24,7 @@ interface Props {
 const PortfolioGraph = (props: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
+  const { values } = useFormikContext<PortfolioFormValues>();
   const {
     loading,
     yAxis,
@@ -37,15 +41,20 @@ const PortfolioGraph = (props: Props) => {
     const data = dataPoints.find(entry => entry.id === id);
     if (data === undefined) return "";
 
-    // Format for tick (ticks on axis)
+    // Convert date to dayjs
+    const date = dayjs(data.date);
+
+    // Format for tick (on x-axis)
     if (context.location === "tick") {
-      // Format date, eg. "Apr 30"
-      return data.date.toLocaleString("en-US", { month: "short", day: "numeric" });
+      return date.format("DD MMM");
     }
 
     // Format for hover (window on mouse hover)
-    // Format date, eg. "Tue, Apr 30"
-    return data.date.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric" });
+    if (dayjs().subtract(values.graphRange, "month").year() != dayjs().year()) {
+      return date.format("D MMM YYYY");
+    } else {
+      return date.format("ddd, D MMM")
+    }
   }
 
   // Determines whether the x-axis tick should be displayed
