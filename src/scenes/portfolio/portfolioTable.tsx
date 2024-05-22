@@ -1,15 +1,19 @@
-import { PortfolioFormValues } from "./index";
-import { useEffect, useState } from "react";
-import { useFormikContext } from "formik";
 import clsx from 'clsx';
 
 // Material UI
 import {
   DataGrid,
-  GridRowsProp,
   GridColDef,
   GridCellParams
 } from '@mui/x-data-grid';
+
+// Types
+import { PortfolioTableRow } from '../../../electron/types';
+
+interface Props {
+  loading: boolean;
+  rows: PortfolioTableRow[];
+}
 
 // A helper function that assigns a class whether it is a positive/negative value
 const makeClassName = (params: GridCellParams<any, string>) => {
@@ -23,38 +27,16 @@ const makeClassName = (params: GridCellParams<any, string>) => {
 
 // A helper function for sorting prices and percentages
 const sortPriceOrPercent = (a: string, b: string) => {
-  const value1 = Number(a.replace('$', '').replace('%', ''));
-  const value2 = Number(b.replace('$', '').replace('%', ''));
+  // Remove all "$" and "%" from strings, then parse as numbers
+  const value1 = Number(a.replaceAll(/$|%/g, ''));
+  const value2 = Number(b.replaceAll(/$|%/g, ''));
   if (isNaN(value1)) return -1;
   if (isNaN(value2)) return 1;
   return (value1 < value2) ? -1 : 1;
 }
 
-const PortfolioTable = () => {
-  const { values } = useFormikContext<PortfolioFormValues>();
-  const [rows, setRows] = useState<GridRowsProp>([]);
-  const [loading, setLoading] = useState<boolean>(false);
-
-  // Update rows when values is modified
-  useEffect(() => {
-    let isMounted = true;
-    (async () => {
-      try {
-        // Show loading icon on table while waiting for request
-        setLoading(true);
-        const rows = await window.electronAPI.getTableRows(values);
-        if (isMounted) setRows(rows);
-        setLoading(false);
-      } catch (error) {
-        // Split message since Electron wraps the original error message with additional text.
-        const splitMsg = error.message.split('Error: ');
-        const msg = (splitMsg.length === 2) ? splitMsg[1] : error.message;
-        console.error(msg);
-      }
-    })();
-    // Clean up
-    return () => { isMounted = false };
-  }, [values]);
+const PortfolioTable = (props: Props) => {
+  const { loading, rows } = props;
 
   // Data grid columns
   const columns: GridColDef[] = [
@@ -94,9 +76,9 @@ const PortfolioTable = () => {
     },
     {
       field: "dailyChangePerc",
-      headerName: "24hr Change %",
-      minWidth: 130,
-      flex: 4,
+      headerName: "Change %",
+      minWidth: 100,
+      flex: 3,
       align: "right",
       headerAlign: "right",
       cellClassName: makeClassName,
@@ -104,8 +86,8 @@ const PortfolioTable = () => {
     },
     {
       field: "dailyProfit",
-      headerName: "24hr Profit",
-      minWidth: 100,
+      headerName: "Today's Profit",
+      minWidth: 130,
       flex: 3,
       align: "right",
       headerAlign: "right",
@@ -136,7 +118,8 @@ const PortfolioTable = () => {
 
   return (
     <DataGrid 
-      disableRowSelectionOnClick 
+      disableRowSelectionOnClick
+      disableColumnMenu
       columns={columns}
       rows={rows}
       loading={loading}
@@ -145,7 +128,6 @@ const PortfolioTable = () => {
       }}
       pageSizeOptions={[8, 16, 32, 64]}
       sx={{
-        mt: "-20px",
         height: 525, 
         gridColumn: "span 4",
         border: 0,
