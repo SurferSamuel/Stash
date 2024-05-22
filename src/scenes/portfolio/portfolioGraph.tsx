@@ -2,7 +2,7 @@ import { tokens } from "../../theme";
 
 // Material UI
 import { AxisValueFormatterContext } from "@mui/x-charts/models/axis";
-import { useDrawingArea, useYScale } from '@mui/x-charts/hooks';
+import { useDrawingArea, useYScale } from '@mui/x-charts';
 import useTheme from "@mui/material/styles/useTheme";
 import { LineChart } from '@mui/x-charts/LineChart';
 import { styled } from '@mui/material/styles';
@@ -39,9 +39,6 @@ const PortfolioGraph = (props: Props) => {
 
     // Format for tick (ticks on axis)
     if (context.location === "tick") {
-      // Only show every 3rd tick
-      if (id % 3 !== 0) return "";
-
       // Format date, eg. "Apr 30"
       return data.date.toLocaleString("en-US", { month: "short", day: "numeric" });
     }
@@ -49,6 +46,13 @@ const PortfolioGraph = (props: Props) => {
     // Format for hover (window on mouse hover)
     // Format date, eg. "Tue, Apr 30"
     return data.date.toLocaleString("en-US", { weekday: "short", month: "short", day: "numeric" });
+  }
+
+  // Determines whether the x-axis tick should be displayed
+  const xAxisTickInterval = (value: number, index: number) => {
+    const frequency = Math.floor(dataPoints.length / 7);
+    const offset = Math.floor((frequency - (dataPoints.length % frequency)) / 2);
+    return index % frequency === Math.max(frequency - offset, 0);
   }
 
   const yAxisValueFormatter = (value: number) => {
@@ -92,6 +96,7 @@ const PortfolioGraph = (props: Props) => {
             dataKey: "id",
             valueFormatter: xAxisValueFormatter,
             scaleType: 'point',
+            tickInterval: xAxisTickInterval,
           }
         ]}
         yAxis={[
