@@ -57,7 +57,7 @@ const UpdateData = (props: Props): null => {
 
           // Use d3 to calculate a nice domain
           const niceDomain = scaleLinear(extremums, range).nice(tickNumber).domain();
-          const bottomOffset = 0.8 * (niceDomain[1] - niceDomain[0]) / niceDomain[1];
+          const bottomOffset = 0.9 * (niceDomain[1] - niceDomain[0]) / niceDomain[1];
           
           // Update states
           setGraphYAxis(niceDomain as [number, number]);
