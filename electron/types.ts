@@ -1,6 +1,7 @@
 import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 import { AddCompanyFormValues } from "../src/scenes/addCompany";
 import { AddTradeFormValues } from "../src/scenes/addTrade";
+export { PortfolioFormValues as FilterValues } from "../src/scenes/portfolio";
 
 // Fetched quote return type from yahoo-finance2
 export type FetchQuote = { quote: Quote };
@@ -135,18 +136,8 @@ export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
 }
 
-// Filter values type for getTableRows() in ./api.ts
-export interface FilterValues {
-  user: Option[];
-  financialStatus: Option[];
-  miningStatus: Option[];
-  resources: Option[];
-  products: Option[];
-  recommendations: Option[];
-}
-
-// Portfolio row type, returned from getTableRows() in ./api.ts
-export interface TableRow {
+// Table row type for the portfolio page
+export interface PortfolioTableRow {
   id: number;               // ID, eg. 1, 2, 3, ...
   asxcode: string;          // ASX code of the company
   units: number;            // Number of units owned
@@ -158,10 +149,29 @@ export interface TableRow {
   profitOrLossPerc: string; // Profit/loss %
 }
 
-// Data point type for the portfolio graph, returned from getPortfolioGraphData() in ./api.ts
+// Return type of getPortfolioTableData() in ./api.ts
+export interface PortfolioTableData {
+  totalValue: string,             // Total value of the portfolio (as of today)
+  dailyChange: string,            // Today's change in portfolio value
+  dailyChangePerc: string,        // Today's change in portfolio value %
+  totalChange: string,            // Total change in portfolio value
+  totalChangePerc: string,        // Total change in portfolio value %
+  rows: PortfolioTableRow[],      // Row data for the table
+  skipped: string[],              // Companies that were skipped when calculating
+}
+
+// Data point type for the portfolio graph
 export interface PortfolioDataPoint {
   id: number;
   date: Date;
   value: number;
   [key: string]: any;
+}
+
+// Return type of getPortfolioGraphData() in ./api.ts
+export interface PortfolioGraphData {
+  minYAxis: number;                 // Min value for y-axis
+  maxYAxis: number;                 // Max value for y-axis
+  bottomOffset: number;             // Bottom offset for the gradient fill
+  dataPoints: PortfolioDataPoint[]; // Data points for the graph
 }
