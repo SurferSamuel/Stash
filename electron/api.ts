@@ -550,19 +550,6 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
 }
 
 /*
- * A helper function that will round the given val up to the next (1,2,5)*10^n
- * Eg: 0.23 -> 0.5 | 5.5  -> 10 | 123  -> 200
- */
-const convertToNiceNumber = (val: number): number => {
-  // Get the first larger power of 10
-  let nice = Math.pow(10, Math.ceil(Math.log10(val)));
-  // Scale the power to the next "nice" value
-  if (val <= 0.2 * nice) nice = 0.2 * nice;
-  else if (val <= 0.5 * nice) nice = 0.5 * nice;
-  return nice;
-}
-
-/*
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
 export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues) => {
@@ -584,12 +571,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
-    return {
-      minYAxis: 0,
-      maxYAxis: 0,
-      bottomOffset: 1,
-      dataPoints: [],
-    };
+    return [];
   }
 
   // Get the required date
@@ -597,7 +579,8 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   const date = dayjs().subtract(months, "month").toDate();
 
   // Get the historicals for all the filtered companies
-  const queryOptions = { period1: date };
+  const interval: "1d" | "1wk" = (months < 12) ? "1d" : "1wk";
+  const queryOptions = { period1: date, interval };
   const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`); 
   const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
 
@@ -663,26 +646,8 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
   // Return early if maxValue is still 0 (occurs if all values are 0) 
   if (maxValue === 0) {
-    return {
-      minYAxis: 0,
-      maxYAxis: 0,
-      bottomOffset: 1,
-      dataPoints: [],
-    }
+    return [];
   }
 
-  // 15% padding above and below min/max values
-  const padding = convertToNiceNumber((maxValue - minValue) * 0.15);
-
-  // Calculate y-axis limits & bottom offset for gradient fill
-  const minYAxis = Math.max(Math.floor(minValue/padding - 1) * padding, 0);
-  const maxYAxis = Math.ceil(maxValue/padding + 1) * padding;
-  const bottomOffset = 0.8 * (maxYAxis - minYAxis) / maxYAxis;
-
-  return {
-    minYAxis,
-    maxYAxis,
-    bottomOffset,
-    dataPoints,
-  };
+  return dataPoints;
 }

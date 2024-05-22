@@ -1,4 +1,5 @@
 import { useFormikContext } from "formik";
+import { scaleLinear } from "d3";
 import { 
   Dispatch, 
   SetStateAction,
@@ -8,21 +9,27 @@ import {
 // Types
 import { PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
 import { PortfolioFormValues } from "./index";
+import { useDrawingArea } from "@mui/x-charts";
 
 interface Props {
   setGraphData: Dispatch<SetStateAction<PortfolioGraphData>>;
   setTableData: Dispatch<SetStateAction<PortfolioTableData>>;
   setGraphLoading: Dispatch<SetStateAction<boolean>>;
   setTableLoading: Dispatch<SetStateAction<boolean>>;
+  setGraphYAxis: Dispatch<SetStateAction<[number, number]>>;
+  setGraphBottomOffset: Dispatch<SetStateAction<number>>;
 }
 
 const UpdateData = (props: Props): null => {
   const { values } = useFormikContext<PortfolioFormValues>();
+  const { top, height } = useDrawingArea();
   const { 
     setGraphData, 
     setTableData,
     setGraphLoading,
     setTableLoading,
+    setGraphYAxis,
+    setGraphBottomOffset,
   } = props;
 
   // A helper function that handles when an error is received from backend API
@@ -33,7 +40,7 @@ const UpdateData = (props: Props): null => {
     console.error(msg);
   }
 
-  // Update Graph data
+  // Update graph data
   useEffect(() => {
     let isMounted = true;
     (async () => {
@@ -42,6 +49,19 @@ const UpdateData = (props: Props): null => {
         setGraphLoading(true);
         const graphData = await window.electronAPI.getPortfolioGraphData(values);
         if (isMounted) {
+          // Calculate y-axis limits and bottom offset using values
+          const values = graphData.map(point => point.value);
+          const extremums = [Math.min(...values), Math.max(...values)];
+          const range = [top + height, top];
+          const tickNumber = Math.floor(Math.abs(range[1] - range[0]) / 50);
+
+          // Use d3 to calculate a nice domain
+          const niceDomain = scaleLinear(extremums, range).nice(tickNumber).domain();
+          const bottomOffset = 0.8 * (niceDomain[1] - niceDomain[0]) / niceDomain[1];
+          
+          // Update states
+          setGraphYAxis(niceDomain as [number, number]);
+          setGraphBottomOffset(bottomOffset);
           setGraphData(graphData);
         }
         setGraphLoading(false);
@@ -54,7 +74,7 @@ const UpdateData = (props: Props): null => {
   }, [values]);
 
 
-  // Update Table and Text data
+  // Update table and text data
   useEffect(() => {
     let isMounted = true;
     (async () => {
