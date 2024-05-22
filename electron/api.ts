@@ -34,13 +34,15 @@ const currencyFormat = new Intl.NumberFormat('en-US', { style: 'currency', curre
 
 // Percentage formatter helper function
 // Eg. 12.3 -> "12.30%"  -12.3 -> "-12.30%"
-const precentFormat = (num: number): string => {
+const precentFormat = (num: number) => {
+  if (num === null) return "";
   return num.toFixed(2) + "%";
 }
 
 // Change formatter helper function
 // Eg. 12.3 -> "+12.30"  -12.3 -> "-12.30"
-const changeFormat = (num: number): string => {
+const changeFormat = (num: number) => {
+  if (num === null) return "";
   return (num < 0) ? num.toFixed(2).toString() : "+" + num.toFixed(2);
 }
 
@@ -582,7 +584,12 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
-    return [];
+    return {
+      minYAxis: 0,
+      maxYAxis: 0,
+      bottomOffset: 1,
+      dataPoints: [],
+    };
   }
 
   // Get the required date
@@ -671,6 +678,16 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
         // ...otherwise, add the value to the entry
         graphEntry.value += value;
       }
+    }
+  }
+
+  // Return early if maxValue is still 0 (occurs if all values are 0) 
+  if (maxValue === 0) {
+    return {
+      minYAxis: 0,
+      maxYAxis: 0,
+      bottomOffset: 1,
+      dataPoints: [],
     }
   }
 
