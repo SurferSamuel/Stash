@@ -44,12 +44,9 @@ const Portfolio = () => {
 
   // Data for graph component
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
-  const [graphData, setGraphData] = useState<PortfolioGraphData>({
-    minYAxis: 0,
-    maxYAxis: 0,
-    bottomOffset: 1,
-    dataPoints: [],
-  });
+  const [graphData, setGraphData] = useState<PortfolioGraphData>([]);
+  const [graphYAxis, setGraphYAxis] = useState<[number, number]>([0, 0]);
+  const [graphBottomOffset, setGraphBottomOffset] = useState<number>(1);
 
   // Data for table (and value text) component
   const [tableLoading, setTableLoading] = useState<boolean>(false);
@@ -117,6 +114,8 @@ const Portfolio = () => {
               setTableData={setTableData}
               setGraphLoading={setGraphLoading}
               setTableLoading={setTableLoading}
+              setGraphYAxis={setGraphYAxis}
+              setGraphBottomOffset={setGraphBottomOffset}
             />
             {/* Portfolio Value Box */}
             <PortfolioValueText
@@ -134,7 +133,7 @@ const Portfolio = () => {
               mt="-5px"
             >
               {/* Graph Range Button Group */}
-              {graphData.dataPoints.length !== 0 && <ButtonGroup color="secondary">
+              {graphData.length !== 0 && <ButtonGroup color="secondary">
                 <GraphRangeButton handleChange={handleChange} label="1M" value={1} />
                 <GraphRangeButton handleChange={handleChange} label="3M" value={3} />
                 <GraphRangeButton handleChange={handleChange} label="6M" value={6} />
@@ -145,10 +144,9 @@ const Portfolio = () => {
             {/* Graph showing portfolio value */}
             <PortfolioGraph
               loading={graphLoading}
-              minYAxis={graphData.minYAxis}
-              maxYAxis={graphData.maxYAxis}
-              bottomOffset={graphData.bottomOffset}
-              dataPoints={graphData.dataPoints}
+              yAxis={graphYAxis}
+              bottomOffset={graphBottomOffset}
+              dataPoints={graphData}
             />
             {/* Filter Dropdown */}
             <Box mt="-10px" gridColumn="span 4">
