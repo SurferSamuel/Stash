@@ -169,9 +169,4 @@ export interface PortfolioDataPoint {
 }
 
 // Return type of getPortfolioGraphData() in ./api.ts
-export interface PortfolioGraphData {
-  minYAxis: number;                 // Min value for y-axis
-  maxYAxis: number;                 // Max value for y-axis
-  bottomOffset: number;             // Bottom offset for the gradient fill
-  dataPoints: PortfolioDataPoint[]; // Data points for the graph
-}
+export type PortfolioGraphData = PortfolioDataPoint[];
