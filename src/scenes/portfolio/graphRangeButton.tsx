@@ -5,12 +5,13 @@ import Button from "@mui/material/Button";
 export type RangeValue = "1M" | "3M" | "6M" | "1Y" | "5Y";
 
 interface Props {
-  value: RangeValue;
-  handleChange: (e: { target: { name: string; value: string } }) => void;
+  label: RangeValue;
+  value: number;
+  handleChange: (e: { target: { name: string; value: number } }) => void;
 }
 
 const GraphRangeButton = (props: Props) => {
-  const { handleChange, value } = props;
+  const { label, value, handleChange } = props;
   const { values } = useFormikContext<PortfolioFormValues>();
   return (
     <Button
@@ -25,7 +26,7 @@ const GraphRangeButton = (props: Props) => {
         },
       }}
     >
-      {value}
+      {label}
     </Button>
   );
 }

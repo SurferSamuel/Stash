@@ -593,28 +593,8 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   }
 
   // Get the required date
-  let date: Date;
-  switch (filterValues.graphRange) {
-    case "1M":
-      date = dayjs().subtract(1, "month").toDate();
-      break;
-    case "3M":
-      date = dayjs().subtract(3, "month").toDate();
-      break;
-    case "6M":
-      date = dayjs().subtract(6, "month").toDate();
-      break;
-    case "1Y":
-      date = dayjs().subtract(1, "year").toDate();
-      break;
-    case "5Y":
-      date = dayjs().subtract(5, "year").toDate();
-      break;
-    default:
-      // Default to 1 month
-      date = dayjs().subtract(1, "month").toDate();
-      break;
-  }
+  const months = filterValues.graphRange || 1;
+  const date = dayjs().subtract(months, "month").toDate();
 
   // Get the historicals for all the filtered companies
   const queryOptions = { period1: date };

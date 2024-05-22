@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Formik } from "formik";
 
 // Page Components
-import GraphRangeButton, { RangeValue } from "./graphRangeButton";
+import GraphRangeButton from "./graphRangeButton";
 import PortfolioTable from "./portfolioTable";
 import PortfolioGraph from "./portfolioGraph";
 import UpdateData from "./updateData";
@@ -28,7 +28,7 @@ export interface PortfolioFormValues {
   resources: Option[];
   products: Option[];
   recommendations: Option[];
-  graphRange: RangeValue;
+  graphRange: number;
 }
 
 const Portfolio = () => {
@@ -94,7 +94,7 @@ const Portfolio = () => {
     resources: [],
     products: [],
     recommendations: [],
-    graphRange: "1M",
+    graphRange: 1,
   }
 
   return (
@@ -135,11 +135,11 @@ const Portfolio = () => {
             >
               {/* Graph Range Button Group */}
               {graphData.dataPoints.length !== 0 && <ButtonGroup color="secondary">
-                <GraphRangeButton handleChange={handleChange} value="1M" />
-                <GraphRangeButton handleChange={handleChange} value="3M" />
-                <GraphRangeButton handleChange={handleChange} value="6M" />
-                <GraphRangeButton handleChange={handleChange} value="1Y" />
-                <GraphRangeButton handleChange={handleChange} value="5Y" />
+                <GraphRangeButton handleChange={handleChange} label="1M" value={1} />
+                <GraphRangeButton handleChange={handleChange} label="3M" value={3} />
+                <GraphRangeButton handleChange={handleChange} label="6M" value={6} />
+                <GraphRangeButton handleChange={handleChange} label="1Y" value={12} />
+                <GraphRangeButton handleChange={handleChange} label="5Y" value={60} />
               </ButtonGroup>}
             </Box>
             {/* Graph showing portfolio value */}
