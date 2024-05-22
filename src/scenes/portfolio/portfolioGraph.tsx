@@ -13,8 +13,7 @@ import { PortfolioDataPoint } from "../../../electron/types";
 
 interface Props {
   loading: boolean;
-  minYAxis: number;
-  maxYAxis: number;
+  yAxis: [number, number];
   bottomOffset: number;
   dataPoints: PortfolioDataPoint[];
 }
@@ -24,8 +23,7 @@ const PortfolioGraph = (props: Props) => {
   const colors = tokens(theme.palette.mode);
   const {
     loading,
-    minYAxis,
-    maxYAxis,
+    yAxis,
     bottomOffset,
     dataPoints,
   } = props;
@@ -73,7 +71,7 @@ const PortfolioGraph = (props: Props) => {
   const Overlay = (text: string) => () => {
     const yScale = useYScale();
     const { left, width, height } = useDrawingArea();
-    const [bottom, top] = yScale.range();
+    const top = yScale.range()[1];
     return (
       <g>
         <OverlayText x={left + width / 2} y={top + height / 2}>
@@ -99,8 +97,8 @@ const PortfolioGraph = (props: Props) => {
         yAxis={[
           {
             valueFormatter: yAxisValueFormatter,
-            min: minYAxis,
-            max: maxYAxis,
+            min: yAxis[0],
+            max: yAxis[1],
           }
         ]}
         series={[
