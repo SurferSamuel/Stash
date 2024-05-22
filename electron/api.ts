@@ -14,7 +14,6 @@ import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/his
 import { 
   AddCompanyValues, 
   AddTradeValues,
-  BuyHistoryEntry,
   CompanyData, 
   CurrentShareEntry, 
   Data, 
@@ -23,20 +22,26 @@ import {
   Option, 
   OptionKey,
   PortfolioDataPoint,
-  SellHistoryEntry,
-  TableRow,
+  PortfolioTableRow,
 } from "./types";
 
 // Dayjs parser helper function
 const dayjsDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
 
 // Currency formatter helper function
-// Note use USD format "$" instead of AUD format "A$"
+// Eg. 12.3 -> "$12.30"  -12.3 -> "-$12.30"
 const currencyFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format;
 
-// Percent formatter helper function
+// Percentage formatter helper function
+// Eg. 12.3 -> "12.30%"  -12.3 -> "-12.30%"
 const precentFormat = (num: number): string => {
   return num.toFixed(2) + "%";
+}
+
+// Change formatter helper function
+// Eg. 12.3 -> "+12.30"  -12.3 -> "-12.30"
+const changeFormat = (num: number): string => {
+  return (num < 0) ? num.toFixed(2).toString() : "+" + num.toFixed(2);
 }
 
 /*
@@ -373,9 +378,43 @@ const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
 }
 
 /*
+ * A helper function that counts the number of units the user(s) held at the given
+ * time (assumed to be in the past). If the users array is empty, then will return
+ * the number of units for all users.
+ */
+const countUnitsAtTime = (company: CompanyData, users: Option[], time: Date) => {
+  // Calculate the number of units brought before the given time
+  const unitsBrought = company.buyHistory.reduce((total, entry) => {
+    // If the user of the entry is correct
+    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+      // If the entry was before the given time
+      if (dayjsDate(entry.date).toDate() < time) {
+        total += Number(entry.quantity);
+      }
+    }
+    return total;
+  }, 0);
+
+  // Calculate the number of units sold before the given time
+  const unitsSold = company.sellHistory.reduce((total, entry) => {
+    // If the user of the entry is correct
+    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+      // If the entry was before the given time
+      if (dayjsDate(entry.sellDate).toDate() < time) {
+        total += Number(entry.quantity);
+      }
+    }
+    return total;
+  }, 0);
+
+  // The total units held at the time is just unitsBrought - unitsSold
+  return unitsBrought - unitsSold;
+}
+
+/*
  * Gets the table rows for the portfolio page that match the given filter values.
  */
-export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValues) => {
+export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: FilterValues) => {
   // Get existing data from storage
   const data = getData(null, "companies") as CompanyData[];
 
@@ -394,7 +433,15 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
-    return [];
+    return {
+      totalValue: "$0.00",
+      dailyChange: "+0.00",
+      dailyChangePerc: "0.00%",
+      totalChange: "+0.00",
+      totalChangePerc: "0.00%",
+      rows: [],
+      skipped: [],
+    };
   }
 
   // Only ask for these fields to save on bandwidth and latency
@@ -402,21 +449,30 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     "symbol",
     "regularMarketPrice",
     "regularMarketChangePercent",
-    "regularMarketPreviousClose"
+    "regularMarketPreviousClose",
   ];
 
   // Get the quotes for all the filtered companies
   const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`);
   const quoteArray = await yahooFinance.quote(symbols, { fields });
   
-  // Loop for each filtered company
+  const rows: PortfolioTableRow[] = [];
+  const skipped: string[] = [];
+
   let id = 1;
-  const tableRows: TableRow[] = []; 
+  let totalValue = 0;
+  let previousTotalValue = 0;
+  let combinedTotalCost = 0; 
+
+  // Loop for each filtered company
   for (const company of filteredData) {
     // Find the quote for this company
     const quote = quoteArray.find((entry) => entry.symbol === `${company.asxcode}.AX`);
+
+    // Skip if no quote was found
     if (quote === undefined) {
-      throw new Error(`ERROR: Could not fetch quote for ${company.asxcode}`);
+      skipped.push(company.asxcode);
+      continue;
     }
 
     // Extract the required info from the quote
@@ -444,7 +500,14 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
       }
     }
 
-    // If no quantity, don't add the row
+    // Update totals
+    // NOTE: Use number of units yesterday to calculate yesterday's total value
+    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day").toDate());
+    if (previousPrice != null) previousTotalValue += previousPrice * previousUnits;
+    if (currentPrice != null) totalValue += currentPrice * totalQuantity;
+    combinedTotalCost += totalCost;
+
+    // If no quantity, don't add row
     if (totalQuantity === 0) continue;
 
     // Calculate row values
@@ -454,7 +517,7 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     const dailyProfit = (currentPrice != null && previousPrice != null) ? (totalQuantity * (currentPrice - previousPrice)) : null;
 
     // Add the row into the array
-    tableRows.push({
+    rows.push({
       id: id++,
       asxcode: company.asxcode,
       units: totalQuantity,
@@ -467,27 +530,34 @@ export const getTableRows = async (event: IpcMainEvent, filterValues: FilterValu
     });
   }
 
-  return tableRows;
+  // Calculate changes
+  const dailyChange = totalValue - previousTotalValue;
+  const dailyChangePerc = (previousTotalValue !== 0) ? dailyChange / previousTotalValue * 100 : null;
+  const totalChange = totalValue - combinedTotalCost;
+  const totalChangePerc = (combinedTotalCost !== 0) ? totalChange / combinedTotalCost * 100 : null;
+
+  return {
+    totalValue: currencyFormat(totalValue),
+    dailyChange: changeFormat(dailyChange),
+    dailyChangePerc: precentFormat(dailyChangePerc).replace("-", ""),
+    totalChange: changeFormat(totalChange),
+    totalChangePerc: precentFormat(totalChangePerc).replace("-", ""),
+    rows,
+    skipped,
+  };
 }
 
 /*
- * A helper function. Counts the number of units that were brought/sold by a user in
- * the given users array before the given time. If the users array is empty, then will
- * return the total number of units for all users.
+ * A helper function that will round the given val up to the next (1,2,5)*10^n
+ * Eg: 0.23 -> 0.5 | 5.5  -> 10 | 123  -> 200
  */
-const countUnitsBeforeTime = (searchArray: (BuyHistoryEntry | SellHistoryEntry)[], users: Option[], time: Date) => {
-  return searchArray.reduce((acc, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
-      // Get the date of entry
-      const entryDate = ((entry as BuyHistoryEntry).date) ?? ((entry as SellHistoryEntry).sellDate);
-      // If the entry was before the given time
-      if (dayjsDate(entryDate).toDate() < time) {
-        acc += Number(entry.quantity);
-      }
-    }
-    return acc;
-  }, 0);
+const convertToNiceNumber = (val: number): number => {
+  // Get the first larger power of 10
+  let nice = Math.pow(10, Math.ceil(Math.log10(val)));
+  // Scale the power to the next "nice" value
+  if (val <= 0.2 * nice) nice = 0.2 * nice;
+  else if (val <= 0.5 * nice) nice = 0.5 * nice;
+  return nice;
 }
 
 /*
@@ -515,9 +585,29 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     return [];
   }
 
-  // Get date 1 month ago
-  let date = new Date();
-  date.setMonth(date.getMonth() - 1);
+  // Get the required date
+  let date: Date;
+  switch (filterValues.graphRange) {
+    case "1M":
+      date = dayjs().subtract(1, "month").toDate();
+      break;
+    case "3M":
+      date = dayjs().subtract(3, "month").toDate();
+      break;
+    case "6M":
+      date = dayjs().subtract(6, "month").toDate();
+      break;
+    case "1Y":
+      date = dayjs().subtract(1, "year").toDate();
+      break;
+    case "5Y":
+      date = dayjs().subtract(5, "year").toDate();
+      break;
+    default:
+      // Default to 1 month
+      date = dayjs().subtract(1, "month").toDate();
+      break;
+  }
 
   // Get the historicals for all the filtered companies
   const queryOptions = { period1: date };
@@ -540,10 +630,13 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     }
   }
 
-  // Calculate the graph data, ie. value of portfolio at each historical entry
   let id = 1;
-  const graphData: PortfolioDataPoint[] = [];
+  let minValue = 0;
+  let maxValue = 0;
+
+  const dataPoints: PortfolioDataPoint[] = [];
   
+  // Loop for each filtered company
   for (const company of filteredData) {
     // Get the historical result for the company
     const historicalResult = cleanHistoricalArray.find(entry => entry.asxcode === company.asxcode);
@@ -555,19 +648,21 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
     // Loop for each entry of the company's historical data
     for (const historical of historicalResult.historical) {
-      // Calculate the number of units before the time of the historical entry
-      const broughtUnits = countUnitsBeforeTime(company.buyHistory, filterValues.user, historical.date);
-      const soldUnits = countUnitsBeforeTime(company.sellHistory, filterValues.user, historical.date);
-      const units = broughtUnits - soldUnits;
+      // Calculate the number of units at the time of the historical entry
+      const units = countUnitsAtTime(company, filterValues.user, historical.date);
 
       // Value at the time of historical entry
       const value = units * historical.adjClose;
 
+      // Update min/max values if necessary
+      if (value < minValue) minValue = value;
+      if (value > maxValue) maxValue = value;
+
       // Add the value into the graph data array
-      const graphEntry = graphData.find(entry => entry.date.getTime() === historical.date.getTime());
+      const graphEntry = dataPoints.find(entry => entry.date.getTime() === historical.date.getTime());
       if (graphEntry === undefined) {
         // Make new entry if none exists...
-        graphData.push({
+        dataPoints.push({
           id: id++,
           date: historical.date,
           value,
@@ -579,5 +674,18 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     }
   }
 
-  return graphData;
+  // 15% padding above and below min/max values
+  const padding = convertToNiceNumber((maxValue - minValue) * 0.15);
+
+  // Calculate y-axis limits & bottom offset for gradient fill
+  const minYAxis = Math.max(Math.floor(minValue/padding - 1) * padding, 0);
+  const maxYAxis = Math.ceil(maxValue/padding + 1) * padding;
+  const bottomOffset = 0.8 * (maxYAxis - minYAxis) / maxYAxis;
+
+  return {
+    minYAxis,
+    maxYAxis,
+    bottomOffset,
+    dataPoints,
+  };
 }
