@@ -638,7 +638,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   }
 
   let id = 1;
-  let minValue = 0;
+  let minValue = Number.MAX_SAFE_INTEGER;
   let maxValue = 0;
 
   const dataPoints: PortfolioDataPoint[] = [];
