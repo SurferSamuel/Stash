@@ -5,7 +5,7 @@ import path from "path";
 import fs from "fs";
 
 // Dayjs
-import dayjs from "dayjs";
+import dayjs, { Dayjs } from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
@@ -380,17 +380,38 @@ const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
 }
 
 /*
+ * A helper function that returns the companies that match the filter values.
+ */
+const getFilteredData = (filterValues: FilterValues): CompanyData[] => {
+  // Get existing data from storage
+  const data = getData(null, "companies") as CompanyData[];
+
+  // Return the filtered companies
+  return data.filter(entry =>
+    filterOption(filterValues.financialStatus, entry.financialStatus) &&
+    filterOption(filterValues.miningStatus, entry.miningStatus) &&
+    filterOption(filterValues.resources, entry.resources) &&
+    filterOption(filterValues.products, entry.products) &&
+    filterOption(filterValues.recommendations, entry.recommendations) && (
+      // Note: Empty user array = show all users
+      filterValues.user.length === 0 || 
+      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
+    )
+  );
+}
+
+/*
  * A helper function that counts the number of units the user(s) held at the given
  * time (assumed to be in the past). If the users array is empty, then will return
  * the number of units for all users.
  */
-const countUnitsAtTime = (company: CompanyData, users: Option[], time: Date) => {
+const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
   // Calculate the number of units brought before the given time
   const unitsBrought = company.buyHistory.reduce((total, entry) => {
     // If the user of the entry is correct
     if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
       // If the entry was before the given time
-      if (dayjsDate(entry.date).toDate() < time) {
+      if (dayjsDate(entry.date).isBefore(time)) {
         total += Number(entry.quantity);
       }
     }
@@ -402,7 +423,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Date) => 
     // If the user of the entry is correct
     if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
       // If the entry was before the given time
-      if (dayjsDate(entry.sellDate).toDate() < time) {
+      if (dayjsDate(entry.sellDate).isBefore(time)) {
         total += Number(entry.quantity);
       }
     }
@@ -417,21 +438,8 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Date) => 
  * Gets the table rows for the portfolio page that match the given filter values.
  */
 export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: FilterValues) => {
-  // Get existing data from storage
-  const data = getData(null, "companies") as CompanyData[];
-
-  // Filter companies that match all the filter values
-  const filteredData = data.filter((entry) =>
-    filterOption(filterValues.financialStatus, entry.financialStatus) &&
-    filterOption(filterValues.miningStatus, entry.miningStatus) &&
-    filterOption(filterValues.resources, entry.resources) &&
-    filterOption(filterValues.products, entry.products) &&
-    filterOption(filterValues.recommendations, entry.recommendations) && (
-      // Note: Empty user array = show all users
-      filterValues.user.length === 0 || 
-      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
-    )
-  );
+  // Get the filtered companies
+  const filteredData = getFilteredData(filterValues);
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
@@ -455,7 +463,7 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
   ];
 
   // Get the quotes for all the filtered companies
-  const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`);
+  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`);
   const quoteArray = await yahooFinance.quote(symbols, { fields });
   
   const rows: PortfolioTableRow[] = [];
@@ -469,7 +477,7 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
   // Loop for each filtered company
   for (const company of filteredData) {
     // Find the quote for this company
-    const quote = quoteArray.find((entry) => entry.symbol === `${company.asxcode}.AX`);
+    const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
 
     // Skip if no quote was found
     if (quote === undefined) {
@@ -489,7 +497,7 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
     // Loop for all current shares in this company
     for (const shareEntry of company.currentShares) {
       // Note: Empty user array = show all users
-      if (filterValues.user.length === 0 || filterValues.user.some((obj) => obj.label === shareEntry.user)) {
+      if (filterValues.user.length === 0 || filterValues.user.some(obj => obj.label === shareEntry.user)) {
         const quantity = Number(shareEntry.quantity);
         const unitPrice = Number(shareEntry.unitPrice);
         const brokerage = Number(shareEntry.brokerage);
@@ -504,7 +512,7 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
 
     // Update totals
     // NOTE: Use number of units yesterday to calculate yesterday's total value
-    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day").toDate());
+    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day"));
     if (previousPrice != null) previousTotalValue += previousPrice * previousUnits;
     if (currentPrice != null) totalValue += currentPrice * totalQuantity;
     combinedTotalCost += totalCost;
@@ -553,21 +561,8 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
 export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues) => {
-  // Get existing data from storage
-  const data = getData(null, "companies") as CompanyData[];
-
-  // Filter companies that match all the filter values
-  const filteredData = data.filter((entry) => 
-    filterOption(filterValues.financialStatus, entry.financialStatus) &&
-    filterOption(filterValues.miningStatus, entry.miningStatus) &&
-    filterOption(filterValues.resources, entry.resources) &&
-    filterOption(filterValues.products, entry.products) &&
-    filterOption(filterValues.recommendations, entry.recommendations) && (
-      // Note: Empty user array = show all users
-      filterValues.user.length === 0 || 
-      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
-    )
-  );
+  // Get the filtered companies
+  const filteredData = getFilteredData(filterValues);
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
@@ -581,7 +576,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   // Get the historicals for all the filtered companies
   const interval: "1d" | "1wk" = (months < 12) ? "1d" : "1wk";
   const queryOptions = { period1: date, interval };
-  const symbols = filteredData.map((entry) => `${entry.asxcode}.AX`); 
+  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
   const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
 
   // Clean the data, removing any promises that were not fulfillied
@@ -619,7 +614,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     // Loop for each entry of the company's historical data
     for (const historical of historicalResult.historical) {
       // Calculate the number of units at the time of the historical entry
-      const units = countUnitsAtTime(company, filterValues.user, historical.date);
+      const units = countUnitsAtTime(company, filterValues.user, dayjs(historical.date));
 
       // Value at the time of historical entry
       const value = units * historical.adjClose;
