@@ -64,16 +64,19 @@ export const getData = (event: IpcMainEvent, key: Key): Data => {
 
   // If data is empty (ie. an empty object), set data using default values
   if (data.constructor !== Array && Object.keys(data).length === 0) {
-    // Attempt to read default values from data folder
-    const fileName = path.join(app.getAppPath(), `./src/assets/data/${key}.json`);
+    const fileName = (app.isPackaged)
+      ? path.join(process.resourcesPath, 'data', `${key}.json`)
+      : path.join(app.getAppPath(), 'src', 'assets', 'data', `${key}.json`);
+
     if (fs.existsSync(fileName)) {
+      // Read default values from file
       const datastr = fs.readFileSync(fileName);
       data = JSON.parse(String(datastr));
-    }
-    // Encase no file exists, set data to an empty array
-    else {
+    } else {
+      // Encase no file exists, set data to an empty array
       data = [];
     }
+    
     // Save data to storage
     storage.set(key, data, (error) => {
       if (error) throw error;
