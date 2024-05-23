@@ -1,1 +1,5 @@
-[{ "label": "Will" }, { "label": "Mike" }, { "label": "Samuel" }]
+[
+  { "label": "Will" },
+  { "label": "Mike" },
+  { "label": "Samuel" }
+]
