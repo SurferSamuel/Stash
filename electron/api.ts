@@ -410,7 +410,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
   const unitsBrought = company.buyHistory.reduce((total, entry) => {
     // If the user of the entry is correct
     if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
-      // If the entry was before the given time
+      // If the entry buy date was before the given time
       if (dayjsDate(entry.date).isBefore(time)) {
         total += Number(entry.quantity);
       }
@@ -422,7 +422,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
   const unitsSold = company.sellHistory.reduce((total, entry) => {
     // If the user of the entry is correct
     if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
-      // If the entry was before the given time
+      // If the entry sell date was before the given time
       if (dayjsDate(entry.sellDate).isBefore(time)) {
         total += Number(entry.quantity);
       }
@@ -613,8 +613,12 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
     // Loop for each entry of the company's historical data
     for (const historical of historicalResult.historical) {
+      // If historical.date is today, use the current time now
+      const now = dayjs();
+      const time = now.isSame(historical.date, "day") ? now : dayjs(historical.date);
+
       // Calculate the number of units at the time of the historical entry
-      const units = countUnitsAtTime(company, filterValues.user, dayjs(historical.date));
+      const units = countUnitsAtTime(company, filterValues.user, time);
 
       // Value at the time of historical entry
       const value = units * historical.adjClose;
@@ -624,12 +628,12 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
       if (value > maxValue) maxValue = value;
 
       // Add the value into the graph data array
-      const graphEntry = dataPoints.find(entry => entry.date.getTime() === historical.date.getTime());
+      const graphEntry = dataPoints.find(entry => time.isSame(entry.date));
       if (graphEntry === undefined) {
         // Make new entry if none exists...
         dataPoints.push({
           id: id++,
-          date: historical.date,
+          date: time.toDate(),
           value,
         });
       } else {
@@ -639,7 +643,7 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     }
   }
 
-  // Return early if maxValue is still 0 (occurs if all values are 0) 
+  // If all values are 0, same as no data
   if (maxValue === 0) {
     return [];
   }
