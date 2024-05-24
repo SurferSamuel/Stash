@@ -3,6 +3,7 @@ import { AddTradeFormValues } from "../src/scenes/addTrade";
 export { PortfolioFormValues as FilterValues } from "../src/scenes/portfolio";
 
 // Yahoo-finance2 types
+export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 
@@ -164,7 +165,7 @@ export interface PortfolioTableData {
 }
 
 // Used in getPortfolioGraphData() in ./api.ts
-export interface CleanHistoricalResult {
+export interface HistoricalEntry {
   asxcode: string;
   historical: HistoricalHistoryResult;
 }
