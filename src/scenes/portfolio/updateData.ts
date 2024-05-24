@@ -7,7 +7,7 @@ import {
 } from "react";
 
 // Types
-import { GraphRange, PortfolioDataPoint, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
+import { GraphRange, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
 import { PortfolioFormValues } from "./index";
 import { useDrawingArea } from "@mui/x-charts";
 

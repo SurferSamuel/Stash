@@ -17,7 +17,6 @@ import {
   CurrentShareEntry, 
   Data, 
   FilterValues,
-  GraphRange,
   HistoricalEntry,
   HistoricalOptionsEventsHistory,
   Key, 
@@ -629,8 +628,8 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
   const asxcodes = filteredData.map(entry => entry.asxcode); 
   const queryOptions = [
-    { period1: dayjs().subtract(6, "month").toDate(), interval: "1d" as "1d" },
-    { period1: dayjs().subtract(5, "year").toDate(), interval: "1wk" as "1wk" }
+    { period1: dayjs().subtract(6, "month").toDate(), interval: "1d" as const },
+    { period1: dayjs().subtract(5, "year").toDate(), interval: "1wk" as const }
   ];
 
   // Fill the graphData array using both queryOptions
