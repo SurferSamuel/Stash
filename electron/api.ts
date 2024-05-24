@@ -13,15 +13,17 @@ dayjs.extend(customParseFormat);
 import { 
   AddCompanyValues, 
   AddTradeValues,
-  CleanHistoricalResult,
   CompanyData, 
   CurrentShareEntry, 
   Data, 
   FilterValues,
   GraphRange,
+  HistoricalEntry,
+  HistoricalOptionsEventsHistory,
   Key, 
   Option, 
   OptionKey,
+  PortfolioDataPoint,
   PortfolioGraphData,
   PortfolioTableData,
   PortfolioTableRow,
@@ -566,6 +568,28 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
 }
 
 /*
+ * A helper function that returns this historical data for the given asxcode and query options.
+ * If any request was rejected (eg. from an invalid code), it is removed from the returned array.
+ */
+const getHistoricalData = async (asxcodes: string[], queryOptions: HistoricalOptionsEventsHistory) => {
+  // Send historical requests in parallel (within concurrency limit)
+  const historicalResults = await Promise.allSettled(asxcodes.map(async (asxcode) => {
+    const historical = await yahooFinance.historical(`${asxcode}.AX`, queryOptions);
+    return { asxcode, historical };
+  }));
+
+  // Remove any promises that were not fulfilled
+  const historicalData: HistoricalEntry[] = [];
+  for (const result of historicalResults) {
+    if (result.status === "fulfilled") {
+      historicalData.push(result.value);
+    }
+  }
+  
+  return historicalData;
+}
+
+/*
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
 export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues): Promise<PortfolioGraphData> => {
@@ -577,52 +601,56 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     return null;
   }
 
-  // Object containing the graph data
-  const graphData: PortfolioGraphData = {
-    1: [],
-    3: [],
-    6: [],
-    12: [],
-    60: [],
-  };
+  // Object containing the graph data for each interval
+  const graphData: Record<"1d" | "1wk", PortfolioDataPoint[]> = {
+    "1d": [],
+    "1wk": [],
+  }
 
-  // Loop for all ranges
-  const allRanges: GraphRange[] = [1, 3, 6, 12, 60];
-  for (const range of allRanges) {
-    // Get the date 'range' months ago
-    const date = dayjs().subtract(range, "month").toDate();
-
-    // Get the historicals for all the filtered companies
-    const interval: "1d" | "1wk" = (range < 12) ? "1d" : "1wk";
-    const queryOptions = { period1: date, interval };
-    const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
-    const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
-
-    // Clean the data, removing any promises that were not fulfillied
-    const cleanHistoricalArray: CleanHistoricalResult[] = [];
-    for (let i = 0; i < filteredData.length; i++) {
-      const historicalResult = historicalArray[i];
-      if (historicalResult.status === "fulfilled") {
-        cleanHistoricalArray.push({
-          asxcode: filteredData[i].asxcode,
-          historical: historicalResult.value,
-        });
-      }
+  // A helper function that adds values into the graphData object
+  // Returns the next id (if an entry was added), or the original id (if entry already existed)
+  const addValueToGraphData = (interval: "1d" | "1wk", id: number, time: Dayjs, value: number) => {
+    // Add the value into the graph data array
+    const graphEntry = graphData[interval].find(entry => time.isSame(entry.date, "day"));
+    if (graphEntry === undefined) {
+      // Make new entry if none exists...
+      graphData[interval].push({
+        id: id++,
+        date: time.toDate(),
+        value,
+      });
+    } else {
+      // ...otherwise, add the value to the entry
+      graphEntry.value += value;
     }
 
-    // Loop for each filtered company
-    let id = 1;    
-    for (const company of filteredData) {
-      // Get the historical result for the company
-      const historicalResult = cleanHistoricalArray.find(entry => entry.asxcode === company.asxcode);
+    return id;
+  }
 
-      // Skip if received no historical result for this company
+  const asxcodes = filteredData.map(entry => entry.asxcode); 
+  const queryOptions = [
+    { period1: dayjs().subtract(6, "month").toDate(), interval: "1d" as "1d" },
+    { period1: dayjs().subtract(5, "year").toDate(), interval: "1wk" as "1wk" }
+  ];
+
+  // Fill the graphData array using both queryOptions
+  for (const queryOption of queryOptions) {
+    // Get the historical data using the query option
+    const historicalData = await getHistoricalData(asxcodes, queryOption);
+
+    // Each graphData entry needs to have an id
+    let id = 1;
+
+    // Portfolio value is made up of all filtered companies
+    for (const company of filteredData) {
+      // Try to get the historical result for the company, otherwise skip if not received
+      const historicalResult = historicalData.find(entry => entry.asxcode === company.asxcode);
       if (historicalResult === undefined) continue;
 
       // Loop for each entry of the company's historical data
       for (const historical of historicalResult.historical) {
         // If historical date is today, use the current time now instead
-        // NOTE: This ensures that if the user brought shares today, it would show on the graph
+        // This ensures that if the user brought shares today, it would show on the graph
         const now = dayjs();
         const time = now.isSame(historical.date, "day") ? now : dayjs(historical.date);
 
@@ -633,21 +661,10 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
         const value = units * historical.adjClose;
 
         // Add the value into the graph data array
-        const graphEntry = graphData[range].find(entry => time.isSame(entry.date, "day"));
-        if (graphEntry === undefined) {
-          // Make new entry if none exists...
-          graphData[range].push({
-            id: id++,
-            date: time.toDate(),
-            value,
-          });
-        } else {
-          // ...otherwise, add the value to the entry
-          graphEntry.value += value;
-        }
+        id = addValueToGraphData(queryOption.interval, id, time, value);
       }
 
-      // If the historicals did not include an entry for today
+      // If the historical data did not include an entry for today
       if (!historicalResult.historical.some(entry => dayjs().isSame(entry.date, "day"))) {
         try {
           // Get the quote for this company
@@ -655,28 +672,17 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
           const quote = await yahooFinance.quote(`${company.asxcode}.AX`, { fields });
 
           // Check that regularMarketPrice was fetched
-          if ("regularMarketPrice" in quote) {
-            // Calculate the number of units as of today
-            const time = dayjs();
-            const units = countUnitsAtTime(company, filterValues.user, time);
+          if (!("regularMarketPrice" in quote)) continue;
 
-            // Calculate the value as of today
-            const value = units * quote.regularMarketPrice;
+          // Calculate the number of units as of today
+          const time = dayjs();
+          const units = countUnitsAtTime(company, filterValues.user, time);
 
-            // Add the value into the graph data array
-            const graphEntry = graphData[range].find(entry => time.isSame(entry.date, "day"));
-            if (graphEntry === undefined) {
-              // Make new entry if none exists...
-              graphData[range].push({
-                id: id++,
-                date: time.toDate(),
-                value,
-              });
-            } else {
-              // ...otherwise, add the value to the entry
-              graphEntry.value += value;
-            }
-          }
+          // Calculate the value as of today
+          const value = units * quote.regularMarketPrice;
+
+          // Add the value into the graph data array
+          id = addValueToGraphData(queryOption.interval, id, time, value);
         } catch (error) {
           // If the quote could not be fetched, do nothing
         }
@@ -684,5 +690,11 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     }
   }
 
-  return graphData;
+  return {
+    1: graphData["1d"].filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
+    3: graphData["1d"].filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
+    6: graphData["1d"].filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
+    12: graphData["1wk"].filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
+    60: graphData["1wk"].filter(entry => dayjs().subtract(60, "month").isBefore(entry.date, "day")),
+  };
 }
