@@ -45,17 +45,16 @@ const UpdateData = (props: Props): null => {
   }
 
   // A helper function that calculates and updates the y-axis limits and 
-  // bottom offset using the given data points
-  const updateYAxisAndOffset = (dataPoints: PortfolioDataPoint[]) => {
-    // If no data points
-    if (dataPoints.length === 0) {
+  // bottom offset using the given data 
+  const updateYAxisAndOffset = (graphData: PortfolioGraphData, graphRange: GraphRange) => {
+    if (graphData === null || graphData[graphRange].length === 0) {
       setGraphYAxis([0, 0]);
       setGraphBottomOffset(1);
       return;
     }
 
     // Calculate y-axis limits and bottom offset using values
-    const values = dataPoints.map(point => point.value);
+    const values = graphData[graphRange].map(point => point.value);
     const extremums = [Math.min(...values), Math.max(...values)];
     const range = [top + height, top];
     const tickNumber = Math.floor(Math.abs(range[1] - range[0]) / 50);
@@ -71,7 +70,7 @@ const UpdateData = (props: Props): null => {
 
   // Handle updating graph range
   useEffect(() => {
-    updateYAxisAndOffset(graphData[graphRange]);
+    updateYAxisAndOffset(graphData, graphRange);
   }, [graphRange]);
 
   // Handle updating graph data
@@ -85,10 +84,10 @@ const UpdateData = (props: Props): null => {
         const graphData = await window.electronAPI.getPortfolioGraphData(values);
         console.log("after");
         if (isMounted) {
-          updateYAxisAndOffset(graphData[graphRange]);
+          updateYAxisAndOffset(graphData, graphRange);
           setGraphData(graphData);
+          setGraphLoading(false);
         }
-        setGraphLoading(false);
       } catch (error) {
         handleError(error);
       }
@@ -108,12 +107,12 @@ const UpdateData = (props: Props): null => {
         const tableData = await window.electronAPI.getPortfolioTableData(values);
         if (isMounted) {
           setTableData(tableData);
+          setTableLoading(false);
           // Also show the skipped companies (if any)
           if (tableData.skipped.length !== 0) {
             console.warn(`WARNING: Skipped ${tableData.skipped}`);
           }
         }
-        setTableLoading(false);
       } catch (error) {
         handleError(error);
       }
