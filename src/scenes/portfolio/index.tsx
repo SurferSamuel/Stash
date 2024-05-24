@@ -18,7 +18,7 @@ import { Accordion, AccordionSummary, AccordionDetails } from "../../components/
 import MultiSelectInput from "../../components/multiSelect";
 
 // Types
-import { Option, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
+import { GraphRange, Option, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
 import PortfolioValueText from "./portfolioValueText";
 
 export interface PortfolioFormValues {
@@ -28,7 +28,6 @@ export interface PortfolioFormValues {
   resources: Option[];
   products: Option[];
   recommendations: Option[];
-  graphRange: number;
 }
 
 const Portfolio = () => {
@@ -44,9 +43,16 @@ const Portfolio = () => {
 
   // Data for graph component
   const [graphLoading, setGraphLoading] = useState<boolean>(false);
-  const [graphData, setGraphData] = useState<PortfolioGraphData>([]);
   const [graphYAxis, setGraphYAxis] = useState<[number, number]>([0, 0]);
   const [graphBottomOffset, setGraphBottomOffset] = useState<number>(1);
+  const [graphRange, setGraphRange] = useState<GraphRange>(1);
+  const [graphData, setGraphData] = useState<PortfolioGraphData>({
+    1: [],
+    3: [],
+    6: [],
+    12: [],
+    60: [],
+  });
 
   // Data for table (and value text) component
   const [tableLoading, setTableLoading] = useState<boolean>(false);
@@ -91,7 +97,6 @@ const Portfolio = () => {
     resources: [],
     products: [],
     recommendations: [],
-    graphRange: 1,
   }
 
   return (
@@ -110,6 +115,8 @@ const Portfolio = () => {
           >
             {/* Update data when filter values change */}
             <UpdateData
+              graphRange={graphRange}
+              graphData={graphData}
               setGraphData={setGraphData}
               setTableData={setTableData}
               setGraphLoading={setGraphLoading}
@@ -133,12 +140,12 @@ const Portfolio = () => {
               mt="-5px"
             >
               {/* Graph Range Button Group */}
-              {graphData.length !== 0 && <ButtonGroup color="secondary">
-                <GraphRangeButton handleChange={handleChange} label="1M" value={1} />
-                <GraphRangeButton handleChange={handleChange} label="3M" value={3} />
-                <GraphRangeButton handleChange={handleChange} label="6M" value={6} />
-                <GraphRangeButton handleChange={handleChange} label="1Y" value={12} />
-                <GraphRangeButton handleChange={handleChange} label="5Y" value={60} />
+              {graphData !== null && <ButtonGroup color="secondary">
+                <GraphRangeButton label="1M" range={graphRange} setRange={setGraphRange} />
+                <GraphRangeButton label="3M" range={graphRange} setRange={setGraphRange}/>
+                <GraphRangeButton label="6M" range={graphRange} setRange={setGraphRange}/>
+                <GraphRangeButton label="1Y" range={graphRange} setRange={setGraphRange}/>
+                <GraphRangeButton label="5Y" range={graphRange} setRange={setGraphRange}/>
               </ButtonGroup>}
             </Box>
             {/* Graph showing portfolio value */}
@@ -146,7 +153,8 @@ const Portfolio = () => {
               loading={graphLoading}
               yAxis={graphYAxis}
               bottomOffset={graphBottomOffset}
-              dataPoints={graphData}
+              range={graphRange}
+              data={graphData}
             />
             {/* Filter Dropdown */}
             <Box mt="-10px" gridColumn="span 4">

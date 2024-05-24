@@ -1,4 +1,3 @@
-import { useFormikContext } from "formik";
 import { tokens } from "../../theme";
 import dayjs from "dayjs";
 
@@ -11,25 +10,25 @@ import { styled } from '@mui/material/styles';
 import Box from "@mui/material/Box";
 
 // Types
-import { PortfolioDataPoint } from "../../../electron/types";
-import { PortfolioFormValues } from "./index";
+import { GraphRange, PortfolioGraphData } from "../../../electron/types";
 
 interface Props {
   loading: boolean;
   yAxis: [number, number];
   bottomOffset: number;
-  dataPoints: PortfolioDataPoint[];
+  range: GraphRange;
+  data: PortfolioGraphData;
 }
 
 const PortfolioGraph = (props: Props) => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
-  const { values } = useFormikContext<PortfolioFormValues>();
   const {
     loading,
     yAxis,
     bottomOffset,
-    dataPoints,
+    range,
+    data,
   } = props;
 
   // Currency formatter helper function
@@ -37,12 +36,12 @@ const PortfolioGraph = (props: Props) => {
   const currencyFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format;
 
   const xAxisValueFormatter = (id: number, context: AxisValueFormatterContext) => {
-    // If data could not be found (eg. if id was invalid)
-    const data = dataPoints.find(entry => entry.id === id);
-    if (data === undefined) return "";
+    // If data point could not be found (eg. if id was invalid)
+    const dataPoint = data[range].find(entry => entry.id === id);
+    if (dataPoint === undefined) return "";
 
     // Convert date to dayjs
-    const date = dayjs(data.date);
+    const date = dayjs(dataPoint.date);
 
     // Format for tick (on x-axis)
     if (context.location === "tick") {
@@ -50,7 +49,7 @@ const PortfolioGraph = (props: Props) => {
     }
 
     // Format for hover (window on mouse hover)
-    if (dayjs().subtract(values.graphRange, "month").year() != dayjs().year()) {
+    if (dayjs().subtract(range, "month").year() != dayjs().year()) {
       return date.format("D MMM YYYY");
     } else {
       return date.format("ddd, D MMM")
@@ -59,8 +58,8 @@ const PortfolioGraph = (props: Props) => {
 
   // Determines whether the x-axis tick should be displayed
   const xAxisTickInterval = (value: number, index: number) => {
-    const frequency = Math.floor(dataPoints.length / 7);
-    const offset = Math.floor((frequency - (dataPoints.length % frequency)) / 2);
+    const frequency = Math.floor(data[range].length / 7);
+    const offset = Math.floor((frequency - (data[range].length % frequency)) / 2);
     return index % frequency === Math.max(frequency - offset, 0);
   }
 
@@ -125,7 +124,7 @@ const PortfolioGraph = (props: Props) => {
             area: true,
           }
         ]}
-        dataset={dataPoints ? dataPoints : []}
+        dataset={data !== null ? data[range] : []}
         height={400}
         grid={{ horizontal: true }}
         slots={{ 

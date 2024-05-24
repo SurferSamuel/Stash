@@ -1,25 +1,32 @@
-import { PortfolioFormValues } from "./index";
-import { useFormikContext } from "formik";
+import { GraphRange } from "../../../electron/types";
+import { Dispatch, SetStateAction } from "react";
 import Button from "@mui/material/Button";
 
-export type RangeValue = "1M" | "3M" | "6M" | "1Y" | "5Y";
+type RangeLabel = "1M" | "3M" | "6M" | "1Y" | "5Y";
 
 interface Props {
-  label: RangeValue;
-  value: number;
-  handleChange: (e: { target: { name: string; value: number } }) => void;
+  label: RangeLabel;
+  range: GraphRange;
+  setRange: Dispatch<SetStateAction<GraphRange>>;
 }
 
 const GraphRangeButton = (props: Props) => {
-  const { label, value, handleChange } = props;
-  const { values } = useFormikContext<PortfolioFormValues>();
+  const { label, range, setRange } = props;
+
+  const value: GraphRange = 
+    label === "1M" ? 1 :
+    label === "3M" ? 3 :
+    label === "6M" ? 6 :
+    label === "1Y" ? 12 :
+    60;
+
   return (
     <Button
       disableRipple
       variant="text"
-      onClick={() => handleChange({ target: { name: "graphRange", value } })}
+      onClick={() => setRange(value)}
       sx={{ 
-        color: values.graphRange === value ? "white" : "primary",
+        color: range === value ? "white" : "primary",
         zIndex: 1,
         '&:hover': {
           backgroundColor: 'transparent',

@@ -10,20 +10,25 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 dayjs.extend(customParseFormat);
 
 // Types
-import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { 
   AddCompanyValues, 
   AddTradeValues,
+  CleanHistoricalResult,
   CompanyData, 
   CurrentShareEntry, 
   Data, 
   FilterValues,
+  GraphRange,
   Key, 
   Option, 
   OptionKey,
-  PortfolioDataPoint,
+  PortfolioGraphData,
+  PortfolioTableData,
   PortfolioTableRow,
 } from "./types";
+
+// Set concurrency limit to 16
+yahooFinance.setGlobalConfig({ queue: { concurrency: 16 } });
 
 // Dayjs parser helper function
 const dayjsDate = (date: string) => dayjs(date, "DD/MM/YYYY hh:mm A");
@@ -440,7 +445,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
 /*
  * Gets the table rows for the portfolio page that match the given filter values.
  */
-export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: FilterValues) => {
+export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: FilterValues): Promise<PortfolioTableData> => {
   // Get the filtered companies
   const filteredData = getFilteredData(filterValues);
 
@@ -563,120 +568,121 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
 /*
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
-export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues) => {
+export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: FilterValues): Promise<PortfolioGraphData> => {
   // Get the filtered companies
   const filteredData = getFilteredData(filterValues);
 
   // If no companies match the filter values
   if (filteredData.length === 0) {
-    return [];
+    return null;
   }
 
-  // Get the required date
-  const months = filterValues.graphRange || 1;
-  const date = dayjs().subtract(months, "month").toDate();
+  // Object containing the graph data
+  const graphData: PortfolioGraphData = {
+    1: [],
+    3: [],
+    6: [],
+    12: [],
+    60: [],
+  };
 
-  // Get the historicals for all the filtered companies
-  const interval: "1d" | "1wk" = (months < 12) ? "1d" : "1wk";
-  const queryOptions = { period1: date, interval };
-  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
-  const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
+  // Loop for all ranges
+  const allRanges: GraphRange[] = [1, 3, 6, 12, 60];
+  for (const range of allRanges) {
+    // Get the date 'range' months ago
+    const date = dayjs().subtract(range, "month").toDate();
 
-  // Clean the data, removing any promises that were not fulfillied
-  const cleanHistoricalArray: {
-    asxcode: string;
-    historical: HistoricalHistoryResult;
-  }[] = [];
+    // Get the historicals for all the filtered companies
+    const interval: "1d" | "1wk" = (range < 12) ? "1d" : "1wk";
+    const queryOptions = { period1: date, interval };
+    const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
+    const historicalArray = await Promise.allSettled(symbols.map(symbol => yahooFinance.historical(symbol, queryOptions)));
 
-  for (let i = 0; i < filteredData.length; i++) {
-    const historicalResult = historicalArray[i];
-    if (historicalResult.status === "fulfilled") {
-      cleanHistoricalArray.push({
-        asxcode: filteredData[i].asxcode,
-        historical: historicalResult.value,
-      });
-    }
-  }
-
-  let id = 1;
-  const dataPoints: PortfolioDataPoint[] = [];
-  
-  // Loop for each filtered company
-  for (const company of filteredData) {
-    // Get the historical result for the company
-    const historicalResult = cleanHistoricalArray.find(entry => entry.asxcode === company.asxcode);
-
-    // Skip if received no historical result for this company
-    if (historicalResult === undefined) {
-      continue;
-    }
-
-    // Loop for each entry of the company's historical data
-    for (const historical of historicalResult.historical) {
-      // If historical.date is today, use the current time now
-      const now = dayjs();
-      const time = now.isSame(historical.date, "day") ? now : dayjs(historical.date);
-
-      // Calculate the number of units at the time of the historical entry
-      const units = countUnitsAtTime(company, filterValues.user, time);
-
-      // Value at the time of historical entry
-      const value = units * historical.adjClose;
-
-      // Add the value into the graph data array
-      const graphEntry = dataPoints.find(entry => time.isSame(entry.date, "day"));
-      if (graphEntry === undefined) {
-        // Make new entry if none exists...
-        dataPoints.push({
-          id: id++,
-          date: time.toDate(),
-          value,
+    // Clean the data, removing any promises that were not fulfillied
+    const cleanHistoricalArray: CleanHistoricalResult[] = [];
+    for (let i = 0; i < filteredData.length; i++) {
+      const historicalResult = historicalArray[i];
+      if (historicalResult.status === "fulfilled") {
+        cleanHistoricalArray.push({
+          asxcode: filteredData[i].asxcode,
+          historical: historicalResult.value,
         });
-      } else {
-        // ...otherwise, add the value to the entry
-        graphEntry.value += value;
       }
     }
 
-    // If the historicals did not include an entry for today
-    if (!historicalResult.historical.some(entry => dayjs().isSame(entry.date, "day"))) {
-      try {
-        // Get the quote for this company
-        const fields = [ "regularMarketPrice" ];
-        const quote = await yahooFinance.quote(`${company.asxcode}.AX`, { fields });
+    // Loop for each filtered company
+    let id = 1;    
+    for (const company of filteredData) {
+      // Get the historical result for the company
+      const historicalResult = cleanHistoricalArray.find(entry => entry.asxcode === company.asxcode);
 
-        // Check that regularMarketPrice was fetched
-        if ("regularMarketPrice" in quote) {
-          // Calculate the number of units, and value, as of today
-          const time = dayjs();
-          const units = countUnitsAtTime(company, filterValues.user, time);
-          const value = units * quote.regularMarketPrice;
+      // Skip if received no historical result for this company
+      if (historicalResult === undefined) continue;
 
-          // Add the value into the graph data array
-          const graphEntry = dataPoints.find(entry => time.isSame(entry.date, "day"));
-          if (graphEntry === undefined) {
-            // Make new entry if none exists...
-            dataPoints.push({
-              id: id++,
-              date: time.toDate(),
-              value,
-            });
-          } else {
-            // ...otherwise, add the value to the entry
-            graphEntry.value += value;
-          }
+      // Loop for each entry of the company's historical data
+      for (const historical of historicalResult.historical) {
+        // If historical date is today, use the current time now instead
+        // NOTE: This ensures that if the user brought shares today, it would show on the graph
+        const now = dayjs();
+        const time = now.isSame(historical.date, "day") ? now : dayjs(historical.date);
+
+        // Calculate the number of units at the time of the historical entry
+        const units = countUnitsAtTime(company, filterValues.user, time);
+
+        // Value at the time of historical entry
+        const value = units * historical.adjClose;
+
+        // Add the value into the graph data array
+        const graphEntry = graphData[range].find(entry => time.isSame(entry.date, "day"));
+        if (graphEntry === undefined) {
+          // Make new entry if none exists...
+          graphData[range].push({
+            id: id++,
+            date: time.toDate(),
+            value,
+          });
+        } else {
+          // ...otherwise, add the value to the entry
+          graphEntry.value += value;
         }
-      } catch (error) {
-        // If the quote could not be fetched, do nothing
+      }
+
+      // If the historicals did not include an entry for today
+      if (!historicalResult.historical.some(entry => dayjs().isSame(entry.date, "day"))) {
+        try {
+          // Get the quote for this company
+          const fields = [ "regularMarketPrice" ];
+          const quote = await yahooFinance.quote(`${company.asxcode}.AX`, { fields });
+
+          // Check that regularMarketPrice was fetched
+          if ("regularMarketPrice" in quote) {
+            // Calculate the number of units as of today
+            const time = dayjs();
+            const units = countUnitsAtTime(company, filterValues.user, time);
+
+            // Calculate the value as of today
+            const value = units * quote.regularMarketPrice;
+
+            // Add the value into the graph data array
+            const graphEntry = graphData[range].find(entry => time.isSame(entry.date, "day"));
+            if (graphEntry === undefined) {
+              // Make new entry if none exists...
+              graphData[range].push({
+                id: id++,
+                date: time.toDate(),
+                value,
+              });
+            } else {
+              // ...otherwise, add the value to the entry
+              graphEntry.value += value;
+            }
+          }
+        } catch (error) {
+          // If the quote could not be fetched, do nothing
+        }
       }
     }
-
   }
 
-  // If all values are 0, same as no data
-  if (dataPoints.every(entry => entry.value === 0)) {
-    return [];
-  }
-
-  return dataPoints;
+  return graphData;
 }

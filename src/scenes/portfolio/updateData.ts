@@ -7,11 +7,13 @@ import {
 } from "react";
 
 // Types
-import { PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
+import { GraphRange, PortfolioDataPoint, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
 import { PortfolioFormValues } from "./index";
 import { useDrawingArea } from "@mui/x-charts";
 
 interface Props {
+  graphRange: GraphRange;
+  graphData: PortfolioGraphData;
   setGraphData: Dispatch<SetStateAction<PortfolioGraphData>>;
   setTableData: Dispatch<SetStateAction<PortfolioTableData>>;
   setGraphLoading: Dispatch<SetStateAction<boolean>>;
@@ -23,7 +25,9 @@ interface Props {
 const UpdateData = (props: Props): null => {
   const { values } = useFormikContext<PortfolioFormValues>();
   const { top, height } = useDrawingArea();
-  const { 
+  const {
+    graphRange,
+    graphData,
     setGraphData, 
     setTableData,
     setGraphLoading,
@@ -40,28 +44,48 @@ const UpdateData = (props: Props): null => {
     console.error(msg);
   }
 
-  // Update graph data
+  // A helper function that calculates and updates the y-axis limits and 
+  // bottom offset using the given data points
+  const updateYAxisAndOffset = (dataPoints: PortfolioDataPoint[]) => {
+    // If no data points
+    if (dataPoints.length === 0) {
+      setGraphYAxis([0, 0]);
+      setGraphBottomOffset(1);
+      return;
+    }
+
+    // Calculate y-axis limits and bottom offset using values
+    const values = dataPoints.map(point => point.value);
+    const extremums = [Math.min(...values), Math.max(...values)];
+    const range = [top + height, top];
+    const tickNumber = Math.floor(Math.abs(range[1] - range[0]) / 50);
+
+    // Use d3 to calculate a nice domain
+    const niceDomain = scaleLinear(extremums, range).nice(tickNumber).domain();
+    const bottomOffset = 0.9 * (niceDomain[1] - niceDomain[0]) / niceDomain[1];
+    
+    // Update states
+    setGraphYAxis(niceDomain as [number, number]);
+    setGraphBottomOffset(bottomOffset);
+  }
+
+  // Handle updating graph range
+  useEffect(() => {
+    updateYAxisAndOffset(graphData[graphRange]);
+  }, [graphRange]);
+
+  // Handle updating graph data
   useEffect(() => {
     let isMounted = true;
     (async () => {
       try {
-        // Show loading icon on table while waiting for request
+        // Show loading text on graph while waiting for request
         setGraphLoading(true);
+        console.log("before");
         const graphData = await window.electronAPI.getPortfolioGraphData(values);
+        console.log("after");
         if (isMounted) {
-          // Calculate y-axis limits and bottom offset using values
-          const values = graphData.map(point => point.value);
-          const extremums = [Math.min(...values), Math.max(...values)];
-          const range = [top + height, top];
-          const tickNumber = Math.floor(Math.abs(range[1] - range[0]) / 50);
-
-          // Use d3 to calculate a nice domain
-          const niceDomain = scaleLinear(extremums, range).nice(tickNumber).domain();
-          const bottomOffset = 0.9 * (niceDomain[1] - niceDomain[0]) / niceDomain[1];
-          
-          // Update states
-          setGraphYAxis(niceDomain as [number, number]);
-          setGraphBottomOffset(bottomOffset);
+          updateYAxisAndOffset(graphData[graphRange]);
           setGraphData(graphData);
         }
         setGraphLoading(false);
@@ -96,16 +120,7 @@ const UpdateData = (props: Props): null => {
     })();
     // Clean up
     return () => { isMounted = false };
-  }, 
-  // Don't trigger useEffect when values.graphRange is updated
-  [
-    values.user,
-    values.financialStatus,
-    values.miningStatus,
-    values.resources,
-    values.products,
-    values.recommendations
-  ]);
+  }, [values]);
 
   return null;
 }
