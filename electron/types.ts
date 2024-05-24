@@ -1,7 +1,10 @@
-import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 import { AddCompanyFormValues } from "../src/scenes/addCompany";
 import { AddTradeFormValues } from "../src/scenes/addTrade";
 export { PortfolioFormValues as FilterValues } from "../src/scenes/portfolio";
+
+// Yahoo-finance2 types
+import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
+import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 
 // Fetched quote return type from yahoo-finance2
 export type FetchQuote = { quote: Quote };
@@ -160,6 +163,12 @@ export interface PortfolioTableData {
   skipped: string[],              // Companies that were skipped when calculating
 }
 
+// Used in getPortfolioGraphData() in ./api.ts
+export interface CleanHistoricalResult {
+  asxcode: string;
+  historical: HistoricalHistoryResult;
+}
+
 // Data point type for the portfolio graph
 export interface PortfolioDataPoint {
   id: number;
@@ -168,5 +177,8 @@ export interface PortfolioDataPoint {
   [key: string]: number | Date; // To keep TS happy
 }
 
+// Graph range in months
+export type GraphRange = 1 | 3 | 6 | 12 | 60;
+
 // Return type of getPortfolioGraphData() in ./api.ts
-export type PortfolioGraphData = PortfolioDataPoint[];
+export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>
