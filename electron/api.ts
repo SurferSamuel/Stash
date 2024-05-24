@@ -599,9 +599,6 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
   }
 
   let id = 1;
-  let minValue = Number.MAX_SAFE_INTEGER;
-  let maxValue = 0;
-
   const dataPoints: PortfolioDataPoint[] = [];
   
   // Loop for each filtered company
@@ -626,12 +623,8 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
       // Value at the time of historical entry
       const value = units * historical.adjClose;
 
-      // Update min/max values if necessary
-      if (value < minValue) minValue = value;
-      if (value > maxValue) maxValue = value;
-
       // Add the value into the graph data array
-      const graphEntry = dataPoints.find(entry => time.isSame(entry.date));
+      const graphEntry = dataPoints.find(entry => time.isSame(entry.date, "day"));
       if (graphEntry === undefined) {
         // Make new entry if none exists...
         dataPoints.push({
@@ -644,10 +637,44 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
         graphEntry.value += value;
       }
     }
+
+    // If the historicals did not include an entry for today
+    if (!historicalResult.historical.some(entry => dayjs().isSame(entry.date, "day"))) {
+      try {
+        // Get the quote for this company
+        const fields = [ "regularMarketPrice" ];
+        const quote = await yahooFinance.quote(`${company.asxcode}.AX`, { fields });
+
+        // Check that regularMarketPrice was fetched
+        if ("regularMarketPrice" in quote) {
+          // Calculate the number of units, and value, as of today
+          const time = dayjs();
+          const units = countUnitsAtTime(company, filterValues.user, time);
+          const value = units * quote.regularMarketPrice;
+
+          // Add the value into the graph data array
+          const graphEntry = dataPoints.find(entry => time.isSame(entry.date, "day"));
+          if (graphEntry === undefined) {
+            // Make new entry if none exists...
+            dataPoints.push({
+              id: id++,
+              date: time.toDate(),
+              value,
+            });
+          } else {
+            // ...otherwise, add the value to the entry
+            graphEntry.value += value;
+          }
+        }
+      } catch (error) {
+        // If the quote could not be fetched, do nothing
+      }
+    }
+
   }
 
   // If all values are 0, same as no data
-  if (maxValue === 0) {
+  if (dataPoints.every(entry => entry.value === 0)) {
     return [];
   }
 
