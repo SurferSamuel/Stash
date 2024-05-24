@@ -59,7 +59,7 @@ const PortfolioGraph = (props: Props) => {
   // Determines whether the x-axis tick should be displayed
   const xAxisTickInterval = (value: number, index: number) => {
     const frequency = Math.floor(data[range].length / 7);
-    const offset = Math.floor((frequency - (data[range].length % frequency)) / 2);
+    const offset = Math.ceil((frequency - (data[range].length % frequency)) / 2);
     return index % frequency === Math.max(frequency - offset, 0);
   }
 
