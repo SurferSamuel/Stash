@@ -626,7 +626,11 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
   // Array of asxcodes ["CBA", ...] and symbols ["CBA.AX", ...]
   const asxcodes = filteredData.map(entry => entry.asxcode); 
-  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
+  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`);
+
+  // Get the quotes for all filtered companies
+  const fields = [ "symbol", "regularMarketPrice" ];
+  const quoteArray = await yahooFinance.quote(symbols, { fields });
 
   // Max range for daily interval is 6 months, max range for weekly interval is 5 years
   const queryOptions = [
@@ -665,10 +669,6 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
         id = addValueToGraphData(queryOption.interval, id, time, value);
       }
     }
-
-    // Get the quotes for all filtered companies
-    const fields = [ "symbol", "regularMarketPrice" ];
-    const quoteArray = await yahooFinance.quote(symbols, { fields });
 
     // Add/update the historical entry for today using the quote data instead of the historical data
     for (const company of filteredData) {
