@@ -487,8 +487,6 @@ export const getPortfolioTableData = async (event: IpcMainEvent, filterValues: F
   for (const company of filteredData) {
     // Find the quote for this company
     const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
-
-    // Skip if no quote was found
     if (quote === undefined) {
       skipped.push(company.asxcode);
       continue;
@@ -626,7 +624,11 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
     return id;
   }
 
+  // Array of asxcodes ["CBA", ...] and symbols ["CBA.AX", ...]
   const asxcodes = filteredData.map(entry => entry.asxcode); 
+  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`); 
+
+  // Max range for daily interval is 6 months, max range for weekly interval is 5 years
   const queryOptions = [
     { period1: dayjs().subtract(6, "month").toDate(), interval: "1d" as const },
     { period1: dayjs().subtract(5, "year").toDate(), interval: "1wk" as const }
@@ -648,12 +650,12 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
 
       // Loop for each entry of the company's historical data
       for (const historical of historicalResult.historical) {
-        // If historical date is today, use the current time now instead
-        // This ensures that if the user brought shares today, it would show on the graph
-        const now = dayjs();
-        const time = now.isSame(historical.date, "day") ? now : dayjs(historical.date);
+        // If historical date is today, don't add an entry as one 
+        // will be added later using more recent quote data instead
+        if (dayjs().isSame(historical.date, "day")) continue;
 
         // Calculate the number of units at the time of the historical entry
+        const time = dayjs(historical.date);
         const units = countUnitsAtTime(company, filterValues.user, time);
 
         // Value at the time of historical entry
@@ -662,38 +664,40 @@ export const getPortfolioGraphData = async (event: IpcMainEvent, filterValues: F
         // Add the value into the graph data array
         id = addValueToGraphData(queryOption.interval, id, time, value);
       }
+    }
 
-      // If the historical data did not include an entry for today
-      if (!historicalResult.historical.some(entry => dayjs().isSame(entry.date, "day"))) {
-        try {
-          // Get the quote for this company
-          const fields = [ "regularMarketPrice" ];
-          const quote = await yahooFinance.quote(`${company.asxcode}.AX`, { fields });
+    // Get the quotes for all filtered companies
+    const fields = [ "symbol", "regularMarketPrice" ];
+    const quoteArray = await yahooFinance.quote(symbols, { fields });
 
-          // Check that regularMarketPrice was fetched
-          if (!("regularMarketPrice" in quote)) continue;
+    // Add/update the historical entry for today using the quote data instead of the historical data
+    for (const company of filteredData) {
+      // Find the quote for this company
+      const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
 
-          // Calculate the number of units as of today
-          const time = dayjs();
-          const units = countUnitsAtTime(company, filterValues.user, time);
-
-          // Calculate the value as of today
-          const value = units * quote.regularMarketPrice;
-
-          // Add the value into the graph data array
-          id = addValueToGraphData(queryOption.interval, id, time, value);
-        } catch (error) {
-          // If the quote could not be fetched, do nothing
-        }
+      // Check that the quote was found and contains the market price
+      if (quote === undefined || !("regularMarketPrice" in quote)) {
+        continue;
       }
+
+      // Calculate the number of units as of today
+      const time = dayjs();
+      const units = countUnitsAtTime(company, filterValues.user, time);
+
+      // Calculate the value as of today
+      const value = units * quote.regularMarketPrice;
+
+      // Add the value into the graph data array
+      id = addValueToGraphData(queryOption.interval, id, time, value);
     }
   }
 
+  // Use 1 day intervals for 1-6 month ranges, and 1 week intervals for 1-5 year ranges
   return {
     1: graphData["1d"].filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
     3: graphData["1d"].filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
-    6: graphData["1d"].filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
+    6: graphData["1d"],
     12: graphData["1wk"].filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
-    60: graphData["1wk"].filter(entry => dayjs().subtract(60, "month").isBefore(entry.date, "day")),
+    60: graphData["1wk"],
   };
 }
