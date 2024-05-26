@@ -80,9 +80,7 @@ const UpdateData = (props: Props): null => {
       try {
         // Show loading text on graph while waiting for request
         setGraphLoading(true);
-        console.log("before");
         const graphData = await window.electronAPI.getPortfolioGraphData(values);
-        console.log("after");
         if (isMounted) {
           updateYAxisAndOffset(graphData, graphRange);
           setGraphData(graphData);
