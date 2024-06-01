@@ -27,9 +27,9 @@ const makeClassName = (params: GridCellParams<any, string>) => {
 
 // A helper function for sorting prices and percentages
 const sortPriceOrPercent = (a: string, b: string) => {
-  // Remove all "$" and "%" from strings, then parse as numbers
-  const value1 = Number(a.replaceAll(/$|%/g, ''));
-  const value2 = Number(b.replaceAll(/$|%/g, ''));
+  // Remove all ["$" "%" ","] from strings, then parse as numbers
+  const value1 = Number(a.replace(/[$%,]/g, ''));
+  const value2 = Number(b.replace(/[$%,]/g, ''));
   if (isNaN(value1)) return -1;
   if (isNaN(value2)) return 1;
   return (value1 < value2) ? -1 : 1;
