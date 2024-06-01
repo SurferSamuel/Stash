@@ -35,87 +35,86 @@ const sortPriceOrPercent = (a: string, b: string) => {
   return (value1 < value2) ? -1 : 1;
 }
 
+// Data grid columns
+const columns: GridColDef[] = [
+  {
+    field: "asxcode",
+    headerName: "Code",
+    minWidth: 70,
+    flex: 3,
+    align: "left",
+    headerAlign: "left",
+  },
+  {
+    field: "units",
+    headerName: "Units",
+    minWidth: 60,
+    flex: 3,
+    align: "right",
+    headerAlign: "right",
+  },
+  {
+    field: "avgBuyPrice",
+    headerName: "Avg Buy Price",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    sortComparator: sortPriceOrPercent,
+  },
+  {
+    field: "currentPrice",
+    headerName: "Current Price",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    sortComparator: sortPriceOrPercent,
+  },
+  {
+    field: "dailyChangePerc",
+    headerName: "Change %",
+    minWidth: 100,
+    flex: 5,
+    align: "right",
+    headerAlign: "right",
+    cellClassName: makeClassName,
+    sortComparator: sortPriceOrPercent,
+  },
+  {
+    field: "dailyProfit",
+    headerName: "Today's Profit",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    cellClassName: makeClassName,
+    sortComparator: sortPriceOrPercent,
+  },
+  {
+    field: "profitOrLoss",
+    headerName: "Profit",
+    minWidth: 80,
+    flex: 4,
+    align: "right",
+    headerAlign: "right",
+    cellClassName: makeClassName,
+    sortComparator: sortPriceOrPercent,
+  },
+  {
+    field: "profitOrLossPerc",
+    headerName: "Profit %",
+    minWidth: 90,
+    flex: 4,
+    align: "right",
+    headerAlign: "right",
+    cellClassName: makeClassName,
+    sortComparator: sortPriceOrPercent,
+  },
+];
+
 const PortfolioTable = (props: Props) => {
   const { loading, rows } = props;
-
-  // Data grid columns
-  const columns: GridColDef[] = [
-    {
-      field: "asxcode",
-      headerName: "Code",
-      minWidth: 70,
-      flex: 3,
-      align: "left",
-      headerAlign: "left",
-    },
-    {
-      field: "units",
-      headerName: "Units",
-      minWidth: 60,
-      flex: 3,
-      align: "right",
-      headerAlign: "right",
-    },
-    {
-      field: "avgBuyPrice",
-      headerName: "Avg Buy Price",
-      minWidth: 130,
-      flex: 6,
-      align: "right",
-      headerAlign: "right",
-      sortComparator: sortPriceOrPercent,
-    },
-    {
-      field: "currentPrice",
-      headerName: "Current Price",
-      minWidth: 130,
-      flex: 6,
-      align: "right",
-      headerAlign: "right",
-      sortComparator: sortPriceOrPercent,
-    },
-    {
-      field: "dailyChangePerc",
-      headerName: "Change %",
-      minWidth: 100,
-      flex: 5,
-      align: "right",
-      headerAlign: "right",
-      cellClassName: makeClassName,
-      sortComparator: sortPriceOrPercent,
-    },
-    {
-      field: "dailyProfit",
-      headerName: "Today's Profit",
-      minWidth: 130,
-      flex: 6,
-      align: "right",
-      headerAlign: "right",
-      cellClassName: makeClassName,
-      sortComparator: sortPriceOrPercent,
-    },
-    {
-      field: "profitOrLoss",
-      headerName: "Profit",
-      minWidth: 80,
-      flex: 4,
-      align: "right",
-      headerAlign: "right",
-      cellClassName: makeClassName,
-      sortComparator: sortPriceOrPercent,
-    },
-    {
-      field: "profitOrLossPerc",
-      headerName: "Profit %",
-      minWidth: 90,
-      flex: 4,
-      align: "right",
-      headerAlign: "right",
-      cellClassName: makeClassName,
-      sortComparator: sortPriceOrPercent,
-    },
-  ];
-
   return (
     <DataGrid 
       disableRowSelectionOnClick
