@@ -2,12 +2,12 @@ import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, Theme, ThemeProvider } from "@mui/material";
 import { Routes, Route } from "react-router-dom";
 
-// Scenes
-import Sidebar from "./scenes/global/sidebar";
-import AddCompany from "./scenes/addCompany";
-import AddTrade from "./scenes/addTrade";
-import Settings from "./scenes/setting";
-import Portfolio from "./scenes/portfolio";
+// Pages
+import Sidebar from "./pages/global/sidebar";
+import AddCompany from "./pages/addCompany";
+import AddTrade from "./pages/addTrade";
+import Settings from "./pages/setting";
+import Portfolio from "./pages/portfolio";
 
 type UseMode = [Theme, { toggleColorMode: () => void }];
 

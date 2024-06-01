@@ -1,6 +1,6 @@
-import { AddCompanyFormValues } from "../src/scenes/addCompany";
-import { AddTradeFormValues } from "../src/scenes/addTrade";
-export { PortfolioFormValues as FilterValues } from "../src/scenes/portfolio";
+import { AddCompanyFormValues } from "../src/pages/addCompany";
+import { AddTradeFormValues } from "../src/pages/addTrade";
+export { PortfolioFormValues as FilterValues } from "../src/pages/portfolio";
 
 // Yahoo-finance2 types
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
