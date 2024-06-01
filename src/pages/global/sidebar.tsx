@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { Dispatch, ReactNode, SetStateAction, useState } from "react";
 import {
   ProSidebar,
   Menu,
@@ -25,9 +25,9 @@ import HomeIcon from "@mui/icons-material/Home";
 interface Props {
   title: string;
   to: string;
-  icon: React.ReactNode;
+  icon: ReactNode;
   selected: string;
-  setSelected: React.Dispatch<React.SetStateAction<string>>;
+  setSelected: Dispatch<SetStateAction<string>>;
 }
 
 // Helper function for menu items
