@@ -1,6 +1,11 @@
-import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 import { AddCompanyFormValues } from "../src/scenes/addCompany";
 import { AddTradeFormValues } from "../src/scenes/addTrade";
+export { PortfolioFormValues as FilterValues } from "../src/scenes/portfolio";
+
+// Yahoo-finance2 types
+export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
+import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
+import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
 
 // Fetched quote return type from yahoo-finance2
 export type FetchQuote = { quote: Quote };
@@ -54,7 +59,7 @@ export interface PriceNotification {
 // CURRENT share entry type
 export interface CurrentShareEntry {
   user: string;                 // User who brought the shares
-  date: string;                  // Date of when the shares were originally brought
+  date: string;                 // Date of when the shares were originally brought
   quantity: string;             // Number of current outstanding shares
   unitPrice: string;            // Price paid for 1 share at the time of purchase
   brokerage: string;            // Remaining brokerage for the trade
@@ -122,15 +127,59 @@ export interface Settings {
 // Any data type, returned from getData
 export type Data = Option[] | Country[] | CompanyData[] | Settings;
 
-// Values type for AddCompany function in ./api.ts
+// Values type for AddCompany() in ./api.ts
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" | "notificationDate"> {
   noteDate: string;
   notificationDate: string;
 }
 
-// Values type for BuyShares & SellShares function in ./api.ts
+// Values type for BuyShares() and SellShares() in ./api.ts
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
 }
+
+// Table row type for the portfolio page
+export interface PortfolioTableRow {
+  id: number;               // ID, eg. 1, 2, 3, ...
+  asxcode: string;          // ASX code of the company
+  units: number;            // Number of units owned
+  avgBuyPrice: string;      // Average price of brought shares
+  currentPrice: string;     // Last share price
+  dailyChangePerc: string;  // Daily change in share price %
+  dailyProfit: string;      // Daily change in profit
+  profitOrLoss: string;     // Profit/loss amount
+  profitOrLossPerc: string; // Profit/loss %
+}
+
+// Return type of getPortfolioTableData() in ./api.ts
+export interface PortfolioTableData {
+  totalValue: string,             // Total value of the portfolio (as of today)
+  dailyChange: string,            // Today's change in portfolio value
+  dailyChangePerc: string,        // Today's change in portfolio value %
+  totalChange: string,            // Total change in portfolio value
+  totalChangePerc: string,        // Total change in portfolio value %
+  rows: PortfolioTableRow[],      // Row data for the table
+  skipped: string[],              // Companies that were skipped when calculating
+}
+
+// Used in getPortfolioGraphData() in ./api.ts
+export interface HistoricalEntry {
+  asxcode: string;
+  historical: HistoricalHistoryResult;
+}
+
+// Data point type for the portfolio graph
+export interface PortfolioDataPoint {
+  id: number;
+  date: Date;
+  value: number;
+  [key: string]: number | Date; // To keep TS happy
+}
+
+// Graph range in months
+export type GraphRange = 1 | 3 | 6 | 12 | 60;
+
+// Return type of getPortfolioGraphData() in ./api.ts
+export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>

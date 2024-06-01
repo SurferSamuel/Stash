@@ -1,6 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { Data, FetchQuote, Key, AddCompanyValues, AddTradeValues } from "./types";
-import { useRef } from "react";
+import { Data, FetchQuote, Key, AddCompanyValues, AddTradeValues, FilterValues } from "./types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   fetchQuote: (asxcode: string): Promise<FetchQuote> => ipcRenderer.invoke("fetchQuote", asxcode),
@@ -12,4 +11,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   availableShares: (asxcode: string, user: string) => ipcRenderer.invoke("availableShares", asxcode, user),
   buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
   sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
+  getPortfolioTableData: (filterValues: FilterValues) => ipcRenderer.invoke("getPortfolioTableData", filterValues),
+  getPortfolioGraphData: (filterValues: FilterValues) => ipcRenderer.invoke("getPortfolioGraphData", filterValues),
 });

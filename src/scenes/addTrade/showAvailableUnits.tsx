@@ -7,9 +7,7 @@ import Typography from "@mui/material/Typography";
 import InfoIcon from '@mui/icons-material/Info';
 import Box from "@mui/material/Box";
 
-interface Props {}
-
-const ShowAvailableUnits = (props: Props) => {
+const ShowAvailableUnits = () => {
   const { values } = useFormikContext<AddTradeFormValues>();
   const [show, setShow] = useState<boolean>(false);
   const [units, setUnits] = useState<number>(0);
@@ -18,13 +16,13 @@ const ShowAvailableUnits = (props: Props) => {
   useEffect(() => {
     (async () => {
       // Show available shares only when trade type is SELL and asxcode/user is non-empty
-      let show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
+      const show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
 
       // Skip API call if not going to show the available shares
       if (!show) {
         setShow(false);
         return;
-      };
+      }
       
       // Attempt to set the units state using backend API call
       try {

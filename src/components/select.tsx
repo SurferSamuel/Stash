@@ -1,6 +1,5 @@
 import Autocomplete from "@mui/material/Autocomplete";
 import { FormikErrors, FormikTouched } from "formik";
-import { AutocompleteProps } from "@mui/material";
 import TextField from "@mui/material/TextField";
 
 interface Option {
@@ -13,15 +12,24 @@ interface Props {
   value: string;
   handleChange: (e: { target: { name: string; value: string } }) => void;
   options: Option[];
-  touched: FormikTouched<any>;
-  errors: FormikErrors<any>;
+  touched?: FormikTouched<any>;
+  errors?: FormikErrors<any>;
   capitaliseInput?: boolean | undefined;
   span: number;
 }
 
 const SelectInput = (props: Props) => {
-  const { label, valueName, value, handleChange, options, errors, touched, capitaliseInput, span } =
-    props;
+  const { 
+    label,
+    valueName,
+    value,
+    handleChange,
+    options,
+    errors,
+    touched,
+    capitaliseInput,
+    span
+  } = props;
 
   return (
     <Autocomplete
@@ -57,8 +65,11 @@ const SelectInput = (props: Props) => {
         <TextField
           {...params}
           label={label}
-          error={!!touched[valueName] && !!errors[valueName]}
-          helperText={touched[valueName] && (errors[valueName] as string)}
+          // If touched and errors were given...
+          {...(touched && errors && { 
+            error: !!touched[valueName] && !!errors[valueName],
+            helperText: touched[valueName] && (errors[valueName] as string)
+          })}
           inputProps={{
             ...params.inputProps,
             style: capitaliseInput ? { textTransform: "uppercase" } : undefined,

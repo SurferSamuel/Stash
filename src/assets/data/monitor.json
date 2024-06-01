@@ -1,1 +1,4 @@
-[{ "label": "Coal Per Mine" }, { "label": "Gold Per Mine" }]
+[
+  { "label": "Coal Per Mine" },
+  { "label": "Gold Per Mine" }
+]

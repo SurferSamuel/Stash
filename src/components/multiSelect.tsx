@@ -11,49 +11,52 @@ interface Props {
   value: Option[];
   handleChange: (e: { target: { name: string; value: Option[] } }) => void;
   options: Option[];
+  allowNewOptions?: boolean;
 }
 
 const filter = createFilterOptions();
 
 const MultiSelectInput = (props: Props) => {
-  const { label, valueName, value, handleChange, options } = props;
+  const { label, valueName, value, handleChange, options, allowNewOptions } = props;
 
-  const handleChangeInput = (event, newArray) => {
+  const handleChangeInput = (event, newValues) => {
     // If newArray is empty, then set value as empty array
-    if (newArray.length === 0) {
-      return handleChange({
-        target: {
-          name: valueName,
-          value: [],
-        },
-      });
+    if (newValues.length === 0) {
+      handleChange({ target: { name: valueName, value: [] } });
+      return;
     }
 
     // New value will always be the last value in the array
-    const index = newArray.length - 1;
-    const newValue = newArray[index];
-
-    // Value selected with enter, right from the input
+    const lastIndex = newValues.length - 1;
+    const newValue = newValues[lastIndex];
+  
+    // If new value was created by pressing enter
     if (typeof newValue === "string") {
-      // If the new value already exists
-      const isExisting =
-        options.some((option) => newValue === option.label) ||
-        value.some((option) => newValue === option.label);
-      if (isExisting) return;
-      newArray[index] = { label: newValue };
-    }
+      const existingOption = options.find((option) => option.label === newValue);
+      const selected = value.some((option) => option.label === newValue);
 
-    // Add option created dynamically
+      // If the new value is an existing option that is not currently selected
+      if (existingOption && !selected) {
+        const updatedValues = [...value, existingOption];
+        handleChange({ target: { name: valueName, value: updatedValues } });
+      } 
+      // If allowing new options
+      else if (allowNewOptions && !existingOption) {
+        const updatedValues = [...value, { label: newValue }];
+        handleChange({ target: { name: valueName, value: updatedValues } });
+      }
+    }
+    // If new value created dynamically on dropdown ("Add [value]")
     else if (newValue && newValue.inputValue) {
-      newArray[index] = { label: newValue.inputValue };
+      const newOption = { label: newValue.inputValue };
+      const updatedValues = [...value, newOption];
+      handleChange({ target: { name: valueName, value: updatedValues } });
+    } 
+    // If the new value was from clicking a normal option on dropdown
+    else {
+      handleChange({ target: { name: valueName, value: newValues } });
     }
 
-    handleChange({
-      target: {
-        name: valueName,
-        value: newArray,
-      },
-    });
   };
 
   return (
@@ -96,7 +99,7 @@ const MultiSelectInput = (props: Props) => {
         const isExisting =
           options.some((option) => inputValue === option.label) ||
           value.some((option) => inputValue === option.label);
-        if (inputValue !== "" && !isExisting) {
+        if (allowNewOptions && inputValue !== "" && !isExisting) {
           filtered.push({
             inputValue,
             label: `Add "${inputValue}"`,

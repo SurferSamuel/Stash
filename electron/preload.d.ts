@@ -5,10 +5,13 @@ import {
   Country, 
   Data, 
   FetchQuote, 
+  FilterValues, 
   Key, 
   Option, 
   OptionKey, 
-  Settings, 
+  PortfolioGraphData,
+  PortfolioTableData,
+  Settings,
 } from "./types";
 
 export interface IElectronAPI {
@@ -27,6 +30,8 @@ export interface IElectronAPI {
   availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
+  getPortfolioTableData: (filterValues: FilterValues) => Promise<PortfolioTableData>;
+  getPortfolioGraphData: (filterValues: FilterValues) => Promise<PortfolioGraphData>;
 }
 
 declare global {

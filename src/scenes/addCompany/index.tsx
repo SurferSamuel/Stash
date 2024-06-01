@@ -95,20 +95,20 @@ const AddCompany = () => {
     let isMounted = true;
     (async () => {
       const countries = await window.electronAPI.getData("countries");
+      const financialStatus = await window.electronAPI.getData("financialStatus");
+      const miningStatus = await window.electronAPI.getData("miningStatus");
       const resources = await window.electronAPI.getData("resources");
       const products = await window.electronAPI.getData("products");
-      const monitor = await window.electronAPI.getData("monitor");
-      const miningStatus = await window.electronAPI.getData("miningStatus");
-      const financialStatus = await window.electronAPI.getData("financialStatus");
       const recommendations = await window.electronAPI.getData("recommendations");
+      const monitor = await window.electronAPI.getData("monitor");
       if (isMounted) {
         setCountriesList(countries);
+        setFinancialStatusList(financialStatus);
+        setMiningStatusList(miningStatus);
         setResourcesList(resources);
         setProductsList(products);
-        setMonitorList(monitor);
-        setMiningStatusList(miningStatus);
-        setFinancialStatusList(financialStatus);
         setRecommendationList(recommendations);
+        setMonitorList(monitor);
       }
     })();
     // Clean up
@@ -283,6 +283,7 @@ const AddCompany = () => {
                   />
                   {/* Financial Status Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Financial Status"
                     valueName="financialStatus"
                     value={values.financialStatus}
@@ -291,6 +292,7 @@ const AddCompany = () => {
                   />
                   {/* Mining Status Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Mining Status"
                     valueName="miningStatus"
                     value={values.miningStatus}
@@ -299,6 +301,7 @@ const AddCompany = () => {
                   />
                   {/* Resources Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Resources"
                     valueName="resources"
                     value={values.resources}
@@ -307,6 +310,7 @@ const AddCompany = () => {
                   />
                   {/* Products Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Products"
                     valueName="products"
                     value={values.products}
@@ -315,6 +319,7 @@ const AddCompany = () => {
                   />
                   {/* Recommendations Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Recommendations"
                     valueName="recommendations"
                     value={values.recommendations}
@@ -323,6 +328,7 @@ const AddCompany = () => {
                   />
                   {/* Monitor Input */}
                   <MultiSelectInput
+                    allowNewOptions
                     label="Monitor"
                     valueName="monitor"
                     value={values.monitor}
