@@ -177,7 +177,7 @@ const PortfolioTable = (props: Props) => {
   return (
     <Box
       mt="-10px"
-      mb="-30px"
+      mb="-40px"
       gridColumn="span 4"
     >
       {/* Dialogs */}
