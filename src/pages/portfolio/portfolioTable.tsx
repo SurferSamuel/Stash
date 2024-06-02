@@ -1,4 +1,9 @@
+import { useEffect, useState } from 'react';
 import clsx from 'clsx';
+
+// Components
+import FilterOptionsDialog from './filterOptionsDialog';
+import ToggleColumnsDialog from './toggleColumnsDialog';
 
 // Material UI
 import {
@@ -6,13 +11,27 @@ import {
   GridColDef,
   GridCellParams
 } from '@mui/x-data-grid';
+import IconButton from '@mui/material/IconButton';
+import Box from '@mui/material/Box';
+
+// Material UI Icons
+import KeyboardArrowRightIcon from '@mui/icons-material/KeyboardArrowRight';
+import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
+import FilterAltIcon from '@mui/icons-material/FilterAlt';
+import ViewWeekIcon from '@mui/icons-material/ViewWeek';
 
 // Types
-import { PortfolioTableRow } from '../../../electron/types';
+import { Option, PortfolioTableRow } from '../../../electron/types';
 
 interface Props {
   loading: boolean;
   rows: PortfolioTableRow[];
+  usersList: Option[];
+  financialStatusList: Option[];
+  miningStatusList: Option[];
+  resourcesList: Option[];
+  productsList: Option[];
+  recommendationList: Option[];
 }
 
 // A helper function that assigns a class whether it is a positive/negative value
@@ -114,65 +133,162 @@ const columns: GridColDef[] = [
 ];
 
 const PortfolioTable = (props: Props) => {
-  const { loading, rows } = props;
+  const { 
+    loading, 
+    rows,
+    usersList,
+    financialStatusList,
+    miningStatusList,
+    resourcesList,
+    productsList,
+    recommendationList,
+  } = props;
+
+  // Hide specific columns from the table
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+
+  // Dialog states
+  const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
+  const [openColumnDialog, setOpenColumnDialog] = useState<boolean>(false);
+
+  // Dialog functions
+  const handleFilterDialogOpen = () => setOpenFilterDialog(true);
+  const handleFilterDialogClose = () => setOpenFilterDialog(false);
+  const handleColumnDialogOpen = () => setOpenColumnDialog(true);
+  const handleColumnDialogClose = () => setOpenColumnDialog(false);
+
+  // Pagnation states
+  const [totalPages, setTotalPages] = useState<number>(1);
+  const [paginationModel, setPaginationModel] = useState({
+    page: 0,
+    pageSize: 6,
+  });
+
+  // Update total pages when rows is changed
+  useEffect(() => {
+    const totalPages = Math.ceil(rows.length / paginationModel.pageSize);
+    setTotalPages(Math.max(totalPages, 1));
+  }, [rows]);
+
+  // Pagnation functions
+  const handleNextPage = () => setPaginationModel((prevModel) => ({ ...prevModel, page: Math.min(prevModel.page + 1, totalPages - 1) }));
+  const handlePrevPage = () => setPaginationModel((prevModel) => ({ ...prevModel, page: Math.max(prevModel.page - 1, 0) }));
+
   return (
-    <DataGrid 
-      disableRowSelectionOnClick
-      disableColumnMenu
-      columns={columns}
-      rows={rows}
-      loading={loading}
-      initialState={{
-        pagination: { paginationModel: { pageSize: 8 } },
-      }}
-      pageSizeOptions={[8, 16, 32, 64]}
-      sx={{
-        height: 525, 
-        gridColumn: "span 4",
-        border: 0,
-        '& .MuiDataGrid-columnHeaderTitle': {
-          fontWeight: 500,
-          fontSize: 16,
-          color: "secondary.main",
-        },
-        '& .MuiDataGrid-cell': {
-          fontSize: 14,
-          borderBottomColor: "#ffffff1f",
-        },
-        '& .MuiDataGrid-cell:focus': {
-          outline: 'none',
-        },
-        '.MuiDataGrid-columnHeader:focus': {
-          outline: 'none',
-        },
-        '& .MuiDataGrid-columnHeaders': {
-          borderBottomColor: "#ffffff1f",
-        },
-        '& .MuiDataGrid-footerContainer': {
-          borderTopColor: "#ffffff1f",
-        },
-        '& .MuiDataGrid-overlay': {
-          fontSize: 14, 
-        },
-        '& .color-cell.positive': {
-          color: "#049104",
-          fontWeight: 600,
-        },
-        '& .color-cell.negative': {
-          color: "#e32020",
-          fontWeight: 600,
-        },
-        '& .MuiTablePagination-selectLabel': {
-          fontSize: 14,
-        },
-        '& .MuiTablePagination-input': {
-          fontSize: 14,
-        },
-        '& .MuiTablePagination-displayedRows': {
-          fontSize: 14,
-        }
-      }}
-    />
+    <Box
+      mt="-10px"
+      mb="-30px"
+      gridColumn="span 4"
+    >
+      {/* Dialogs */}
+      <FilterOptionsDialog 
+        open={openFilterDialog}
+        handleClose={handleFilterDialogClose}
+        usersList={usersList}
+        financialStatusList={financialStatusList}
+        miningStatusList={miningStatusList}
+        resourcesList={resourcesList}
+        productsList={productsList}
+        recommendationList={recommendationList}
+      />
+      <ToggleColumnsDialog 
+        open={openColumnDialog}
+        handleClose={handleColumnDialogClose}
+        columns={columns}
+        hiddenColumns={hiddenColumns}
+        setHiddenColumns={setHiddenColumns}
+      />
+      {/* Toolbar */}
+      <Box
+        display="flex"
+        justifyContent="flex-end"
+        alignItems="center"
+        gap="4px"
+        mb="-5px"
+      >
+        {/* Filter Options Button */}
+        <IconButton 
+          disabled={openFilterDialog}
+          onClick={handleFilterDialogOpen}
+          sx={{ mr: "4px", zIndex: 10 }}
+        >
+          <FilterAltIcon />
+        </IconButton>
+        {/* Toggle Column Button */}
+        <IconButton
+          disabled={openColumnDialog}
+          onClick={handleColumnDialogOpen}
+          sx={{ zIndex: 10 }}
+        >
+          <ViewWeekIcon />
+        </IconButton>
+        {/* Previous Page Button */}
+        <IconButton 
+          onClick={handlePrevPage}
+          disabled={paginationModel.page === 0}
+          sx={{ zIndex: 10 }}
+        >
+          <KeyboardArrowLeftIcon />
+        </IconButton>
+        {/* Next Page Button */}
+        <IconButton 
+          onClick={handleNextPage}
+          disabled={paginationModel.page === totalPages - 1}
+          sx={{ zIndex: 10 }}
+        >
+          <KeyboardArrowRightIcon />
+        </IconButton>
+      </Box>
+      {/* Table */}
+      <DataGrid 
+        disableRowSelectionOnClick
+        disableColumnMenu
+        pagination
+        hideFooter
+        paginationModel={paginationModel}
+        loading={loading}
+        columns={columns.filter(column => !hiddenColumns.includes(column.field))}
+        rows={rows}
+        sx={{
+          height: 385, 
+          border: 0,
+          '& .MuiDataGrid-columnHeaderTitle': {
+            fontWeight: 500,
+            fontSize: 16,
+            color: "secondary.main",
+          },
+          '& .MuiDataGrid-cell': {
+            fontSize: 14,
+            borderColor: "#ffffff1f",
+          },
+          '& .MuiDataGrid-cell:focus': {
+            outline: 'none',
+          },
+          '.MuiDataGrid-columnHeader:focus': {
+            outline: 'none',
+          },
+          '& .MuiDataGrid-topContainer::after': {
+            bgcolor: "transparent"
+          },
+          '& .MuiDataGrid-filler': {
+            '& > *': {
+              borderTopColor: "#ffffff1f"
+            }
+          },
+          '& .MuiDataGrid-overlay': {
+            fontSize: 14, 
+          },
+          '& .color-cell.positive': {
+            color: "#049104",
+            fontWeight: 600,
+          },
+          '& .color-cell.negative': {
+            color: "#e32020",
+            fontWeight: 600,
+          }
+        }}
+      />
+    </Box>
   );
 }
 

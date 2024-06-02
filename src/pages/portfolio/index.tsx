@@ -8,14 +8,8 @@ import PortfolioGraph from "./portfolioGraph";
 import UpdateData from "./updateData";
 
 // Material UI
-import useMediaQuery from "@mui/material/useMediaQuery";
 import ButtonGroup from "@mui/material/ButtonGroup";
-import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
-
-// Components
-import { Accordion, AccordionSummary, AccordionDetails } from "../../components/accordion";
-import MultiSelectInput from "../../components/multiSelect";
 
 // Types
 import { GraphRange, Option, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
@@ -31,8 +25,6 @@ export interface PortfolioFormValues {
 }
 
 const Portfolio = () => {
-  const isNonMobile = useMediaQuery("(min-width:800px)");
-
   // Dropdown data
   const [usersList, setUsersList] = useState<Option[]>([]);
   const [financialStatusList, setFinancialStatusList] = useState<Option[]>([]);
@@ -107,132 +99,66 @@ const Portfolio = () => {
         }}
         initialValues={initialValues}
       >
-        {({values, handleChange}) => (
+        <Box
+          display="grid"
+          pb="30px"
+          gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+        >
+          {/* Update data when filter values change */}
+          <UpdateData
+            graphRange={graphRange}
+            graphData={graphData}
+            setGraphData={setGraphData}
+            setTableData={setTableData}
+            setGraphLoading={setGraphLoading}
+            setTableLoading={setTableLoading}
+            setGraphYAxis={setGraphYAxis}
+            setGraphBottomOffset={setGraphBottomOffset}
+          />
+          {/* Portfolio Value Box */}
+          <PortfolioValueText
+            totalValue={tableData.totalValue}
+            dailyChange={tableData.dailyChange}
+            dailyChangePerc={tableData.dailyChangePerc}
+            totalChange={tableData.totalChange}
+            totalChangePerc={tableData.totalChangePerc}
+          />
           <Box
-            display="grid"
-            pb="30px"
-            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+            display="flex"
+            flexDirection="row-reverse"
+            gridColumn="span 4"
+            height="33px"
+            mt="-5px"
           >
-            {/* Update data when filter values change */}
-            <UpdateData
-              graphRange={graphRange}
-              graphData={graphData}
-              setGraphData={setGraphData}
-              setTableData={setTableData}
-              setGraphLoading={setGraphLoading}
-              setTableLoading={setTableLoading}
-              setGraphYAxis={setGraphYAxis}
-              setGraphBottomOffset={setGraphBottomOffset}
-            />
-            {/* Portfolio Value Box */}
-            <PortfolioValueText
-              totalValue={tableData.totalValue}
-              dailyChange={tableData.dailyChange}
-              dailyChangePerc={tableData.dailyChangePerc}
-              totalChange={tableData.totalChange}
-              totalChangePerc={tableData.totalChangePerc}
-            />
-            <Box
-              display="flex"
-              flexDirection="row-reverse"
-              gridColumn="span 4"
-              height="33px"
-              mt="-5px"
-            >
-              {/* Graph Range Button Group */}
-              {graphData !== null && <ButtonGroup color="secondary">
-                <GraphRangeButton label="1M" range={graphRange} setRange={setGraphRange} />
-                <GraphRangeButton label="3M" range={graphRange} setRange={setGraphRange}/>
-                <GraphRangeButton label="6M" range={graphRange} setRange={setGraphRange}/>
-                <GraphRangeButton label="1Y" range={graphRange} setRange={setGraphRange}/>
-                <GraphRangeButton label="5Y" range={graphRange} setRange={setGraphRange}/>
-              </ButtonGroup>}
-            </Box>
-            {/* Graph showing portfolio value */}
-            <PortfolioGraph
-              loading={graphLoading}
-              yAxis={graphYAxis}
-              bottomOffset={graphBottomOffset}
-              range={graphRange}
-              data={graphData}
-            />
-            {/* Filter Dropdown */}
-            <Box mt="-10px" gridColumn="span 4">
-              <Accordion>
-                <AccordionSummary>
-                  <Typography variant="h5">Filter Options</Typography>
-                </AccordionSummary>
-                <AccordionDetails>
-                  <Box
-                    display="grid"
-                    gap="30px"
-                    py="12px"
-                    gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-                    sx={{
-                      "& > div": {
-                        gridColumn: isNonMobile ? undefined : "span 4",
-                      },
-                    }}
-                  >
-                    {/* User Input */}
-                    <MultiSelectInput
-                      label="Specifc User(s)"
-                      valueName={"user"}
-                      value={values.user}
-                      handleChange={handleChange}
-                      options={usersList}
-                    />
-                    {/* Financial Status Input */}
-                    <MultiSelectInput
-                      label="Financial Status"
-                      valueName="financialStatus"
-                      value={values.financialStatus}
-                      handleChange={handleChange}
-                      options={financialStatusList}
-                    />
-                    {/* Mining Status Input */}
-                    <MultiSelectInput
-                      label="Mining Status"
-                      valueName="miningStatus"
-                      value={values.miningStatus}
-                      handleChange={handleChange}
-                      options={miningStatusList}
-                    />
-                    {/* Resources Input */}
-                    <MultiSelectInput
-                      label="Resources"
-                      valueName="resources"
-                      value={values.resources}
-                      handleChange={handleChange}
-                      options={resourcesList}
-                    />
-                    {/* Products Input */}
-                    <MultiSelectInput
-                      label="Products"
-                      valueName="products"
-                      value={values.products}
-                      handleChange={handleChange}
-                      options={productsList}
-                    />
-                    {/* Recommendations Input */}
-                    <MultiSelectInput
-                      label="Recommendations"
-                      valueName="recommendations"
-                      value={values.recommendations}
-                      handleChange={handleChange}
-                      options={recommendationList}
-                    />
-                  </Box>
-                </AccordionDetails>
-              </Accordion>
-            </Box>
-            {/* Table showing current shares */}
-            <PortfolioTable 
-              loading={tableLoading}
-              rows={tableData.rows}
-            />
+            {/* Graph Range Button Group */}
+            {graphData !== null && <ButtonGroup color="secondary">
+              <GraphRangeButton label="1M" range={graphRange} setRange={setGraphRange} />
+              <GraphRangeButton label="3M" range={graphRange} setRange={setGraphRange}/>
+              <GraphRangeButton label="6M" range={graphRange} setRange={setGraphRange}/>
+              <GraphRangeButton label="1Y" range={graphRange} setRange={setGraphRange}/>
+              <GraphRangeButton label="5Y" range={graphRange} setRange={setGraphRange}/>
+            </ButtonGroup>}
           </Box>
-        )}
+          {/* Graph showing portfolio value */}
+          <PortfolioGraph
+            loading={graphLoading}
+            yAxis={graphYAxis}
+            bottomOffset={graphBottomOffset}
+            range={graphRange}
+            data={graphData}
+          />
+          {/* Table showing current shares */}
+          <PortfolioTable 
+            loading={tableLoading}
+            rows={tableData.rows}
+            usersList={usersList}
+            financialStatusList={financialStatusList}
+            miningStatusList={miningStatusList}
+            resourcesList={resourcesList}
+            productsList={productsList}
+            recommendationList={recommendationList}
+          />
+        </Box>
       </Formik>
     </Box>
   )

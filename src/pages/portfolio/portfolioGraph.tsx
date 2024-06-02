@@ -98,7 +98,7 @@ const PortfolioGraph = (props: Props) => {
       <LineChart
         skipAnimation={true}
         loading={loading}
-        margin={{ left: 50, right: 5 }}
+        margin={{ left: 35, right: 5 }}
         xAxis={[
           {
             dataKey: "id",
