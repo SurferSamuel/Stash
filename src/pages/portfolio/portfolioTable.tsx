@@ -207,7 +207,8 @@ const PortfolioTable = (props: Props) => {
   } = props;
 
   // Hide specific columns from the table
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>(["purchaseCost", "firstPurchaseDate", "lastPurchaseDate"]);
+  const defaultHidden = ["purchaseCost", "firstPurchaseDate", "lastPurchaseDate", "weightPerc"];
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>(defaultHidden);
 
   // Dialog states
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);

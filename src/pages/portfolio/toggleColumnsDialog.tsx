@@ -54,7 +54,7 @@ const ToggleColumnsDialog = (props: Props) => {
   };
 
   const handleDefault = () => {
-    setHiddenColumns(["purchaseCost", "firstPurchaseDate", "lastPurchaseDate"]);
+    setHiddenColumns(["purchaseCost", "firstPurchaseDate", "lastPurchaseDate", "weightPerc"]);
   }
 
   return (
