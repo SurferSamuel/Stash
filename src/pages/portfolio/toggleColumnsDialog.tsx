@@ -11,9 +11,10 @@ import FormGroup from '@mui/material/FormGroup';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
+import Box from '@mui/material/Box';
 
 // Types
-import { Dispatch, SetStateAction } from 'react';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { GridColDef } from '@mui/x-data-grid';
 
 interface Props {
@@ -34,6 +35,15 @@ const ToggleColumnsDialog = (props: Props) => {
     hiddenColumns,
     setHiddenColumns,
   } = props;
+
+  // Split columns into 2 equal parts
+  const [columnsList, setColumnsList] = useState<GridColDef[][]>([[], []]);
+  useEffect(() => {
+    const midIndex = Math.ceil(columns.length / 2);
+    const firstHalf = columns.slice(0, midIndex);
+    const secondHalf = columns.slice(midIndex);
+    setColumnsList([firstHalf, secondHalf]);
+  }, []);
 
   const handleToggleColumn = (field: string) => {
     if (hiddenColumns.includes(field)) {
@@ -61,25 +71,34 @@ const ToggleColumnsDialog = (props: Props) => {
         <DialogContentText>
           View/hide columns from the table
         </DialogContentText>
-        <FormGroup
-          sx={{ mt: "12px" }}
+        <Box
+          display="flex"
+          flexDirection="row"
+          justifyContent="space-between"
+          mt="12px"
         >
-          {columns.map(column => {
+          {columnsList.map(columns => {
             return (
-              <FormControlLabel
-                key={column.field}
-                control={
-                  <Switch
-                    color="secondary"
-                    checked={!hiddenColumns.includes(column.field)}
-                    onChange={() => handleToggleColumn(column.field)}
-                  />
-                }
-                label={column.headerName}
-              />
-            );
+              <FormGroup sx={{ width: "100%" }}>
+                {columns.map(column => {
+                  return (
+                    <FormControlLabel
+                      key={column.field}
+                      control={
+                        <Switch
+                          color="secondary"
+                          checked={!hiddenColumns.includes(column.field)}
+                          onChange={() => handleToggleColumn(column.field)}
+                        />
+                      }
+                      label={column.headerName}
+                    />
+                  );
+                })}
+              </FormGroup>
+            )
           })}
-        </FormGroup>
+        </Box>
       </DialogContent>
       <DialogActions sx={{ mt: "-30px", bgcolor: colors.primary[500] }}>
         <Button 
