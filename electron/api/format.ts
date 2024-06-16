@@ -4,12 +4,12 @@ import dayjs from "dayjs";
 // Examples: 
 //    12.3  -> "$12.30"
 //   -12.3  -> "-$12.30"
-export const currencyFormat = (value: number | null, digits = 2) => {
+export const currencyFormat = (value: number | null, decimals = 2) => {
   if (value === null) return "-";
   return Intl.NumberFormat('en-US', { 
     style: 'currency', 
     currency: 'USD',
-    minimumFractionDigits: digits,
+    minimumFractionDigits: decimals,
   }).format(value);
 };
 
@@ -17,18 +17,18 @@ export const currencyFormat = (value: number | null, digits = 2) => {
 // Examples: 
 //    12.3  -> "12.30%"
 //   -12.3  -> "-$12.30%"
-export const precentFormat = (value: number | null, digits = 2) => {
+export const precentFormat = (value: number | null, decimals = 2) => {
   if (value === null) return "-";
-  return value.toFixed(digits) + "%";
+  return value.toFixed(decimals) + "%";
 }
 
 // Change formatter helper function
 // Examples: 
 //    12.3  -> "+12.30"
 //   -12.3  -> "-12.30"
-export const changeFormat = (value: number | null, digits = 2) => {
+export const changeFormat = (value: number | null, decimals = 2) => {
   if (value === null) return "-";
-  return (value < 0) ? value.toFixed(digits).toString() : "+" + value.toFixed(digits);
+  return (value < 0) ? value.toFixed(decimals).toString() : "+" + value.toFixed(decimals);
 }
 
 // Dayjs parser helper function
