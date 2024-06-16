@@ -43,8 +43,8 @@ const ToggleColumnsDialog = (props: Props) => {
     }
   };
 
-  const handleReset = () => {
-    setHiddenColumns([]);
+  const handleDefault = () => {
+    setHiddenColumns(["purchaseCost", "firstPurchaseDate", "lastPurchaseDate"]);
   }
 
   return (
@@ -83,10 +83,10 @@ const ToggleColumnsDialog = (props: Props) => {
       </DialogContent>
       <DialogActions sx={{ mt: "-30px", bgcolor: colors.primary[500] }}>
         <Button 
-          onClick={handleReset}
+          onClick={handleDefault}
           color="secondary"
         >
-          Reset
+          Default
         </Button>
         <Button 
           onClick={handleClose}
