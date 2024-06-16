@@ -129,9 +129,9 @@ export const getPortfolioTableData = async (filterValues: FilterValues): Promise
   const skipped: string[] = [];
 
   let id = 1;
-  let totalValue = 0;
-  let previousTotalValue = 0;
-  let combinedTotalCost = 0; 
+  let combinedValue = 0;
+  let combinedPreviousValue = 0;
+  let combinedCost = 0; 
 
   // Loop for each filtered company
   for (const company of filteredData) {
@@ -149,62 +149,79 @@ export const getPortfolioTableData = async (filterValues: FilterValues): Promise
 
     let totalQuantity = 0;
     let totalCost = 0;
-    let totalCostForAvg = 0;
+    let firstPurchaseDate = "-";
+    let lastPurchaseDate = "-";
 
     // Loop for all current shares in this company
     for (const shareEntry of company.currentShares) {
-      // Note: Empty user array = show all users
+      // Only add entry if user matches filtered values. Note: Empty user array = show all users
       if (filterValues.user.length === 0 || filterValues.user.some(obj => obj.label === shareEntry.user)) {
+        // Update totals
         const quantity = Number(shareEntry.quantity);
         const unitPrice = Number(shareEntry.unitPrice);
-        const brokerage = Number(shareEntry.brokerage);
-        const gst = Number(shareEntry.gst);
-
-        // Update totals
-        totalCost += quantity * unitPrice + brokerage + gst;
-        totalCostForAvg += quantity * unitPrice;
         totalQuantity += quantity;
+        totalCost += quantity * unitPrice;
+
+        // Update dates
+        if (firstPurchaseDate === "-" || dayjsDate(shareEntry.date).isBefore(firstPurchaseDate)) {
+          firstPurchaseDate = shareEntry.date;
+        }
+        if (lastPurchaseDate === "-" || dayjsDate(shareEntry.date).isAfter(lastPurchaseDate)) {
+          lastPurchaseDate = shareEntry.date;
+        }
       }
     }
-
-    // Update totals
-    // NOTE: Use number of units yesterday to calculate yesterday's total value
-    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day"));
-    if (previousPrice != null) previousTotalValue += previousPrice * previousUnits;
-    if (currentPrice != null) totalValue += currentPrice * totalQuantity;
-    combinedTotalCost += totalCost;
 
     // If no quantity, don't add row
     if (totalQuantity === 0) continue;
 
+    // Update totals, using the number of units yesterday to calculate yesterday's total value
+    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day"));
+    combinedPreviousValue += (previousPrice != null) ? previousPrice * previousUnits : 0;
+    combinedValue += (currentPrice != null) ? currentPrice * totalQuantity : 0;
+    combinedCost += totalCost;
+
     // Calculate row values
-    const avgBuyPrice = totalCostForAvg / totalQuantity;
-    const profitOrLoss = (currentPrice != null) ? (currentPrice * totalQuantity - totalCost) : null;
-    const profitOrLossPerc = (profitOrLoss != null) ? (profitOrLoss / totalCost * 100) : null;
-    const dailyProfit = (currentPrice != null && previousPrice != null) ? (totalQuantity * (currentPrice - previousPrice)) : null;
+    const avgBuyPrice = totalCost / totalQuantity;
+    const marketValue = (currentPrice != null) ? currentPrice * totalQuantity : null;
+    const profitOrLoss = (currentPrice != null) ? currentPrice * totalQuantity - totalCost : null;
+    const profitOrLossPerc = (profitOrLoss != null) ? profitOrLoss / totalCost * 100 : null;
+    const dailyProfit = (currentPrice != null && previousPrice != null) ? totalQuantity * (currentPrice - previousPrice) : null;
 
     // Add the row into the array
     rows.push({
       id: id++,
       asxcode: company.asxcode,
       units: totalQuantity,
-      avgBuyPrice: currencyFormat(avgBuyPrice, 3),
-      currentPrice: currencyFormat(currentPrice, 3),
-      dailyChangePerc: precentFormat(dailyChangePerc),
-      dailyProfit: currencyFormat(dailyProfit),
-      profitOrLoss: currencyFormat(profitOrLoss),
-      profitOrLossPerc: precentFormat(profitOrLossPerc),
+      avgBuyPrice,
+      currentPrice,
+      marketValue,
+      purchaseCost: totalCost,
+      dailyChangePerc,
+      dailyProfit,
+      profitOrLoss,
+      profitOrLossPerc,
+      firstPurchaseDate,
+      lastPurchaseDate,
+      weightPerc: null,
     });
   }
 
+  // Once all rows have been added, calculate the weighting of each row
+  for (const row of rows) {
+    // Skip if invalid market value
+    if (row.marketValue === null) continue;
+    row.weightPerc = row.marketValue / combinedValue * 100;
+  }
+
   // Calculate changes
-  const dailyChange = totalValue - previousTotalValue;
-  const dailyChangePerc = (previousTotalValue !== 0) ? dailyChange / previousTotalValue * 100 : null;
-  const totalChange = totalValue - combinedTotalCost;
-  const totalChangePerc = (combinedTotalCost !== 0) ? totalChange / combinedTotalCost * 100 : null;
+  const dailyChange = combinedValue - combinedPreviousValue;
+  const dailyChangePerc = (combinedPreviousValue !== 0) ? dailyChange / combinedPreviousValue * 100 : null;
+  const totalChange = combinedValue - combinedCost;
+  const totalChangePerc = (combinedCost !== 0) ? totalChange / combinedCost * 100 : null;
 
   return {
-    totalValue: currencyFormat(totalValue),
+    totalValue: currencyFormat(combinedValue),
     dailyChange: changeFormat(dailyChange),
     dailyChangePerc: precentFormat(dailyChangePerc).replace("-", ""),
     totalChange: changeFormat(totalChange),

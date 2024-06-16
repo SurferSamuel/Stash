@@ -1,3 +1,4 @@
+import { currencyFormat, dayjsDate, precentFormat } from '../../../electron/api/format';
 import { useEffect, useState } from 'react';
 import clsx from 'clsx';
 
@@ -35,23 +36,37 @@ interface Props {
 }
 
 // A helper function that assigns a class whether it is a positive/negative value
-const makeClassName = (params: GridCellParams<any, string>) => {
-  // Don't assign class if no value, or value is "-"
-  if (params.value == null || params.value === "-") return "";
+const colorValue = (params: GridCellParams<any, number>) => {
+  // Don't assign class if no value
+  if (params.value == null) return "";
   return clsx('color-cell', {
-    negative: params.value[0] === '-',
-    positive: params.value[0] !== '-' && params.value.replaceAll('0', '').length > 2,
+    negative: params.value < 0,
+    positive: params.value > 0,
   });
 }
 
-// A helper function for sorting prices and percentages
-const sortPriceOrPercent = (a: string, b: string) => {
-  // Remove all ["$" "%" ","] from strings, then parse as numbers
-  const value1 = Number(a.replace(/[$%,]/g, ''));
-  const value2 = Number(b.replace(/[$%,]/g, ''));
-  if (isNaN(value1)) return -1;
-  if (isNaN(value2)) return 1;
-  return (value1 < value2) ? -1 : 1;
+// A helper function for formatting prices
+const formatPriceValue = (decimals: number) => (value: number) => {
+  // If no value
+  if (value == null) return "-";
+  return currencyFormat(value, decimals);
+}
+
+// A helper function for formatting precents
+const formatPercentValue = (decimals: number) => (value: number) => {
+  // If no value
+  if (value == null) return "-";
+  return precentFormat(value, decimals);
+}
+
+// A helper function for formatting dates
+const formatDateValue = (value: string) => {
+  return value.split(" ")[0];
+}
+
+// A helper function for sorting with dates
+const sortDateValue = (value1: string, value2: string) => {
+  return dayjsDate(value1).isAfter(value2) ? 1 : -1;
 }
 
 // Data grid columns
@@ -79,7 +94,7 @@ const columns: GridColDef[] = [
     flex: 6,
     align: "right",
     headerAlign: "right",
-    sortComparator: sortPriceOrPercent,
+    valueFormatter: formatPriceValue(3),
   },
   {
     field: "currentPrice",
@@ -88,7 +103,25 @@ const columns: GridColDef[] = [
     flex: 6,
     align: "right",
     headerAlign: "right",
-    sortComparator: sortPriceOrPercent,
+    valueFormatter: formatPriceValue(3),
+  },
+  {
+    field: "marketValue",
+    headerName: "Market Value",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    valueFormatter: formatPriceValue(2),
+  },
+  {
+    field: "purchaseCost",
+    headerName: "Purchase Cost",
+    minWidth: 140,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    valueFormatter: formatPriceValue(2),
   },
   {
     field: "dailyChangePerc",
@@ -97,8 +130,8 @@ const columns: GridColDef[] = [
     flex: 5,
     align: "right",
     headerAlign: "right",
-    cellClassName: makeClassName,
-    sortComparator: sortPriceOrPercent,
+    cellClassName: colorValue,
+    valueFormatter: formatPercentValue(2),
   },
   {
     field: "dailyProfit",
@@ -107,8 +140,8 @@ const columns: GridColDef[] = [
     flex: 6,
     align: "right",
     headerAlign: "right",
-    cellClassName: makeClassName,
-    sortComparator: sortPriceOrPercent,
+    cellClassName: colorValue,
+    valueFormatter: formatPriceValue(2),
   },
   {
     field: "profitOrLoss",
@@ -117,8 +150,8 @@ const columns: GridColDef[] = [
     flex: 4,
     align: "right",
     headerAlign: "right",
-    cellClassName: makeClassName,
-    sortComparator: sortPriceOrPercent,
+    cellClassName: colorValue,
+    valueFormatter: formatPriceValue(2),
   },
   {
     field: "profitOrLossPerc",
@@ -127,8 +160,37 @@ const columns: GridColDef[] = [
     flex: 4,
     align: "right",
     headerAlign: "right",
-    cellClassName: makeClassName,
-    sortComparator: sortPriceOrPercent,
+    cellClassName: colorValue,
+    valueFormatter: formatPercentValue(2),
+  },
+  {
+    field: "firstPurchaseDate",
+    headerName: "First Purchase",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    valueFormatter: formatDateValue,
+    sortComparator: sortDateValue,
+  },
+  {
+    field: "lastPurchaseDate",
+    headerName: "Last Purchase",
+    minWidth: 130,
+    flex: 6,
+    align: "right",
+    headerAlign: "right",
+    valueFormatter: formatDateValue,
+    sortComparator: sortDateValue,
+  },
+  {
+    field: "weightPerc",
+    headerName: "Weight %",
+    minWidth: 100,
+    flex: 4,
+    align: "right",
+    headerAlign: "right",
+    valueFormatter: formatPercentValue(2),
   },
 ];
 
@@ -145,7 +207,7 @@ const PortfolioTable = (props: Props) => {
   } = props;
 
   // Hide specific columns from the table
-  const [hiddenColumns, setHiddenColumns] = useState<string[]>([]);
+  const [hiddenColumns, setHiddenColumns] = useState<string[]>(["purchaseCost", "firstPurchaseDate", "lastPurchaseDate"]);
 
   // Dialog states
   const [openFilterDialog, setOpenFilterDialog] = useState<boolean>(false);
@@ -168,6 +230,8 @@ const PortfolioTable = (props: Props) => {
   useEffect(() => {
     const totalPages = Math.ceil(rows.length / paginationModel.pageSize);
     setTotalPages(Math.max(totalPages, 1));
+    // Also reset page back to page 0 (to prevent a blank page being shown when totalPages is decreased)
+    setPaginationModel((prevModel) => ({ ...prevModel, page: 0 }));
   }, [rows]);
 
   // Pagnation functions

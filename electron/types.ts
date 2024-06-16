@@ -142,15 +142,20 @@ export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
 
 // Table row type for the portfolio page
 export interface PortfolioTableRow {
-  id: number;               // ID, eg. 1, 2, 3, ...
-  asxcode: string;          // ASX code of the company
-  units: number;            // Number of units owned
-  avgBuyPrice: string;      // Average price of brought shares
-  currentPrice: string;     // Last share price
-  dailyChangePerc: string;  // Daily change in share price %
-  dailyProfit: string;      // Daily change in profit
-  profitOrLoss: string;     // Profit/loss amount
-  profitOrLossPerc: string; // Profit/loss %
+  id: number;                // ID, eg. 1, 2, 3, ...
+  asxcode: string;           // ASX code of the company
+  units: number;             // Number of units owned
+  avgBuyPrice: number;       // Average price of brought shares
+  currentPrice: number;      // Last share price
+  marketValue: number;       // Market value using last share price
+  purchaseCost: number;      // Purchase cost of all units
+  dailyChangePerc: number;   // Daily change in share price %
+  dailyProfit: number;       // Daily change in profit
+  profitOrLoss: number;      // Profit/loss amount
+  profitOrLossPerc: number;  // Profit/loss %
+  firstPurchaseDate: string; // Earliest purchase date of current shares
+  lastPurchaseDate: string;  // Latest purchast date of current shares
+  weightPerc: number;        // Weight % using market value
 }
 
 // Return type of getPortfolioTableData() in ./api.ts
