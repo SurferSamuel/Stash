@@ -5,7 +5,8 @@
     "node": true
   },
   "rules": {   
-    "@typescript-eslint/no-explicit-any": "off"
+    "@typescript-eslint/no-explicit-any": "off",
+    "import/namespace": ["error", { "allowComputed": true }]
   },
   "extends": [
     "eslint:recommended",
