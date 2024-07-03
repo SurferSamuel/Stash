@@ -56,6 +56,13 @@ export interface PriceNotification {
   lowPrice: string;
 }
 
+// Return type from validateASXCode()
+export interface ValidateASXReturn {
+  status: string,
+  companyName: string,
+  unitPrice: string,
+}
+
 // CURRENT share entry type
 export interface CurrentShareEntry {
   user: string;                 // User who brought the shares
@@ -127,14 +134,14 @@ export interface Settings {
 // Any data type, returned from getData
 export type Data = Option[] | Country[] | CompanyData[] | Settings;
 
-// Values type for AddCompany() in ./api.ts
+// Values type for AddCompany()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" | "notificationDate"> {
   noteDate: string;
   notificationDate: string;
 }
 
-// Values type for BuyShares() and SellShares() in ./api.ts
+// Values type for BuyShares() and SellShares()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
@@ -158,7 +165,7 @@ export interface PortfolioTableRow {
   weightPerc: number;        // Weight % using market value
 }
 
-// Return type of getPortfolioTableData() in ./api.ts
+// Return type of getPortfolioTableData()
 export interface PortfolioTableData {
   totalValue: string,             // Total value of the portfolio (as of today)
   dailyChange: string,            // Today's change in portfolio value
@@ -169,7 +176,7 @@ export interface PortfolioTableData {
   skipped: string[],              // Companies that were skipped when calculating
 }
 
-// Used in getPortfolioGraphData() in ./api.ts
+// Used in getPortfolioGraphData()
 export interface HistoricalEntry {
   asxcode: string;
   historical: HistoricalHistoryResult;
@@ -186,5 +193,5 @@ export interface PortfolioDataPoint {
 // Graph range in months
 export type GraphRange = 1 | 3 | 6 | 12 | 60;
 
-// Return type of getPortfolioGraphData() in ./api.ts
+// Return type of getPortfolioGraphData()
 export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>

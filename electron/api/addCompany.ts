@@ -85,7 +85,7 @@ const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
 
   // Filter the current options to find any new options
   const newOptions = currentOptions.filter((option) => {
-    return !existingOptions.some((value) => value.label === option.label);
+    return !existingOptions.some(value => value.label === option.label);
   });
 
   // If new options were found...

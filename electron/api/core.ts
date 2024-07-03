@@ -5,7 +5,14 @@ import path from "path";
 import fs from "fs";
 
 // Types
-import { CompanyData, Country, Data, Key, Option, OptionKey } from "../types";
+import { 
+  CompanyData, 
+  Country, 
+  Data, 
+  Key, 
+  Option, 
+  OptionKey,
+} from "../types";
 
 /*
  * Gets the data for a specific key
@@ -66,10 +73,49 @@ export const openStoragePath = () => {
 };
 
 /*
- * Fetches the quote for the given asxcode, using yahoo-finance2.
- * If no quote is found (eg. from invalid asxcode), then an error is thrown.
+ * Validates the given asxcode. If existing is true, then the provided asxcode
+ * must be existing in the data. Otherwise, if existing is false, then the 
+ * provided asxcode must not be existing (ie. a new asxcode).
  */
-export const fetchQuote = async (asxcode: string) => {
-  const quote = await yahooFinance.quote(`${asxcode}.AX`);
-  return { quote };
-};
+export const validateASXCode = async (asxcode: string, existing: boolean) => {
+  // ASX Code must be 3-5 characters long
+  if (!/^[a-zA-Z0-9]{3,5}$/.test(asxcode)) {
+    return { status: "Must be 3-5 characters", companyName: "", unitPrice: undefined };
+  }
+
+  // Ensure ASX code is all uppercase
+  asxcode = asxcode.toUpperCase();
+
+  // Get existing data from storage
+  const data = getData("companies");
+
+  // ASX code must already exist in data
+  if (existing && !data.some(obj => obj.asxcode === asxcode)) {
+    return { status: "Could not find company", companyName: "", unitPrice: undefined };
+  }
+
+  // ASX code must not already exist in data (ie. a new asxcode)
+  if (!existing && data.some(obj => obj.asxcode === asxcode)) {
+    return { status: "Already existing company", companyName: "", unitPrice: undefined };
+  }
+
+  try {
+    // Send request to yahoo-finance using asxcode
+    const fields = ["longName", "shortName", "regularMarketPrice"];
+    const quote = await yahooFinance.quote(`${asxcode}.AX`, { fields });
+  
+    // If no quote was found, then asxcode was invalid
+    // Also, ensure company name does exist
+    if (quote === undefined || !(quote.longName || quote.shortName)) {
+      return { status: "Company quote not found", companyName: "", unitPrice: undefined };
+    }
+  
+    // Return valid object with the company's name and share price
+    const companyName = quote.longName || quote.shortName;
+    const unitPrice = quote.regularMarketPrice.toString();
+    return { status: "Valid", companyName, unitPrice };
+  } catch (error) {
+    console.log(error);
+    return { status: "ERROR: Could not fetch quote", companyName: "", unitPrice: undefined };
+  }
+}

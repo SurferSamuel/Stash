@@ -12,10 +12,10 @@ import {
   PortfolioGraphData,
   PortfolioTableData,
   Settings,
+  ValidateASXReturn,
 } from "./types";
 
 export interface IElectronAPI {
-  fetchQuote: (asxcode: string) => Promise<FetchQuote>;
   // Overload function definitions
   getData: {
     (key: OptionKey): Promise<Option[]>;
@@ -26,6 +26,7 @@ export interface IElectronAPI {
   setData: (key: Key, data: Data) => Promise<void>;
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
+  validateASXCode: (asxcode: string, existing: boolean) => Promise<ValidateASXReturn>;
   addCompany: (values: AddCompanyValues) => Promise<void>;
   availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
