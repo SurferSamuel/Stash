@@ -107,7 +107,7 @@ export const validateASXCode = async (asxcode: string, existing: boolean) => {
     // If no quote was found, then asxcode was invalid
     // Also, ensure company name does exist
     if (quote === undefined || !(quote.longName || quote.shortName)) {
-      return { status: "Company quote not found", companyName: "", unitPrice: undefined };
+      return { status: "Company not found", companyName: "", unitPrice: undefined };
     }
   
     // Return valid object with the company's name and share price
