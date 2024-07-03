@@ -4,7 +4,6 @@ import {
   CompanyData, 
   Country, 
   Data, 
-  FetchQuote, 
   FilterValues, 
   Key, 
   Option, 
