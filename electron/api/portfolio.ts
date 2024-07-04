@@ -14,11 +14,11 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 // Types
 import { 
   CompanyData, 
-  FilterValues,
   HistoricalEntry,
   HistoricalOptionsEventsHistory,
   Option, 
   PortfolioDataPoint,
+  PortfolioFilterValues,
   PortfolioGraphData,
   PortfolioTableData,
   PortfolioTableRow,
@@ -41,7 +41,7 @@ const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
 /*
  * A helper function that returns the companies that match the filter values.
  */
-const getFilteredData = (filterValues: FilterValues): CompanyData[] => {
+const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
   // Get existing data from storage
   const data = getData("companies");
 
@@ -96,7 +96,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
 /*
  * Gets the table rows for the portfolio page that match the given filter values.
  */
-export const getPortfolioTableData = async (filterValues: FilterValues): Promise<PortfolioTableData> => {
+export const getPortfolioTableData = async (filterValues: PortfolioFilterValues): Promise<PortfolioTableData> => {
   // Get the filtered companies
   const filteredData = getFilteredData(filterValues);
 
@@ -256,7 +256,7 @@ const getHistoricalData = async (asxcodes: string[], queryOptions: HistoricalOpt
 /*
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
-export const getPortfolioGraphData = async (filterValues: FilterValues): Promise<PortfolioGraphData | null> => {
+export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues): Promise<PortfolioGraphData | null> => {
   // Get the filtered companies
   const filteredData = getFilteredData(filterValues);
 
