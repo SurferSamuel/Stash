@@ -1,5 +1,5 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { Data, Key, AddCompanyValues, AddTradeValues, FilterValues } from "./types";
+import { Data, Key, AddCompanyValues, AddTradeValues, PortfolioFilterValues } from "./types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   getData: (key: Key) => ipcRenderer.invoke("getData", key),
@@ -11,6 +11,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   availableShares: (asxcode: string, user: string) => ipcRenderer.invoke("availableShares", asxcode, user),
   buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
   sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
-  getPortfolioTableData: (filterValues: FilterValues) => ipcRenderer.invoke("getPortfolioTableData", filterValues),
-  getPortfolioGraphData: (filterValues: FilterValues) => ipcRenderer.invoke("getPortfolioGraphData", filterValues),
+  getPortfolioTableData: (filterValues: PortfolioFilterValues) => ipcRenderer.invoke("getPortfolioTableData", filterValues),
+  getPortfolioGraphData: (filterValues: PortfolioFilterValues) => ipcRenderer.invoke("getPortfolioGraphData", filterValues),
 });
