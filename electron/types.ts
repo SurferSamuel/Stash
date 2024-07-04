@@ -4,7 +4,7 @@ export { PortfolioFormValues as PortfolioFilterValues } from "../src/pages/portf
 
 // Yahoo-finance2 types
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
-import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
+import { HistoricalRowHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 
 // Valid option keys, used for company details and users
 export type OptionKey =
@@ -175,7 +175,8 @@ export interface PortfolioTableData {
 // Used in getPortfolioGraphData()
 export interface HistoricalEntry {
   asxcode: string;
-  historical: HistoricalHistoryResult;
+  lastUpdated: string;
+  historical: HistoricalRowHistory[];
 }
 
 // Data point type for the portfolio graph
