@@ -5,10 +5,6 @@ export { PortfolioFormValues as FilterValues } from "../src/pages/portfolio";
 // Yahoo-finance2 types
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
-import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
-
-// Fetched quote return type from yahoo-finance2
-export type FetchQuote = { quote: Quote };
 
 // Valid option keys, used for company details and users
 export type OptionKey =
