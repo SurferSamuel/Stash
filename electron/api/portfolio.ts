@@ -282,13 +282,26 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
     }
   }
 
-  // Only use weekly data for 1 and 5 year intervals
+  // 1, 3, and 6 month interval data
+  const oneMonth = graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day"));
+  const threeMonth = graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day"));
+  const sixMonth = graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day"));
+  
+  // 1 and 5 year interval data
+  // NOTE: Uses weekly data, not daily data
+  const oneYear = graphData.filter(entry => 
+    (entry.date.getDay() == 1 && dayjs().subtract(12, "month").isBefore(entry.date, "day")) || 
+    dayjs().isSame(entry.date, "day")
+  );
+  const fiveYear = graphData.filter(entry => entry.date.getDay() == 1 || dayjs().isSame(entry.date, "day"));
+
+  // Return data for each graph range (in months)
   return {
-    1: graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
-    3: graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
-    6: graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
-    12: graphData.filter(entry => entry.date.getDay() == 1 && dayjs().subtract(12, "month").isBefore(entry.date, "day")),
-    60: graphData.filter(entry => entry.date.getDay() == 1),
+    1: oneMonth,
+    3: threeMonth,
+    6: sixMonth,
+    12: oneYear,
+    60: fiveYear,
   };
 }
 
