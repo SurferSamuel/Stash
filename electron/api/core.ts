@@ -45,7 +45,7 @@ export const getData: {
     
     // Save data to storage
     storage.set(key, data, (error) => {
-      if (error) throw error;
+      if (error) writeLog(`Error in storage.set: ${error}`);
     });
   }
 
@@ -57,7 +57,7 @@ export const getData: {
  */
 export const setData = (key: Key, data: Data) => {
   storage.set(key, data, (error) => {
-    if (error) throw error;
+    if (error) writeLog(`Error in storage.set: ${error}`);
   });
 };
 
