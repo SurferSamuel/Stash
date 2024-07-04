@@ -1,6 +1,7 @@
 import { Settings, app, shell } from "electron";
 import storage from "electron-json-storage";
 import yahooFinance from "yahoo-finance2";
+import { writeLog } from "./logs";
 import path from "path";
 import fs from "fs";
 
@@ -23,9 +24,10 @@ export const getData: {
   (key: "companies"): CompanyData[];
   (key: "settings"): Settings;
 } = (key: Key): any => {
+  // Attempt to get data from storage
   let data = storage.getSync(key);
 
-  // If data is empty (ie. an empty object), set data using default values
+  // If data is empty (ie. data = {}), set data using default values
   if (data.constructor !== Array && Object.keys(data).length === 0) {
     const fileName = (app.isPackaged)
       ? path.join(process.resourcesPath, 'data', `${key}.json`)
@@ -38,6 +40,7 @@ export const getData: {
     } else {
       // Encase no file exists, set data to an empty array
       data = [];
+      writeLog(`WARNING: Failed to read default values from [${fileName}]`);
     }
     
     // Save data to storage
@@ -115,7 +118,7 @@ export const validateASXCode = async (asxcode: string, existing: boolean) => {
     const unitPrice = quote.regularMarketPrice.toString();
     return { status: "Valid", companyName, unitPrice };
   } catch (error) {
-    console.log(error);
+    writeLog(error);
     return { status: "ERROR: Could not fetch quote", companyName: "", unitPrice: undefined };
   }
 }
