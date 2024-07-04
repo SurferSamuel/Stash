@@ -1,4 +1,6 @@
+import storage from "electron-json-storage";
 import yahooFinance from "yahoo-finance2";
+import { writeLog } from "./logs";
 import { getData } from "./core";
 import { 
   changeFormat, 
@@ -15,7 +17,6 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import { 
   CompanyData, 
   HistoricalEntry,
-  HistoricalOptionsEventsHistory,
   Option, 
   PortfolioDataPoint,
   PortfolioFilterValues,
@@ -57,40 +58,6 @@ const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => 
       filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
     )
   );
-}
-
-/*
- * A helper function that counts the number of units the user(s) held at the given
- * time (assumed to be in the past). If the users array is empty, then will return
- * the number of units for all users.
- */
-const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
-  // Calculate the number of units brought before the given time
-  const unitsBrought = company.buyHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
-      // If the entry buy date was before the given time
-      if (dayjsDate(entry.date).isBefore(time)) {
-        total += Number(entry.quantity);
-      }
-    }
-    return total;
-  }, 0);
-
-  // Calculate the number of units sold before the given time
-  const unitsSold = company.sellHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
-      // If the entry sell date was before the given time
-      if (dayjsDate(entry.sellDate).isBefore(time)) {
-        total += Number(entry.quantity);
-      }
-    }
-    return total;
-  }, 0);
-
-  // The total units held at the time is just unitsBrought - unitsSold
-  return unitsBrought - unitsSold;
 }
 
 /*
@@ -232,28 +199,6 @@ export const getPortfolioTableData = async (filterValues: PortfolioFilterValues)
 }
 
 /*
- * A helper function that returns this historical data for the given asxcode and query options.
- * If any request was rejected (eg. from an invalid code), it is removed from the returned array.
- */
-const getHistoricalData = async (asxcodes: string[], queryOptions: HistoricalOptionsEventsHistory) => {
-  // Send historical requests in parallel (within concurrency limit)
-  const historicalResults = await Promise.allSettled(asxcodes.map(async (asxcode) => {
-    const historical = await yahooFinance.historical(`${asxcode}.AX`, queryOptions);
-    return { asxcode, historical };
-  }));
-
-  // Remove any promises that were not fulfilled
-  const historicalData: HistoricalEntry[] = [];
-  for (const result of historicalResults) {
-    if (result.status === "fulfilled") {
-      historicalData.push(result.value);
-    }
-  }
-  
-  return historicalData;
-}
-
-/*
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
 export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues): Promise<PortfolioGraphData | null> => {
@@ -265,106 +210,191 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
     return null;
   }
 
-  // Object containing the graph data for each interval
-  const graphData: Record<"1d" | "1wk", PortfolioDataPoint[]> = {
-    "1d": [],
-    "1wk": [],
-  }
-
-  // A helper function that adds values into the graphData object
-  // Returns the next id (if an entry was added), or the original id (if entry already existed)
-  const addValueToGraphData = (interval: "1d" | "1wk", id: number, time: Dayjs, value: number) => {
-    // Add the value into the graph data array
-    const graphEntry = graphData[interval].find(entry => time.isSame(entry.date, "day"));
-    if (graphEntry === undefined) {
-      // Make new entry if none exists...
-      graphData[interval].push({
-        id: id++,
-        date: time.toDate(),
-        value,
-      });
-    } else {
-      // ...otherwise, add the value to the entry
-      graphEntry.value += value;
-    }
-
-    return id;
-  }
-
   // Array of asxcodes ["CBA", ...] and symbols ["CBA.AX", ...]
-  const asxcodes = filteredData.map(entry => entry.asxcode); 
-  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`);
+  const asxcodeArray = filteredData.map(entry => entry.asxcode); 
+  const symbolArray = filteredData.map(entry => `${entry.asxcode}.AX`);
 
   // Get the quotes for all filtered companies
   const fields = [ "symbol", "regularMarketPrice" ];
-  const quoteArray = await yahooFinance.quote(symbols, { fields });
+  const quoteArray = await yahooFinance.quote(symbolArray, { fields });
 
-  // Max range for daily interval is 6 months, max range for weekly interval is 5 years
-  const queryOptions = [
-    { period1: dayjs().subtract(6, "month").toDate(), interval: "1d" as const },
-    { period1: dayjs().subtract(5, "year").toDate(), interval: "1wk" as const }
-  ];
+  // Get the historical data for the filtered companies
+  const historicalData = await getHistoricalData(asxcodeArray);
 
-  // Fill the graphData array using both queryOptions
-  for (const queryOption of queryOptions) {
-    // Get the historical data using the query option
-    const historicalData = await getHistoricalData(asxcodes, queryOption);
+  // Object containing the graph data points
+  const graphData: PortfolioDataPoint[] = [];
 
-    // Each graphData entry needs to have an id
-    let id = 1;
+  // Each graphData entry needs to have an id
+  let id = 1;
 
-    // Portfolio value is made up of all filtered companies
-    for (const company of filteredData) {
-      // Try to get the historical result for the company, otherwise skip if not received
-      const historicalResult = historicalData.find(entry => entry.asxcode === company.asxcode);
-      if (historicalResult === undefined) continue;
-
-      // Loop for each entry of the company's historical data
-      for (const historical of historicalResult.historical) {
-        // If historical date is today, don't add an entry as one 
-        // will be added later using more recent quote data instead
-        if (dayjs().isSame(historical.date, "day")) continue;
-
-        // Calculate the number of units at the time of the historical entry
-        const time = dayjs(historical.date);
-        const units = countUnitsAtTime(company, filterValues.user, time);
-
-        // Value at the time of historical entry
-        const value = units * historical.adjClose;
-
-        // Add the value into the graph data array
-        id = addValueToGraphData(queryOption.interval, id, time, value);
-      }
+  // Portfolio value is made up of all filtered companies
+  for (const company of filteredData) {
+    // Try to get the historical result for the company, otherwise skip if not received
+    const historicalResult = historicalData.find(entry => entry.asxcode === company.asxcode);
+    if (historicalResult === undefined) {
+      writeLog(`WARNING: Could not find historical data for ${company.asxcode}`);
+      continue;
     }
 
-    // Add/update the historical entry for today using the quote data instead of the historical data
-    for (const company of filteredData) {
-      // Find the quote for this company
-      const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
+    // Loop for each entry of the company's historical data
+    for (const historical of historicalResult.historical) {
+      // If historical date is today, don't add an entry as one 
+      // will be added later using more recent quote data instead
+      if (dayjs().isSame(historical.date, "day")) continue;
 
-      // Check that the quote was found and contains the market price
-      if (quote === undefined || quote.regularMarketPrice === undefined) {
-        continue;
-      }
-
-      // Calculate the number of units as of today
-      const time = dayjs();
+      // Calculate the value at the time of the historical entry
+      const time = dayjs(historical.date);
       const units = countUnitsAtTime(company, filterValues.user, time);
+      const value = units * historical.adjClose;
 
-      // Calculate the value as of today
-      const value = units * quote.regularMarketPrice;
-
-      // Add the value into the graph data array
-      id = addValueToGraphData(queryOption.interval, id, time, value);
+      // Add value to the existing data point (if possible), otherwise make new data point
+      const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
+      if (graphEntry === undefined) {
+        graphData.push({ id: id++, date: time.toDate(), value });
+      } else {
+        graphEntry.value += value;
+      }
     }
   }
 
-  // Use 1 day intervals for 1-6 month ranges, and 1 week intervals for 1-5 year ranges
+  // Add/update the historical entry for today using the quote data instead of the historical data
+  for (const company of filteredData) {
+    // Find the quote for this company
+    const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
+
+    // Check that the quote was found and contains the market price
+    if (quote === undefined || quote.regularMarketPrice === undefined) {
+      writeLog(`WARNING: Quote/market price not found for ${company.asxcode}`);
+      continue;
+    }
+
+    // Calculate the value as of today
+    const time = dayjs();
+    const units = countUnitsAtTime(company, filterValues.user, time);
+    const value = units * quote.regularMarketPrice;
+
+    // Add value to the existing data point (if possible), otherwise make new data point
+    const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
+    if (graphEntry === undefined) {
+      graphData.push({ id: id++, date: time.toDate(), value });
+    } else {
+      graphEntry.value += value;
+    }
+  }
+
+  // Only use weekly data for 1 and 5 year intervals
   return {
-    1: graphData["1d"].filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
-    3: graphData["1d"].filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
-    6: graphData["1d"],
-    12: graphData["1wk"].filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
-    60: graphData["1wk"],
+    1: graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
+    3: graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
+    6: graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
+    12: graphData.filter(entry => entry.date.getDay() == 1 && dayjs().subtract(12, "month").isBefore(entry.date, "day")),
+    60: graphData.filter(entry => entry.date.getDay() == 1),
   };
+}
+
+/*
+ * A helper function that counts the number of units the user(s) held at the given
+ * time (assumed to be in the past). If the users array is empty, then will return
+ * the number of units for all users.
+ */
+const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
+  // Calculate the number of units brought before the given time
+  const unitsBrought = company.buyHistory.reduce((total, entry) => {
+    // If the user of the entry is correct
+    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+      // If the entry buy date was before the given time
+      if (dayjsDate(entry.date).isBefore(time)) {
+        total += Number(entry.quantity);
+      }
+    }
+    return total;
+  }, 0);
+
+  // Calculate the number of units sold before the given time
+  const unitsSold = company.sellHistory.reduce((total, entry) => {
+    // If the user of the entry is correct
+    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+      // If the entry sell date was before the given time
+      if (dayjsDate(entry.sellDate).isBefore(time)) {
+        total += Number(entry.quantity);
+      }
+    }
+    return total;
+  }, 0);
+
+  // The total units held at the time is just unitsBrought - unitsSold
+  return unitsBrought - unitsSold;
+}
+
+/*
+ * A helper function that gets the historical data from storage, fetching new 
+ * data if any asxcodes are outdated or missing from the data. The new data is 
+ * saved to storage, and returned from this function.
+ */
+const getHistoricalData = async (asxcodes: string[]) => {
+  // Get historical data from storage
+  let data = storage.getSync("historicalData") as HistoricalEntry[];
+
+  // If data is empty (ie. file doesn't exist or file is empty), set data as empty array
+  if (data.constructor !== Array && Object.keys(data).length === 0) {
+    data = [];
+  }
+
+  // Missing asxcodes (not found in the storage file)
+  const existing = new Set(data.map(entry => entry.asxcode));
+  const missing = asxcodes.filter(asxcode => !existing.has(asxcode));
+
+  // Outdated asxcodes (haven't been updated today)
+  const outdated = data
+    .filter(entry => !dayjsDate(entry.lastUpdated).isSame(dayjs(), "day"))
+    .map(entry => entry.asxcode);
+
+  // Update data using only missing and outdated asxcodes
+  const needUpdate = [...missing, ...outdated];
+
+  // If no updates needed, can return early
+  if (needUpdate.length === 0) return data;
+
+  // Query options for each historical request
+  const queryOptions = { 
+    period1: dayjs().subtract(5, "year").toDate(), 
+    interval: "1d" as const,
+  };
+
+  // Send historical requests in parallel (within concurrency limit)
+  const responseArray = await Promise.allSettled(needUpdate.map(async (asxcode) => {
+    const historical = await yahooFinance.historical(`${asxcode}.AX`, queryOptions);
+    return { asxcode, historical };
+  }));
+
+  // Update data using responses
+  for (const response of responseArray) {
+    if (response.status === "fulfilled") {
+      // Extract values from response
+      // NOTE: Only keep weekly data for entries >6 months ago
+      const asxcode = response.value.asxcode;
+      const lastUpdated = dayjs().format("DD/MM/YYYY hh:mm A");
+      const historical = response.value.historical
+      .filter(entry => dayjs().diff(entry.date, "month") < 6 || entry.date.getDay() == 1);
+      
+      // Find the existing entry and update it (if possible), otherwise add a new entry
+      const existingEntry = data.find(entry => entry.asxcode === response.value.asxcode);
+      if (existingEntry === undefined) {
+        data.push({ asxcode, lastUpdated, historical });
+      } else {
+        existingEntry.lastUpdated = lastUpdated;
+        existingEntry.historical = historical;
+      }
+      writeLog(`Successfully updated historical data for [${asxcode}.AX]`);
+    } else {
+      writeLog(`WARNING: A historical request could not be fulfilled: ${response.reason}`);
+    }
+  }
+
+  // Save the updated data
+  storage.set("historicalData", data, (error) => {
+    if (error) writeLog(`Error in storage.set: ${error}`);
+  });
+
+  return data;
 }
