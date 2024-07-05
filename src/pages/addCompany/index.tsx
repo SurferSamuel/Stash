@@ -535,6 +535,7 @@ const AddCompany = () => {
             </Accordion>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button
+                id="submit"
                 type="submit"
                 color="secondary"
                 variant="contained"

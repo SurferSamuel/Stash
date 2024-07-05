@@ -21,7 +21,7 @@ export const validateASXCode = (
   return async (value: string, context: TestContext) => {
     const { createError } = context;
 
-    // Only validate if asxcode input is being actively edited and has changed since last call
+    // If asxcode input is being actively edited and has changed since last call
     if (document.activeElement.id === "asxcode" && value !== prevValue) {
       // Keep track of the current request id
       const currentRequestId = ++requestId;
@@ -50,6 +50,35 @@ export const validateASXCode = (
       if (res.status !== "Valid") {
         prevErrorMsg = res.status;
         return createError({ message: res.status });
+      } 
+      
+      // Otherwise if it is valid
+      prevErrorMsg = undefined;
+      return true;
+    }
+
+    // Use a quicker validation when pressing the submit button
+    if (document.activeElement.id === "submit") {
+      // Keep track of the current request id
+      const currentRequestId = ++requestId;
+
+      // Update previous value
+      prevValue = value;
+
+      // Wait for validation request to be processed
+      const res = await window.electronAPI.quickValidateASXCode(value);
+      
+      // If current request id is outdated, don't update anything and
+      // just show the previous error (if one)
+      if (currentRequestId !== requestId) {
+        return !prevErrorMsg || createError({ message: prevErrorMsg });
+      }
+
+      // Create error if asxcode was not valid
+      if (res !== "Valid") {
+        setCompanyName("");
+        prevErrorMsg = res;
+        return createError({ message: res });
       } 
       
       // Otherwise if it is valid

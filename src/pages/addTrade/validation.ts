@@ -21,7 +21,7 @@ export const validateASXCode = (
   return async (value: string, context: TestContext) => {
     const { createError } = context;
 
-    // Only validate if asxcode input is being actively edited and has changed since last call
+    // If asxcode input is being actively edited and has changed since last call
     if (document.activeElement.id === "asxcode" && value !== prevValue) {
       // Keep track of the current request id
       const currentRequestId = ++requestId;

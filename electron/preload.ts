@@ -6,6 +6,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   setData: (key: Key, data: Data) => ipcRenderer.invoke("setData", key, data),
   getStoragePath: () => ipcRenderer.invoke("getStoragePath"),
   openStoragePath: () => ipcRenderer.invoke("openStoragePath"),
+  quickValidateASXCode: (asxcode: string) => ipcRenderer.invoke("quickValidateASXCode", asxcode),
   validateASXCode: (asxcode: string, existing: boolean) => ipcRenderer.invoke("validateASXCode", asxcode, existing),
   addCompany: (values: AddCompanyValues) => ipcRenderer.invoke("addCompany", values),
   availableShares: (asxcode: string, user: string) => ipcRenderer.invoke("availableShares", asxcode, user),

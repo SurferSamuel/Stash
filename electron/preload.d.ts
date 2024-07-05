@@ -25,6 +25,7 @@ export interface IElectronAPI {
   setData: (key: Key, data: Data) => Promise<void>;
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
+  quickValidateASXCode: (asxcode: string) => Promise<string>;
   validateASXCode: (asxcode: string, existing: boolean) => Promise<ValidateASXReturn>;
   addCompany: (values: AddCompanyValues) => Promise<void>;
   availableShares: (asxcode: string, user: string) => Promise<number>;

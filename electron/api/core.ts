@@ -76,6 +76,31 @@ export const openStoragePath = () => {
 };
 
 /*
+ * Validates the ASX code without sending any requests to yahoo-finance. Used for
+ * the "addCompany" page when the submit button is pressed. Faster, but has more
+ * basic checking than validateASXCode(). 
+ */
+export const quickValidateASXCode = (asxcode: string) => {
+  // ASX Code must be 3-5 characters long
+  if (!/^[a-zA-Z0-9]{3,5}$/.test(asxcode)) {
+    return "Must be 3-5 characters";
+  }
+
+  // Ensure ASX code is all uppercase
+  asxcode = asxcode.toUpperCase();
+
+  // Get existing data from storage
+  const data = getData("companies");
+
+  // ASX code must not already exist in data (ie. a new asxcode)
+  if (data.some(obj => obj.asxcode === asxcode)) {
+    return "Already existing company";
+  }
+
+  return "Valid";
+}
+
+/*
  * Validates the given asxcode. If existing is true, then the provided asxcode
  * must be existing in the data. Otherwise, if existing is false, then the 
  * provided asxcode must not be existing (ie. a new asxcode).
