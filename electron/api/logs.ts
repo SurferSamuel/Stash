@@ -6,7 +6,7 @@ import fs from "fs";
 // Ensure log folder exists
 const dirPath = path.join(storage.getDataPath(), "logs");
 if (!fs.existsSync(dirPath)) {
-  fs.mkdirSync(dirPath);
+  fs.mkdirSync(dirPath, { recursive: true });
 }
 
 // Rename existing 'latest.log' (if exists)
