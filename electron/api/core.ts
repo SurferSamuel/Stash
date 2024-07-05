@@ -107,8 +107,7 @@ export const validateASXCode = async (asxcode: string, existing: boolean) => {
     const fields = ["longName", "shortName", "regularMarketPrice"];
     const quote = await yahooFinance.quote(`${asxcode}.AX`, { fields });
   
-    // If no quote was found, then asxcode was invalid
-    // Also, ensure company name & share price does exist
+    // Ensure company name & share price does exist
     if (!quote?.regularMarketPrice || !(quote.longName ?? quote.shortName)) {
       return { status: "Company not found", companyName: "", unitPrice: undefined };
     }
