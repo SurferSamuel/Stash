@@ -1,11 +1,18 @@
 import { Settings, app, shell } from "electron";
 import storage from "electron-json-storage";
-import yahooFinance from "yahoo-finance2";
+import { writeLog } from "./logs";
 import path from "path";
 import fs from "fs";
 
 // Types
-import { CompanyData, Country, Data, Key, Option, OptionKey } from "../types";
+import { 
+  CompanyData, 
+  Country, 
+  Data, 
+  Key, 
+  Option, 
+  OptionKey,
+} from "../types";
 
 /*
  * Gets the data for a specific key
@@ -16,9 +23,10 @@ export const getData: {
   (key: "companies"): CompanyData[];
   (key: "settings"): Settings;
 } = (key: Key): any => {
+  // Attempt to get data from storage
   let data = storage.getSync(key);
 
-  // If data is empty (ie. an empty object), set data using default values
+  // If data is empty (ie. data = {}), set data using default values
   if (data.constructor !== Array && Object.keys(data).length === 0) {
     const fileName = (app.isPackaged)
       ? path.join(process.resourcesPath, 'data', `${key}.json`)
@@ -31,11 +39,12 @@ export const getData: {
     } else {
       // Encase no file exists, set data to an empty array
       data = [];
+      writeLog(`WARNING: Failed to read default values from [${fileName}]`);
     }
     
     // Save data to storage
     storage.set(key, data, (error) => {
-      if (error) throw error;
+      if (error) writeLog(`Error in storage.set: ${error}`);
     });
   }
 
@@ -47,7 +56,7 @@ export const getData: {
  */
 export const setData = (key: Key, data: Data) => {
   storage.set(key, data, (error) => {
-    if (error) throw error;
+    if (error) writeLog(`Error in storage.set: ${error}`);
   });
 };
 
@@ -63,13 +72,4 @@ export const getStoragePath = () => {
  */
 export const openStoragePath = () => {
   shell.openPath(storage.getDataPath());
-};
-
-/*
- * Fetches the quote for the given asxcode, using yahoo-finance2.
- * If no quote is found (eg. from invalid asxcode), then an error is thrown.
- */
-export const fetchQuote = async (asxcode: string) => {
-  const quote = await yahooFinance.quote(`${asxcode}.AX`);
-  return { quote };
 };

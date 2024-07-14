@@ -16,14 +16,14 @@ export const availableShares = (asxcode: string, user: string) => {
   const data = getData("companies");
 
   // If the company's data could not be found...
-  const companyData = data.find((entry) => entry.asxcode === asxcode);
+  const companyData = data.find(entry => entry.asxcode === asxcode);
   if (companyData === undefined) {
     throw new Error(`ERROR: Could not find data for ${asxcode}`);
   }
 
   // Return the number of available shares for the user (0 if the user does not exist)
   return companyData.currentShares
-    .filter((entry) => entry.user === user)
+    .filter(entry => entry.user === user)
     .reduce((acc, cur) => acc + Number(cur.quantity), 0);
 }
 
@@ -39,7 +39,7 @@ export const buyShare = (values: AddTradeValues, gstPercent: string) => {
   const data = getData("companies");
 
   // If the company's data could not be found...
-  const companyData = data.find((entry) => entry.asxcode === values.asxcode);
+  const companyData = data.find(entry => entry.asxcode === values.asxcode);
   if (companyData === undefined) {
     throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
   }
@@ -84,7 +84,7 @@ export const sellShare = (values: AddTradeValues, gstPercent: string) => {
   const data = getData("companies");
 
   // If the company's data could not be found...
-  const companyData = data.find((entry) => entry.asxcode === values.asxcode);
+  const companyData = data.find(entry => entry.asxcode === values.asxcode);
   if (companyData === undefined) {
     throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
   }
@@ -92,7 +92,7 @@ export const sellShare = (values: AddTradeValues, gstPercent: string) => {
   // Retrieve all of the current shares for the user, removing any entries with buy dates
   // after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
-    .filter((entry) => entry.user === values.user && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
+    .filter(entry => entry.user === values.user && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
     .sort((a, b) => dayjsDate(a.date).isBefore(dayjsDate(b.date)) ? -1 : 1);
 
   // If the user has no shares

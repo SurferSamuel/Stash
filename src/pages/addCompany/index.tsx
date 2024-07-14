@@ -224,8 +224,8 @@ const AddCompany = () => {
                 value={values.asxcode}
                 onBlur={handleBlur}
                 onChange={handleChange}
-                error={!!touched.asxcode && !!errors.asxcode}
-                helperText={touched.asxcode && errors.asxcode}
+                error={!!errors.asxcode}
+                helperText={errors.asxcode}
                 inputProps={{ style: { textTransform: "uppercase" } }}
                 sx={{ gridColumn: isNonMobile ? "span 2" : "span 4" }}
               />
@@ -535,6 +535,7 @@ const AddCompany = () => {
             </Accordion>
             <Box display="flex" justifyContent="end" mt="20px">
               <Button
+                id="submit"
                 type="submit"
                 color="secondary"
                 variant="contained"

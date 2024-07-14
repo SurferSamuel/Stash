@@ -4,18 +4,17 @@ import {
   CompanyData, 
   Country, 
   Data, 
-  FetchQuote, 
-  FilterValues, 
   Key, 
   Option, 
   OptionKey, 
+  PortfolioFilterValues, 
   PortfolioGraphData,
   PortfolioTableData,
   Settings,
+  ValidateASXReturn,
 } from "./types";
 
 export interface IElectronAPI {
-  fetchQuote: (asxcode: string) => Promise<FetchQuote>;
   // Overload function definitions
   getData: {
     (key: OptionKey): Promise<Option[]>;
@@ -26,12 +25,14 @@ export interface IElectronAPI {
   setData: (key: Key, data: Data) => Promise<void>;
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
+  quickValidateASXCode: (asxcode: string) => Promise<string>;
+  validateASXCode: (asxcode: string, existing: boolean) => Promise<ValidateASXReturn>;
   addCompany: (values: AddCompanyValues) => Promise<void>;
   availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
-  getPortfolioTableData: (filterValues: FilterValues) => Promise<PortfolioTableData>;
-  getPortfolioGraphData: (filterValues: FilterValues) => Promise<PortfolioGraphData>;
+  getPortfolioTableData: (filterValues: PortfolioFilterValues) => Promise<PortfolioTableData>;
+  getPortfolioGraphData: (filterValues: PortfolioFilterValues) => Promise<PortfolioGraphData>;
 }
 
 declare global {

@@ -1,14 +1,10 @@
 import { AddCompanyFormValues } from "../src/pages/addCompany";
 import { AddTradeFormValues } from "../src/pages/addTrade";
-export { PortfolioFormValues as FilterValues } from "../src/pages/portfolio";
+export { PortfolioFormValues as PortfolioFilterValues } from "../src/pages/portfolio";
 
 // Yahoo-finance2 types
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
-import { HistoricalHistoryResult } from "yahoo-finance2/dist/esm/src/modules/historical";
-import { Quote } from "yahoo-finance2/dist/esm/src/modules/quote";
-
-// Fetched quote return type from yahoo-finance2
-export type FetchQuote = { quote: Quote };
+import { HistoricalRowHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 
 // Valid option keys, used for company details and users
 export type OptionKey =
@@ -54,6 +50,13 @@ export interface PriceNotification {
   title: string;
   highPrice: string;
   lowPrice: string;
+}
+
+// Return type from validateASXCode()
+export interface ValidateASXReturn {
+  status: string,
+  companyName: string,
+  unitPrice: string,
 }
 
 // CURRENT share entry type
@@ -127,14 +130,14 @@ export interface Settings {
 // Any data type, returned from getData
 export type Data = Option[] | Country[] | CompanyData[] | Settings;
 
-// Values type for AddCompany() in ./api.ts
+// Values type for AddCompany()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddCompanyValues extends Omit<AddCompanyFormValues, "noteDate" | "notificationDate"> {
   noteDate: string;
   notificationDate: string;
 }
 
-// Values type for BuyShares() and SellShares() in ./api.ts
+// Values type for BuyShares() and SellShares()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
 export interface AddTradeValues extends Omit<AddTradeFormValues, "date"> {
   date: string;
@@ -158,7 +161,7 @@ export interface PortfolioTableRow {
   weightPerc: number;        // Weight % using market value
 }
 
-// Return type of getPortfolioTableData() in ./api.ts
+// Return type of getPortfolioTableData()
 export interface PortfolioTableData {
   totalValue: string,             // Total value of the portfolio (as of today)
   dailyChange: string,            // Today's change in portfolio value
@@ -169,10 +172,11 @@ export interface PortfolioTableData {
   skipped: string[],              // Companies that were skipped when calculating
 }
 
-// Used in getPortfolioGraphData() in ./api.ts
+// Used in getPortfolioGraphData()
 export interface HistoricalEntry {
   asxcode: string;
-  historical: HistoricalHistoryResult;
+  lastUpdated: string;
+  historical: HistoricalRowHistory[];
 }
 
 // Data point type for the portfolio graph
@@ -186,5 +190,5 @@ export interface PortfolioDataPoint {
 // Graph range in months
 export type GraphRange = 1 | 3 | 6 | 12 | 60;
 
-// Return type of getPortfolioGraphData() in ./api.ts
+// Return type of getPortfolioGraphData()
 export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>

@@ -5,7 +5,7 @@ import { Formik } from "formik";
 import * as yup from "yup";
 import dayjs from "dayjs";
 
-import { cleanUpValidation, validateASXCode } from "./valdation";
+import { cleanUpValidation, validateASXCode } from "./validation";
 import AutoUpdateUnitPrice from "./autoUpdateUnitPrice";
 import ShowAvailableUnits from "./showAvailableUnits";
 import PriceBreakdownHandler from "./priceBreakdown";
@@ -29,7 +29,7 @@ import SelectInput from "../../components/select";
 import Header from "../../components/header";
 
 // Types
-import { CompanyData, Option } from "../../../electron/types";
+import { Option } from "../../../electron/types";
 
 interface Settings {
   unitPriceAutoFill: boolean;
@@ -53,7 +53,6 @@ const AddTrade = () => {
   const isNonMobile = useMediaQuery("(min-width:800px)");
 
   // Core data related states
-  const [data, setData] = useState<CompanyData[]>([]);
   const [settings, setSettings] = useState<Settings>({
     unitPriceAutoFill: false,
     gstPercent: "0",
@@ -92,7 +91,6 @@ const AddTrade = () => {
       const users = await window.electronAPI.getData("users");
       const settings = await window.electronAPI.getData("settings");
       if (isMounted) {
-        setData(data);
         setUsersList(users);
         setSettings(settings);
         // If data is not empty...
@@ -122,7 +120,7 @@ const AddTrade = () => {
     yup.object().shape({
       asxcode: yup
         .string()
-        .test("asxcode", "", validateASXCode(data, setCompanyName, setLoading, setUnitPrice)),
+        .test("asxcode", "", validateASXCode(setCompanyName, setLoading, setUnitPrice)),
       user: yup.string().required("Required"),
       date: yup.date().typeError("Invalid Date").required("Required"),
       quantity: yup.number().required("Requried"),

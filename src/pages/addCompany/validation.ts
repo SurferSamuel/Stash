@@ -1,162 +1,177 @@
-import * as yup from "yup";
+import { Dispatch, SetStateAction } from "react";
+import { TestContext } from "yup";
 import dayjs from "dayjs";
-import React from "react";
 
-// Used in validateASXCode
+// Global variables used in validateASXCode()
 let prevErrorMsg: string = undefined;
+let prevValue: string = undefined;
+let requestId = 0;
 
-// Reset local variables when screen is unmounted
+// Clean up variables when page is unmounted
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
+  prevValue = undefined;
+  requestId = 0;
 };
 
 export const validateASXCode = (
-  setCompanyName: React.Dispatch<React.SetStateAction<string>>,
-  setLoading: React.Dispatch<React.SetStateAction<boolean>>
+  setCompanyName: Dispatch<SetStateAction<string>>,
+  setLoading: Dispatch<SetStateAction<boolean>>
 ) => {
-  return async (value: string, context: yup.TestContext) => {
-    const { path, createError } = context;
+  return async (value: string, context: TestContext) => {
+    const { createError } = context;
 
-    // Helper function
-    const sendError = (message: string) => {
+    // If asxcode input is being actively edited and has changed since last call
+    if (document.activeElement.id === "asxcode" && value !== prevValue) {
+      // Keep track of the current request id
+      const currentRequestId = ++requestId;
+
+      // Update previous value
+      prevValue = value;
+
+      // Update states
       setCompanyName("");
-      prevErrorMsg = message;
-      return createError({ path, message });
-    };
+      setLoading(true);
 
-    // ASX Code must be 3-5 characters long
-    if (!/^[a-zA-Z0-9]{3,5}$/.test(value)) {
-      return sendError("Invalid Format");
-    }
-
-    // ASX Code must be new and not in the existing data
-    const existingData = await window.electronAPI.getData("companies");
-    if (existingData.some((obj) => obj.asxcode === value.toUpperCase())) {
-      return sendError("Already Exists");
-    }
-
-    // Only call API if asxcode is being actively edited (to reduce number of API calls)
-    if (document.activeElement.id === "asxcode") {
-      try {
-        // Display loading icon while API request is being processed
-        setLoading(true);
-        const res = await window.electronAPI.fetchQuote(value);
-        setLoading(false);
-
-        // If quote is empty (no results), then it is invalid
-        if (!res.quote) {
-          return sendError("Invalid");
-        }
-
-        // Otherwise if asxcode is valid...
-        if (res.quote.longName) setCompanyName(res.quote.longName.toUpperCase());
-        prevErrorMsg = undefined;
-        return true;
-      } catch (error) {
-        // Handle any errors
-        setLoading(false);
-        console.error(error); // Show error for future debugging
-        return sendError(`ERROR: Could not fetch quote for '${value}'`);
+      // Wait for validation request to be processed
+      const res = await window.electronAPI.validateASXCode(value, false);
+      
+      // If current request id is outdated, don't update anything and
+      // just show the previous error (if one)
+      if (currentRequestId !== requestId) {
+        return !prevErrorMsg || createError({ message: prevErrorMsg });
       }
+
+      // Update states
+      setLoading(false);
+      setCompanyName(res.companyName);
+
+      // Create error if asxcode was not valid
+      if (res.status !== "Valid") {
+        prevErrorMsg = res.status;
+        return createError({ message: res.status });
+      } 
+      
+      // Otherwise if it is valid
+      prevErrorMsg = undefined;
+      return true;
     }
 
-    // Keep showing previous error...
-    return !prevErrorMsg || createError({ path, message: prevErrorMsg });
+    // Use a quicker validation when pressing the submit button
+    if (document.activeElement.id === "submit") {
+      // Keep track of the current request id
+      const currentRequestId = ++requestId;
+
+      // Update previous value
+      prevValue = value;
+
+      // Wait for validation request to be processed
+      const res = await window.electronAPI.quickValidateASXCode(value);
+      
+      // If current request id is outdated, don't update anything and
+      // just show the previous error (if one)
+      if (currentRequestId !== requestId) {
+        return !prevErrorMsg || createError({ message: prevErrorMsg });
+      }
+
+      // Create error if asxcode was not valid
+      if (res !== "Valid") {
+        setCompanyName("");
+        prevErrorMsg = res;
+        return createError({ message: res });
+      } 
+      
+      // Otherwise if it is valid
+      prevErrorMsg = undefined;
+      return true;
+    }
+
+    // If not currently being edited, keep showing previous error (if one)
+    return !prevErrorMsg || createError({ message: prevErrorMsg });
   };
 };
 
-export const noteTitleRequired = (value: string, context: yup.TestContext) => {
-  const { createError } = context;
-
-  // Only check if title has not been entered
-  if (value !== undefined) return true;
+export const noteTitleRequired = (value: string, context: TestContext) => {
+  const { createError, parent } = context;
 
   // If "note description" field is not empty, then a title must be provided
-  if (context.parent.noteDescription) {
+  if (parent.noteDescription && value === undefined) {
     return createError();
-  } else {
-    return true;
   }
+  return true;
 };
 
-export const noteDateRequired = (value: Date, context: yup.TestContext) => {
-  const { createError } = context;
+export const noteDateRequired = (value: Date, context: TestContext) => {
+  const { createError, parent } = context;
 
   // Date is required if any "note" related field is not empty
-  const nonEmpty = context.parent.noteTitle || context.parent.noteDescription;
-
-  if (nonEmpty && value === null) {
-    createError();
-  } else {
-    return true;
+  const nonEmpty = parent.noteTitle || parent.noteDescription;
+  if (nonEmpty && value === undefined) {
+    return createError();
   }
+  return true;
 };
 
-export const notificationDateRequired = (value: Date, context: yup.TestContext) => {
-  const { createError } = context;
+export const notificationDateRequired = (value: Date, context: TestContext) => {
+  const { createError, parent } = context;
 
   // Notification date is required if title is not empty
-  if (context.parent.notificationDateTitle && value === null) {
-    createError();
-  } else {
-    return true;
+  if (parent.notificationDateTitle && value === undefined) {
+    return createError();
   }
+  return true;
 };
 
-export const futureDate = (value: Date, context: yup.TestContext) => {
+export const futureDate = (value: Date, context: TestContext) => {
   const { createError } = context;
 
   // Ignore if date is not provided
-  if (value === null) return true;
+  if (value === undefined) return true;
 
   // Notification date must be greater than or equal to today
-  if (dayjs(value).isBefore(dayjs()) && !dayjs(value).isSame(dayjs(), "day")) {
-    createError();
-  } else {
-    return true;
+  if (dayjs().isAfter(value)) {
+    return createError();
   }
+  return true;
 };
 
-export const missingPrice = (value: number, context: yup.TestContext) => {
-  const { path, createError } = context;
+export const missingPrice = (value: number, context: TestContext) => {
+  const { createError, parent } = context;
 
   // Ignore if title is empty
-  if (!context.parent.notificationPriceTitle) return true;
+  if (!parent.notificationPriceTitle) return true;
 
   // If title is provided, then a price must be provided
-  if (context.parent.notificationPriceHigh || context.parent.notificationPriceLow) {
-    return true;
-  } else {
-    createError({ path });
+  if (!parent.notificationPriceHigh && !parent.notificationPriceLow) {
+    return createError();
   }
+  return true;
 };
 
-export const lessThanLowPrice = (value: number, context: yup.TestContext) => {
-  const { path, createError } = context;
+export const lessThanLowPrice = (value: number, context: TestContext) => {
+  const { createError, parent } = context;
 
   // Ignore if low price is invalid
-  const lowPrice = context.parent.notificationPriceLow;
+  const lowPrice = parent.notificationPriceLow;
   if (isNaN(lowPrice)) return true;
 
   // Create error if value (high price) is less than low price
   if (value < lowPrice) {
-    createError({ path });
-  } else {
-    return true;
+    return createError();
   }
+  return true;
 };
 
-export const greaterThanHighPrice = (value: number, context: yup.TestContext) => {
-  const { path, createError } = context;
+export const greaterThanHighPrice = (value: number, context: TestContext) => {
+  const { createError, parent } = context;
 
   // Ignore if high price is invalid
-  const highPrice = context.parent.notificationPriceHigh;
+  const highPrice = parent.notificationPriceHigh;
   if (isNaN(highPrice)) return true;
 
   // Create error if value (low price) is greater than high price
   if (value > highPrice) {
-    createError({ path });
-  } else {
-    return true;
+    return createError();
   }
+  return true;
 };
