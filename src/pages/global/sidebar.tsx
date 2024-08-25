@@ -22,6 +22,9 @@ import AddchartIcon from '@mui/icons-material/Addchart';
 import NoteAddIcon from "@mui/icons-material/NoteAdd";
 import HomeIcon from "@mui/icons-material/Home";
 
+// Custom logo icon
+import LogoIcon from "../../assets/logo.svg"
+
 interface Props {
   title: string;
   to: string;
@@ -69,7 +72,7 @@ const Sidebar = () => {
       borderRadius: "10px",
     },
     "& .pro-inner-item": {
-      padding: "5px 35px 5px 10px !important",
+      padding: "5px 5px 5px 10px !important",
       borderRadius: "10px",
     },
     "& .pro-inner-item:hover": {
@@ -101,10 +104,13 @@ const Sidebar = () => {
               }}
             >
               {!isCollapsed && (
-                <Box display="flex" justifyContent="space-between" alignItems="center" ml="24px">
-                  <Typography variant="h2" fontWeight={500} color={colors.grey[100]}>
-                    STASH
-                  </Typography>
+                <Box display="flex" justifyContent="space-between" alignItems="center" ml="4px">
+                  <Box display="flex" alignItems="center"> 
+                    <LogoIcon style={{ width: '32px', height: '32px', marginRight: '8px', flexShrink: 0 }} />
+                    <Typography variant="h2" fontWeight={400} color={colors.grey[100]}>
+                      Stash
+                    </Typography>
+                  </Box>
                   <IconButton onClick={() => setIsCollapsed(!isCollapsed)}>
                     <KeyboardDoubleArrowLeftIcon />
                   </IconButton>
