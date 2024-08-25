@@ -5,6 +5,9 @@ import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
+// Loading text
+export const loadingText = "Loading";
+
 interface Props {
   totalValue: string;
   dailyChange: string;
@@ -26,7 +29,7 @@ const PortfolioValueText = (props: Props) => {
 
   // A helper function that determines the color based on the given string
   const getColor = (str: string): string => {
-    if (str === "+0.00" || str === "Loading") return "white";
+    if (str === loadingText || str === "+0.00") return "white";
     return (str[0] === "+") ? "success.main" : "error.main";
   }
 
