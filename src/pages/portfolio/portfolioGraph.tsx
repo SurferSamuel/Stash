@@ -94,11 +94,11 @@ const PortfolioGraph = (props: Props) => {
   }
 
   return (
-    <Box gridColumn="span 4" m="-42px -5px 0px 10px">
+    <Box gridColumn="span 4" m="-42px -5px 0px 0px">
       <LineChart
         skipAnimation={true}
         loading={loading}
-        margin={{ left: 35, right: 5 }}
+        margin={{ right: 5 }}
         xAxis={[
           {
             dataKey: "id",
@@ -119,7 +119,7 @@ const PortfolioGraph = (props: Props) => {
             dataKey: "value",
             curve: "linear",
             showMark: false,
-            color: colors.blueAccent[400],
+            color: colors.blueAccent[600],
             valueFormatter: currencyFormat,
             area: true,
           }
@@ -157,8 +157,8 @@ const PortfolioGraph = (props: Props) => {
       >
         <defs>
           <linearGradient id="areaGradient" gradientTransform="rotate(90)">
-            <stop offset={0} stopColor={colors.blueAccent[400]} stopOpacity={0.2} />
-            <stop offset={bottomOffset} stopColor={colors.blueAccent[400]} stopOpacity={0} />
+            <stop offset={0} stopColor={colors.blueAccent[600]} stopOpacity={0.2} />
+            <stop offset={bottomOffset} stopColor={colors.blueAccent[600]} stopOpacity={0} />
           </linearGradient>
         </defs>
       </LineChart>

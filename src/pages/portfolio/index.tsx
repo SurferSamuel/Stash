@@ -131,7 +131,7 @@ const Portfolio = () => {
             mt="-5px"
           >
             {/* Graph Range Button Group */}
-            {graphData !== null && <ButtonGroup color="secondary">
+            {graphData !== null && <ButtonGroup>
               <GraphRangeButton label="1M" range={graphRange} setRange={setGraphRange} />
               <GraphRangeButton label="3M" range={graphRange} setRange={setGraphRange}/>
               <GraphRangeButton label="6M" range={graphRange} setRange={setGraphRange}/>

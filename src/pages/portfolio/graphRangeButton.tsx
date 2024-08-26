@@ -25,8 +25,9 @@ const GraphRangeButton = (props: Props) => {
       disableRipple
       variant="text"
       onClick={() => setRange(value)}
+      color="blue"
       sx={{ 
-        color: range === value ? "white" : "primary",
+        color: range === value ? "white" : "blue",
         zIndex: 1,
         '&:hover': {
           backgroundColor: 'transparent',

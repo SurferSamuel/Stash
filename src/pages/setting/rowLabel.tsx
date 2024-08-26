@@ -1,8 +1,6 @@
 import { memo } from "react";
-import { tokens } from "../../theme";
 
 // Material UI
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
@@ -13,14 +11,12 @@ interface LabelProps {
 
 const RowLabel: React.FC<LabelProps> = memo((props) => {
   const { title, subtitle } = props;
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   return (
     <Box>
-      <Typography variant="h6" fontWeight={400}>
+      <Typography variant="h6" fontWeight={400} color="primary">
         {title}
       </Typography>
-      <Typography variant="h6" fontWeight={400} color={colors.grey[300]}>
+      <Typography variant="h6" fontWeight={400} color="secondary">
         {subtitle}
       </Typography>
     </Box>

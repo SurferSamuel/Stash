@@ -13,14 +13,14 @@ import { Link } from "react-router-dom";
 import { tokens } from "../../theme";
 
 // Material UI Icons
-import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRight";
-import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeft";
+import KeyboardDoubleArrowRightIcon from "@mui/icons-material/KeyboardDoubleArrowRightRounded";
+import KeyboardDoubleArrowLeftIcon from "@mui/icons-material/KeyboardDoubleArrowLeftRounded";
+import AccountBalanceIcon from "@mui/icons-material/AccountBalanceRounded";
+import NotificationsIcon from "@mui/icons-material/NotificationsRounded";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
-import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
-import NotificationsIcon from "@mui/icons-material/Notifications";
-import AddchartIcon from '@mui/icons-material/Addchart';
-import NoteAddIcon from "@mui/icons-material/NoteAdd";
-import HomeIcon from "@mui/icons-material/Home";
+import AddchartIcon from "@mui/icons-material/AddchartRounded";
+import NoteAddIcon from "@mui/icons-material/NoteAddRounded";
+import HomeIcon from "@mui/icons-material/HomeRounded";
 
 // Custom logo icon
 import LogoIcon from "../../assets/logo.svg"
@@ -43,7 +43,7 @@ const Item = (props: Props) => {
   return (
     <MenuItem
       active={selected === title}
-      style={{ color: colors.grey[100] }}
+      style={{ color: colors.grey[200] }}
       onClick={() => setSelected(title)}
       icon={icon}
     >
@@ -62,35 +62,45 @@ const Sidebar = () => {
   // Override specific themes
   const overrideTheme = {
     "& .pro-sidebar-inner": {
-      background: `${colors.primary[600]} !important`,
+      background: `${colors.grey[900]} !important`,
+    },
+    "& .pro-sidebar-header": {
+      marginTop: "8px",
+    },
+    "& .pro-sidebar-content": {
+      marginTop: "-6px",
+    },
+    "& .pro-sidebar-footer": {
+      borderTop: "none !important",
     },
     "& .pro-icon-wrapper": {
-      background: "transparent !important",
+      marginLeft: "5px",
     },
     "& .pro-menu-item": {
-      margin: "4px 12px 4px 12px !important",
-      borderRadius: "10px",
+      margin: "5px 12px 5px 12px !important",
+      borderRadius: "12px",
     },
     "& .pro-inner-item": {
-      padding: "5px 5px 5px 10px !important",
-      borderRadius: "10px",
+      padding: "2px 5px 2px 5px !important",
+      borderRadius: "12px",
     },
     "& .pro-inner-item:hover": {
-      color: `${colors.blueAccent[400]} !important`,
-      background: `${colors.blueAccent[900]} !important`,
+      color: `${colors.grey[100]} !important`,
+      background: `${colors.grey[700]} !important`,
     },
     "& .pro-menu-item.active, & .pro-menu-item.active .pro-inner-item:hover": {
-      color: "white !important",
-      background: `${colors.blueAccent[500]} !important`,
+      color: `${colors.grey[100]} !important`,
+      background: `${colors.grey[600]} !important`,
+      boxShadow: "0px 2px 1px rgba(0, 0, 0, 0.3)",
     },
     "& .pro-sidebar-header .pro-menu .pro-inner-item:hover": {
       background: "transparent !important", // Don't change bg color on logo
-    },
+    }
   };
 
   return (
     <Box sx={overrideTheme}>
-      <ProSidebar collapsed={isCollapsed} width={260}>
+      <ProSidebar collapsed={isCollapsed} width={240}>
         <SidebarHeader>
           <Menu>
             {/* STASH Logo & Collapse Menu Button */}
@@ -98,15 +108,14 @@ const Sidebar = () => {
               onClick={() => setIsCollapsed(!isCollapsed)}
               icon={isCollapsed ? <KeyboardDoubleArrowRightIcon /> : undefined}
               style={{
-                margin: "10px 0 10px 0",
                 color: colors.grey[100],
                 height: "50px",
               }}
             >
               {!isCollapsed && (
-                <Box display="flex" justifyContent="space-between" alignItems="center" ml="4px">
+                <Box display="flex" justifyContent="space-between" alignItems="center" ml="8px">
                   <Box display="flex" alignItems="center"> 
-                    <LogoIcon style={{ width: '32px', height: '32px', marginRight: '8px', flexShrink: 0 }} />
+                    <LogoIcon style={{ width: '32px', height: '32px', marginRight: '10px', flexShrink: 0 }} />
                     <Typography variant="h2" fontWeight={400} color={colors.grey[100]}>
                       Stash
                     </Typography>
@@ -138,17 +147,6 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              {/* Manage Text */}
-              {!isCollapsed && (
-                <Typography
-                  variant="h6"
-                  color={colors.grey[200]}
-                  fontWeight={300}
-                  sx={{ m: "15px 0 10px 20px" }}
-                >
-                  Manage
-                </Typography>
-              )}
               {/* Add Company Button */}
               <Item
                 title="Add Company"

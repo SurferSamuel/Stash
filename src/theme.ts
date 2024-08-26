@@ -1,6 +1,29 @@
 import { createContext, useState, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
-import { PaletteMode } from "@mui/material";
+import { PaletteColorOptions, PaletteMode } from "@mui/material";
+
+// Augment the palette to include new colors
+declare module '@mui/material/styles' {
+  interface CustomPalette {
+    blue: PaletteColorOptions;
+  }
+  interface Palette extends CustomPalette {}
+  interface PaletteOptions extends CustomPalette {}
+}
+
+// Extend Button color options to include new color options
+declare module '@mui/material/Button' {
+  interface ButtonPropsColorOverrides {
+    blue: true;
+  }
+}
+
+// Extend Switch color options to include new color options
+declare module '@mui/material/Switch' {
+  interface SwitchPropsColorOverrides {
+    blue: true;
+  }
+}
 
 interface Color {
   100: string;
@@ -16,9 +39,6 @@ interface Color {
 
 export interface ColorType {
   grey: Color;
-  primary: Color;
-  greenAccent: Color;
-  redAccent: Color;
   blueAccent: Color;
 }
 
@@ -27,59 +47,26 @@ export const tokens = (mode: PaletteMode): ColorType => ({
   ...(mode === "dark"
     ? {
         grey: {
-          100: "#e0e0e0",
-          200: "#c2c2c2",
-          300: "#a3a3a3",
-          400: "#858585",
-          500: "#666666",
-          600: "#525252",
-          700: "#3d3d3d",
-          800: "#292929",
-          900: "#1e1e1e",
-        },
-        primary: {
-          100: "#cfd0d3",
-          200: "#9fa1a7",
-          300: "#5e6b8a", // ASX Company Name Color
-          400: "#111429",
-          500: "#0b0e1b", // Content bg
-          600: "#070a17", // Sidebar bg
-          700: "#090c14",
-          800: "#05070d",
-          900: "#030407",
-        },
-        greenAccent: {
-          100: "#dbf5ee",
-          200: "#b7ebde",
-          300: "#94e2cd",
-          400: "#70d8bd",
-          500: "#4cceac",
-          600: "#3da58a",
-          700: "#2e7c67",
-          800: "#1e5245",
-          900: "#0f2922",
-        },
-        redAccent: {
-          100: "#f8dcdb",
-          200: "#f1b9b7",
-          300: "#e99592",
-          400: "#e2726e",
-          500: "#db4f4a",
-          600: "#af3f3b",
-          700: "#832f2c",
-          800: "#58201e",
-          900: "#2c100f",
+          100: "#ffffff", // Primary text
+          200: "#bbbbbb", 
+          300: "#888888", // Secondary text
+          400: "#4a4a4a", 
+          500: "#3a3a3a", 
+          600: "#2c2c2c", // Sidebar selected bg 
+          700: "#212121", // Sidebar hover bg & Card UI 
+          800: "#171717", // Content bg
+          900: "#121212", // Sidebar bg
         },
         blueAccent: {
-          100: "#e1e2fe",
-          200: "#c3c6fd",
-          300: "#a4a9fc",
-          400: "#1ca8ff", // Secondary
-          500: "#1269a1", // Sidebar selected bg
-          600: "#535ac8",
-          700: "#1269a1",
-          800: "#09304a",
-          900: "#041830", // Sidebar highlighted bg
+          100: "#bbdefb",
+          200: "#90caf9",
+          300: "#64b5f6",
+          400: "#42a5f5", 
+          500: "#2196f3", 
+          600: "#1e88e5",
+          700: "#1976d2",
+          800: "#1565c0",
+          900: "#0d47a1", 
         },
       }
     : {
@@ -93,39 +80,6 @@ export const tokens = (mode: PaletteMode): ColorType => ({
           700: "#a3a3a3",
           800: "#c2c2c2",
           900: "#e0e0e0",
-        },
-        primary: {
-          100: "#030407",
-          200: "#06080e",
-          300: "#090c14",
-          400: "#f2f0f0",
-          500: "#0f1422",
-          600: "#3f434e",
-          700: "#6f727a",
-          800: "#9fa1a7",
-          900: "#cfd0d3",
-        },
-        greenAccent: {
-          100: "#0f2922",
-          200: "#1e5245",
-          300: "#2e7c67",
-          400: "#3da58a",
-          500: "#4cceac",
-          600: "#70d8bd",
-          700: "#94e2cd",
-          800: "#b7ebde",
-          900: "#dbf5ee",
-        },
-        redAccent: {
-          100: "#2c100f",
-          200: "#58201e",
-          300: "#832f2c",
-          400: "#af3f3b",
-          500: "#db4f4a",
-          600: "#e2726e",
-          700: "#e99592",
-          800: "#f1b9b7",
-          900: "#f8dcdb",
         },
         blueAccent: {
           100: "#151632",
@@ -141,7 +95,7 @@ export const tokens = (mode: PaletteMode): ColorType => ({
       }),
 });
 
-// MUI theme settins
+// MUI theme settings
 export const themeSettings = (mode: PaletteMode) => {
   const colors = tokens(mode);
   return {
@@ -150,18 +104,19 @@ export const themeSettings = (mode: PaletteMode) => {
       ...(mode === "dark"
         ? {
             primary: {
-              main: colors.primary[100],
+              main: colors.grey[100],
             },
             secondary: {
-              main: colors.blueAccent[400],
-            },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
+              main: colors.grey[300],
             },
             background: {
-              default: colors.primary[500],
+              default: colors.grey[800],
+            },
+            blue: {
+              light: colors.blueAccent[400],
+              main: colors.blueAccent[600],
+              dark: colors.blueAccent[800],
+              contrastText: colors.grey[800],
             },
             success: {
               light: "#00ff38",
@@ -178,18 +133,19 @@ export const themeSettings = (mode: PaletteMode) => {
           }
         : {
             primary: {
-              main: colors.primary[500],
+              main: colors.grey[100],
             },
             secondary: {
-              main: colors.blueAccent[400],
-            },
-            neutral: {
-              dark: colors.grey[700],
-              main: colors.grey[500],
-              light: colors.grey[100],
+              main: colors.grey[200],
             },
             background: {
               default: "#fcfcfc",
+            },
+            blue: {
+              light: colors.blueAccent[400],
+              main: colors.blueAccent[600],
+              dark: colors.blueAccent[800],
+              contrastText: colors.grey[800],
             },
             success: {
               light: "#00ff38",

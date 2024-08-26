@@ -15,14 +15,14 @@ const Header = (props: Props) => {
       <Typography
         variant="h2"
         fontWeight={500}
-        color={colors.grey[100]}
+        color="primary"
         sx={{
           mb: "5px",
         }}
       >
         {props.title}
       </Typography>
-      <Typography variant="h5" color={colors.blueAccent[400]}>
+      <Typography variant="h5" color="secondary">
         {props.subtitle}
       </Typography>
     </Box>

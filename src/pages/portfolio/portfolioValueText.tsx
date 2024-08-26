@@ -50,7 +50,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Portfolio Value
         </Typography>
@@ -71,7 +71,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography 
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Today's Change
         </Typography>
@@ -92,7 +92,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography 
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Total Change
         </Typography>
