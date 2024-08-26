@@ -21,7 +21,7 @@ export const quickValidateASXCode = (asxcode: string) => {
 
   // ASX code must not already exist in data (ie. a new asxcode)
   if (data.some(obj => obj.asxcode === asxcode)) {
-    return "Already existing company";
+    return "Company already added";
   }
 
   return "Valid";
@@ -51,7 +51,7 @@ export const validateASXCode = async (asxcode: string, existing: boolean) => {
 
   // ASX code must not already exist in data (ie. a new asxcode)
   if (!existing && data.some(obj => obj.asxcode === asxcode)) {
-    return { status: "Already existing company", companyName: "", unitPrice: undefined };
+    return { status: "Company already added", companyName: "", unitPrice: undefined };
   }
 
   try {
