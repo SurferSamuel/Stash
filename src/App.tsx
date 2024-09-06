@@ -2,6 +2,9 @@ import { ColorModeContext, useMode } from "./theme";
 import { CssBaseline, Theme, ThemeProvider } from "@mui/material";
 import { Routes, Route } from "react-router-dom";
 
+// Fonts
+import 'non.geist'
+
 // Pages
 import Sidebar from "./pages/global/sidebar";
 import AddCompany from "./pages/addCompany";

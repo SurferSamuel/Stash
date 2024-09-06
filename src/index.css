@@ -5,7 +5,6 @@ body,
 .content {
   height: 100%;
   width: 100%;
-  font-family: "Inter", sans-serif;
 }
 
 .app {
@@ -36,10 +35,4 @@ body,
 /* Handle on hover */
 ::-webkit-scrollbar-thumb:hover {
   background: #ddd;
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: "InterVariable", sans-serif;
-  }
 }
