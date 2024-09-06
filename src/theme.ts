@@ -49,13 +49,13 @@ export const tokens = (mode: PaletteMode): ColorType => ({
         grey: {
           100: "#ffffff", // Primary text
           200: "#bbbbbb", 
-          300: "#888888", // Secondary text
+          300: "#aaaaac", // Secondary text
           400: "#4a4a4a", 
           500: "#3a3a3a", 
-          600: "#2c2c2c", // Sidebar selected bg 
-          700: "#212121", // Sidebar hover bg & Card UI 
-          800: "#171717", // Content bg
-          900: "#121212", // Sidebar bg
+          600: "#27272a", // Sidebar selected bg & borders
+          700: "#212124", // Sidebar hover bg & Card UI 
+          800: "#121212",
+          900: "#0a0a0b", // Sidebar & content bg
         },
         blueAccent: {
           100: "#bbdefb",
@@ -110,7 +110,7 @@ export const themeSettings = (mode: PaletteMode) => {
               main: colors.grey[300],
             },
             background: {
-              default: colors.grey[800],
+              default: colors.grey[900],
             },
             blue: {
               light: colors.blueAccent[400],
@@ -189,6 +189,15 @@ export const themeSettings = (mode: PaletteMode) => {
         fontSize: 15,
       },
     },
+    components: {
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            borderColor: colors.grey[600],
+          }
+        }
+      }
+    }
   };
 };
 

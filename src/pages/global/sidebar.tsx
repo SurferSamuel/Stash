@@ -43,7 +43,7 @@ const Item = (props: Props) => {
   return (
     <MenuItem
       active={selected === title}
-      style={{ color: colors.grey[200] }}
+      style={{ color: colors.grey[100] }}
       onClick={() => setSelected(title)}
       icon={icon}
     >
@@ -62,9 +62,11 @@ const Sidebar = () => {
   // Override specific themes
   const overrideTheme = {
     "& .pro-sidebar-inner": {
+      borderRight: `1px solid ${colors.grey[600]}`,
       background: `${colors.grey[900]} !important`,
     },
     "& .pro-sidebar-header": {
+      borderBottom: `1px solid ${colors.grey[600]} !important`,
       marginTop: "8px",
     },
     "& .pro-sidebar-content": {
@@ -78,11 +80,11 @@ const Sidebar = () => {
     },
     "& .pro-menu-item": {
       margin: "5px 12px 5px 12px !important",
-      borderRadius: "12px",
+      borderRadius: "8px",
     },
     "& .pro-inner-item": {
       padding: "2px 5px 2px 5px !important",
-      borderRadius: "12px",
+      borderRadius: "8px",
     },
     "& .pro-inner-item:hover": {
       color: `${colors.grey[100]} !important`,
@@ -91,7 +93,6 @@ const Sidebar = () => {
     "& .pro-menu-item.active, & .pro-menu-item.active .pro-inner-item:hover": {
       color: `${colors.grey[100]} !important`,
       background: `${colors.grey[600]} !important`,
-      boxShadow: "0px 2px 1px rgba(0, 0, 0, 0.3)",
     },
     "& .pro-sidebar-header .pro-menu .pro-inner-item:hover": {
       background: "transparent !important", // Don't change bg color on logo
