@@ -1,11 +1,9 @@
 import { useFormikContext } from 'formik';
-import { tokens } from '../../theme';
 
 // Material UI
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import useTheme from "@mui/material/styles/useTheme";
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -30,8 +28,6 @@ interface Props {
 }
 
 const FilterOptionsDialog = (props: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const { values, handleChange, setValues } = useFormikContext<PortfolioFormValues>();
   const {
     open,

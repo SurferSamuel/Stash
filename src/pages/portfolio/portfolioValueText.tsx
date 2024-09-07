@@ -1,7 +1,3 @@
-import { tokens } from "../../theme";
-
-// Material UI
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
 
@@ -17,8 +13,6 @@ interface Props {
 }
 
 const PortfolioValueText = (props: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const {
     totalValue,
     dailyChange,

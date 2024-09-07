@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import { tokens } from '../../theme';
 import { Formik } from "formik";
 import * as yup from "yup";
 
@@ -9,7 +8,6 @@ import LoadSettings from "./loadSettings";
 import RowLabel from "./rowLabel";
 
 // Material UI
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Snackbar from "@mui/material/Snackbar";
 import Divider from "@mui/material/Divider";
@@ -23,9 +21,6 @@ import CustomTextField from "../../components/customTextField";
 import Header from "../../components/header";
 
 const Settings = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
   const [storagePath, setStoragePath] = useState<string>("Loading...");
 
   // Success alert states

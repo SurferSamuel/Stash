@@ -1,29 +1,6 @@
 import { createContext, useState, useMemo } from "react";
 import { createTheme } from "@mui/material/styles";
-import { PaletteColorOptions, PaletteMode } from "@mui/material";
-
-// Augment the palette to include new colors
-declare module '@mui/material/styles' {
-  interface CustomPalette {
-    blue: PaletteColorOptions;
-  }
-  interface Palette extends CustomPalette {}
-  interface PaletteOptions extends CustomPalette {}
-}
-
-// Extend Button color options to include new color options
-declare module '@mui/material/Button' {
-  interface ButtonPropsColorOverrides {
-    blue: true;
-  }
-}
-
-// Extend Switch color options to include new color options
-declare module '@mui/material/Switch' {
-  interface SwitchPropsColorOverrides {
-    blue: true;
-  }
-}
+import { PaletteMode } from "@mui/material";
 
 interface Color {
   100: string;
@@ -112,12 +89,6 @@ export const themeSettings = (mode: PaletteMode) => {
             background: {
               default: colors.grey[900],
             },
-            blue: {
-              light: colors.blueAccent[400],
-              main: colors.blueAccent[600],
-              dark: colors.blueAccent[800],
-              contrastText: colors.grey[800],
-            },
             success: {
               light: "#00ff38",
               main: "#007d1c",
@@ -140,12 +111,6 @@ export const themeSettings = (mode: PaletteMode) => {
             },
             background: {
               default: "#fcfcfc",
-            },
-            blue: {
-              light: colors.blueAccent[400],
-              main: colors.blueAccent[600],
-              dark: colors.blueAccent[800],
-              contrastText: colors.grey[800],
             },
             success: {
               light: "#00ff38",
