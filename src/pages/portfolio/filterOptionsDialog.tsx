@@ -74,11 +74,11 @@ const FilterOptionsDialog = (props: Props) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle variant="h5" fontWeight={500} sx={{ bgcolor: colors.grey[800] }}>
+      <DialogTitle variant="h4" fontWeight={500}>
         Filter Options
       </DialogTitle>
-      <DialogContent sx={{ bgcolor: colors.grey[800] }}>
-        <DialogContentText>
+      <DialogContent>
+        <DialogContentText fontSize="14px">
           Select options to filter your portfolio
         </DialogContentText>
         <Box
@@ -142,16 +142,16 @@ const FilterOptionsDialog = (props: Props) => {
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ bgcolor: colors.grey[800] }}>
-        <Button 
+      <DialogActions>
+        <Button
+          variant="outlined"
           onClick={handleReset}
-          color="blue"
         >
           Reset
         </Button>
-        <Button 
+        <Button
+          variant="contained"
           onClick={handleClose}
-          color="blue"
         >
           Close
         </Button>

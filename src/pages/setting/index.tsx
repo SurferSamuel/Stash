@@ -84,7 +84,6 @@ const Settings = () => {
               {/* Right Side */}
               <Box>
                 <Button
-                  color="blue"
                   variant="outlined"
                   onClick={() => window.electronAPI.openStoragePath()}
                   sx={{ width: 130 }}
@@ -170,7 +169,7 @@ const Settings = () => {
               />
             </Box>
             <Box display="flex" justifyContent="end" mt="20px" mr="6px">
-              <Button type="submit" color="blue" variant="contained" sx={{ width: 130 }}>
+              <Button type="submit" variant="contained" sx={{ width: 130 }}>
                 Save Changes
               </Button>
             </Box>

@@ -64,11 +64,11 @@ const ToggleColumnsDialog = (props: Props) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle variant="h5" fontWeight={500} sx={{ bgcolor: colors.grey[800] }}>
+      <DialogTitle variant="h4" fontWeight={600}>
         Toggle Columns
       </DialogTitle>
-      <DialogContent sx={{ bgcolor: colors.grey[800] }}>
-        <DialogContentText>
+      <DialogContent>
+        <DialogContentText fontSize="14px">
           View/hide columns from the table
         </DialogContentText>
         <Box
@@ -100,16 +100,16 @@ const ToggleColumnsDialog = (props: Props) => {
           })}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ mt: "-30px", bgcolor: colors.grey[800] }}>
+      <DialogActions sx={{ mt: "-20px" }}>
         <Button 
+          variant="outlined"
           onClick={handleDefault}
-          color="blue"
         >
           Default
         </Button>
         <Button 
+          variant="contained"
           onClick={handleClose}
-          color="blue"
         >
           Close
         </Button>

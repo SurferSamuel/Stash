@@ -157,7 +157,7 @@ const PortfolioGraph = (props: Props) => {
       >
         <defs>
           <linearGradient id="areaGradient" gradientTransform="rotate(90)">
-            <stop offset={0} stopColor={colors.blueAccent[600]} stopOpacity={0.2} />
+            <stop offset={0} stopColor={colors.blueAccent[600]} stopOpacity={0.25} />
             <stop offset={bottomOffset} stopColor={colors.blueAccent[600]} stopOpacity={0} />
           </linearGradient>
         </defs>

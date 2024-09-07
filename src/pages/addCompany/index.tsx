@@ -537,7 +537,6 @@ const AddCompany = () => {
               <Button
                 id="submit"
                 type="submit"
-                color="blue"
                 variant="contained"
                 // Open respective accordion's on input error
                 onClick={() => OpenAccordionOnError(errors)}

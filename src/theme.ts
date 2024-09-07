@@ -49,11 +49,11 @@ export const tokens = (mode: PaletteMode): ColorType => ({
         grey: {
           100: "#ffffff", // Primary text
           200: "#bbbbbb", 
-          300: "#aaaaac", // Secondary text
+          300: "#aaaab2", // Secondary text
           400: "#4a4a4a", 
           500: "#3a3a3a", 
           600: "#27272a", // Sidebar selected bg & borders
-          700: "#212124", // Sidebar hover bg & Card UI 
+          700: "#212124", // Sidebar hover bg & card UI 
           800: "#121212",
           900: "#0a0a0b", // Sidebar & content bg
         },
@@ -190,14 +190,70 @@ export const themeSettings = (mode: PaletteMode) => {
       },
     },
     components: {
+      MuiButton: {
+        styleOverrides: {
+          root: {
+            textTransform: "none" as const,
+            fontSize: 14,
+          },
+          contained: {
+            fontWeight: 550,
+          },
+          outlined: {
+            borderColor: colors.grey[600],
+          }
+        }
+      },
       MuiDivider: {
         styleOverrides: {
           root: {
             borderColor: colors.grey[600],
           }
         }
-      }
-    }
+      },
+      MuiDialog: {
+        styleOverrides: {
+          paper: {
+            borderRadius: "8px",
+            border: `1px solid ${colors.grey[600]}`,
+            boxShadow: "none",
+          },
+        },
+      },
+      MuiDialogTitle: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.grey[900],
+            paddingTop: "20px",
+            marginBottom: "-6px",
+          },
+        },
+      },
+      MuiDialogContent: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.grey[900],
+            marginBottom: "-6px",
+          },
+        },
+      },
+      MuiDialogContentText: {
+        styleOverrides: {
+          root: {
+            color: colors.grey[300],
+          },
+        },
+      },
+      MuiDialogActions: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.grey[900],
+            paddingRight: "25px",
+            paddingBottom: "25px",
+          },
+        },
+      },
+    },
   };
 };
 

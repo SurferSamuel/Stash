@@ -216,6 +216,7 @@ const AddTrade = () => {
                 size="large"
                 onClick={() => handleChange({ target: { name: "type", value: "BUY" } })} 
                 sx={{ 
+                  borderColor: theme.palette.success.main,
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
                 }}
@@ -228,6 +229,7 @@ const AddTrade = () => {
                 size="large"
                 onClick={() => handleChange({ target: { name: "type", value: "SELL" } })}
                 sx={{ 
+                  borderColor: theme.palette.error.main,
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
                 }}
@@ -333,7 +335,7 @@ const AddTrade = () => {
               </Box>
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
-              <Button type="submit" color="blue" variant="contained">
+              <Button type="submit" variant="contained">
                 Confirm
               </Button>
             </Box>
