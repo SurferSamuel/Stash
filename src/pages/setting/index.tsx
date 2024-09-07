@@ -111,7 +111,6 @@ const Settings = () => {
               />
               {/* Right Side */}
               <Switch
-                color="blue"
                 name="unitPriceAutoFill"
                 checked={values.unitPriceAutoFill}
                 onChange={handleChange}

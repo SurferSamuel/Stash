@@ -1,12 +1,12 @@
-import { tokens } from '../../theme';
+import { GridColDef } from '@mui/x-data-grid';
 
 // Material UI
 import DialogContentText from '@mui/material/DialogContentText';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
 import useTheme from "@mui/material/styles/useTheme";
 import DialogTitle from '@mui/material/DialogTitle';
+import Typography from '@mui/material/Typography';
 import FormGroup from '@mui/material/FormGroup';
 import Switch from '@mui/material/Switch';
 import Dialog from '@mui/material/Dialog';
@@ -15,7 +15,6 @@ import Box from '@mui/material/Box';
 
 // Types
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { GridColDef } from '@mui/x-data-grid';
 
 interface Props {
   open: boolean;
@@ -26,8 +25,6 @@ interface Props {
 }
 
 const ToggleColumnsDialog = (props: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const {
     open,
     handleClose,
@@ -79,28 +76,29 @@ const ToggleColumnsDialog = (props: Props) => {
         >
           {columnsList.map(columns => {
             return (
-              <FormGroup sx={{ width: "100%" }}>
-                {columns.map(column => {
-                  return (
-                    <FormControlLabel
-                      key={column.field}
-                      control={
-                        <Switch
-                          color="blue"
-                          checked={!hiddenColumns.includes(column.field)}
-                          onChange={() => handleToggleColumn(column.field)}
-                        />
-                      }
-                      label={column.headerName}
+              <FormGroup sx={{ width: "100%", zIndex: 10 }}>
+                {columns.map(column => (
+                  <Box 
+                    key={column.field} 
+                    display="flex" 
+                    alignItems="center" 
+                    justifyContent="flex-start"
+                    my="5px"
+                    gap="8px"
+                  >
+                    <Switch
+                      checked={!hiddenColumns.includes(column.field)}
+                      onChange={() => handleToggleColumn(column.field)}
                     />
-                  );
-                })}
+                    <Typography>{column.headerName}</Typography>
+                  </Box>
+                ))}
               </FormGroup>
             )
           })}
         </Box>
       </DialogContent>
-      <DialogActions sx={{ mt: "-20px" }}>
+      <DialogActions sx={{ mt: "-30px" }}>
         <Button 
           variant="outlined"
           onClick={handleDefault}

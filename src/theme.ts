@@ -51,7 +51,7 @@ export const tokens = (mode: PaletteMode): ColorType => ({
           200: "#bbbbbb", 
           300: "#aaaab2", // Secondary text
           400: "#4a4a4a", 
-          500: "#3a3a3a", 
+          500: "#3a3a3f", // Scrollbar hover
           600: "#27272a", // Sidebar selected bg & borders
           700: "#212124", // Sidebar hover bg & card UI 
           800: "#121212",
@@ -250,6 +250,67 @@ export const themeSettings = (mode: PaletteMode) => {
             backgroundColor: colors.grey[900],
             paddingRight: "25px",
             paddingBottom: "25px",
+          },
+        },
+      },
+      MuiSwitch: {
+        defaultProps: {
+          disableRipple: true,
+        },
+        styleOverrides: {
+          root: {
+            width: 42,
+            height: 24,
+            padding: 0,
+            '& .MuiSwitch-switchBase': {
+              padding: 0,
+              margin: 2,
+              transitionDuration: '160ms',
+              '&.Mui-checked': {
+                transform: 'translateX(18px)',
+                '& + .MuiSwitch-track': {
+                  backgroundColor: colors.grey[100],
+                  opacity: 1,
+                  border: 0,
+                },
+                '&.Mui-disabled + .MuiSwitch-track': {
+                  opacity: 0.5,
+                },
+              },
+              '&.Mui-disabled + .MuiSwitch-track': {
+                opacity: 0.7,
+              },
+            },
+            '& .MuiSwitch-thumb': {
+              color: colors.grey[900],
+              boxSizing: 'border-box',
+              width: 20,
+              height: 20,
+            },
+            '& .MuiSwitch-track': {
+              borderRadius: 24 / 2,
+              backgroundColor: colors.grey[600],
+              opacity: 1,
+            },
+          },
+        },
+      },
+      MuiCssBaseline: {
+        styleOverrides: {
+          body: {
+            "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
+              backgroundColor: "inherit",
+            },
+            "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+              backgroundColor: colors.grey[600],
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: colors.grey[500],
+            },
           },
         },
       },
