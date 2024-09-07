@@ -50,9 +50,9 @@ export const tokens = (mode: PaletteMode): ColorType => ({
           100: "#ffffff", // Primary text
           200: "#bbbbbb", 
           300: "#aaaab2", // Secondary text
-          400: "#4a4a4a", 
-          500: "#3a3a3f", // Scrollbar hover
-          600: "#27272a", // Sidebar selected bg & borders
+          400: "#4a4a4a",
+          500: "#3a3a3f", // Scrollbar hover, Borders & Input Outline
+          600: "#27272a", // Sidebar selected bg, Scrollbar handle, Dialog Outline
           700: "#212124", // Sidebar hover bg & card UI 
           800: "#121212",
           900: "#0a0a0b", // Sidebar & content bg
@@ -63,7 +63,7 @@ export const tokens = (mode: PaletteMode): ColorType => ({
           300: "#64b5f6",
           400: "#42a5f5", 
           500: "#2196f3", 
-          600: "#1e88e5",
+          600: "#1e88e5", // Graph components
           700: "#1976d2",
           800: "#1565c0",
           900: "#0d47a1", 
@@ -190,6 +190,29 @@ export const themeSettings = (mode: PaletteMode) => {
       },
     },
     components: {
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.grey[500],
+            },
+          },
+        },
+      },
+      MuiAutocomplete: {
+        styleOverrides: {
+          paper: {
+            backgroundColor: colors.grey[900],
+            backgroundImage: "none",
+            boxShadow: "none",
+            marginTop: "4px",
+            border: `1px solid ${colors.grey[600]}`,
+          },
+          listbox: {
+            padding: "0px",
+          }
+        },
+      },
       MuiButton: {
         styleOverrides: {
           root: {
@@ -200,14 +223,14 @@ export const themeSettings = (mode: PaletteMode) => {
             fontWeight: 550,
           },
           outlined: {
-            borderColor: colors.grey[600],
-          }
-        }
+            borderColor: colors.grey[500],
+          },
+        },
       },
       MuiDivider: {
         styleOverrides: {
           root: {
-            borderColor: colors.grey[600],
+            borderColor: colors.grey[500],
           }
         }
       },
@@ -289,7 +312,7 @@ export const themeSettings = (mode: PaletteMode) => {
             },
             '& .MuiSwitch-track': {
               borderRadius: 24 / 2,
-              backgroundColor: colors.grey[600],
+              backgroundColor: colors.grey[500],
               opacity: 1,
             },
           },

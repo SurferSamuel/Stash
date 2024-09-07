@@ -62,11 +62,11 @@ const Sidebar = () => {
   // Override specific themes
   const overrideTheme = {
     "& .pro-sidebar-inner": {
-      borderRight: `1px solid ${colors.grey[600]}`,
+      borderRight: `1px solid ${colors.grey[500]}`,
       background: `${colors.grey[900]} !important`,
     },
     "& .pro-sidebar-header": {
-      borderBottom: `1px solid ${colors.grey[600]} !important`,
+      borderBottom: `1px solid ${colors.grey[500]} !important`,
       marginTop: "8px",
     },
     "& .pro-sidebar-content": {
