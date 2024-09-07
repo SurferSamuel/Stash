@@ -190,11 +190,35 @@ export const themeSettings = (mode: PaletteMode) => {
       },
     },
     components: {
-      MuiOutlinedInput: {
+      MuiAccordion: {
+        defaultProps: {
+          disableGutters: true,
+        },
         styleOverrides: {
           root: {
-            "& .MuiOutlinedInput-notchedOutline": {
-              borderColor: colors.grey[500],
+            gridColumn: "span 4",
+            backgroundColor: colors.grey[900],
+            boxShadow: "none",
+            "&:before": {
+              display: "none",
+            },
+          },
+        },
+      },
+      MuiAccordionDetails: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.grey[900],
+            padding: 0,
+          },
+        },
+      },
+      MuiAccordionSummary: {
+        styleOverrides: {
+          root: {
+            backgroundColor: colors.grey[900],
+            "& .MuiAccordionSummary-content": {
+              marginLeft: "10px",
             },
           },
         },
@@ -227,12 +251,24 @@ export const themeSettings = (mode: PaletteMode) => {
           },
         },
       },
-      MuiDivider: {
+      MuiCssBaseline: {
         styleOverrides: {
-          root: {
-            borderColor: colors.grey[500],
-          }
-        }
+          body: {
+            "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
+              width: "8px",
+            },
+            "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
+              backgroundColor: "inherit",
+            },
+            "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
+              backgroundColor: colors.grey[600],
+              borderRadius: "4px",
+            },
+            "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
+              backgroundColor: colors.grey[500],
+            },
+          },
+        },
       },
       MuiDialog: {
         styleOverrides: {
@@ -276,6 +312,22 @@ export const themeSettings = (mode: PaletteMode) => {
           },
         },
       },
+      MuiDivider: {
+        styleOverrides: {
+          root: {
+            borderColor: colors.grey[500],
+          },
+        },
+      },
+      MuiOutlinedInput: {
+        styleOverrides: {
+          root: {
+            "& .MuiOutlinedInput-notchedOutline": {
+              borderColor: colors.grey[500],
+            },
+          },
+        },
+      },
       MuiSwitch: {
         defaultProps: {
           disableRipple: true,
@@ -314,25 +366,6 @@ export const themeSettings = (mode: PaletteMode) => {
               borderRadius: 24 / 2,
               backgroundColor: colors.grey[500],
               opacity: 1,
-            },
-          },
-        },
-      },
-      MuiCssBaseline: {
-        styleOverrides: {
-          body: {
-            "&::-webkit-scrollbar, & *::-webkit-scrollbar": {
-              width: "8px",
-            },
-            "&::-webkit-scrollbar-track, & *::-webkit-scrollbar-track": {
-              backgroundColor: "inherit",
-            },
-            "&::-webkit-scrollbar-thumb, & *::-webkit-scrollbar-thumb": {
-              backgroundColor: colors.grey[600],
-              borderRadius: "4px",
-            },
-            "&::-webkit-scrollbar-thumb:hover, & *::-webkit-scrollbar-thumb:hover": {
-              backgroundColor: colors.grey[500],
             },
           },
         },

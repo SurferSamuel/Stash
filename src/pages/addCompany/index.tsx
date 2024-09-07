@@ -22,17 +22,22 @@ import {
 
 // Material UI
 import CircularProgress from "@mui/material/CircularProgress";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
+import Accordion from "@mui/material/Accordion";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 
+// Icons
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
 // Components
-import { Accordion, AccordionSummary, AccordionDetails } from "../../components/accordion";
 import { PerformantTextField } from "../../components/PerformantTextField";
 import MultiSelectInput from "../../components/multiSelect";
 import DatePicker from "../../components/datePicker";
@@ -260,7 +265,10 @@ const AddCompany = () => {
             </Box>
             {/* Company Details Dropdown */}
             <Accordion>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Company Details</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -380,7 +388,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add Note Dropdown */}
             <Accordion expanded={noteExpanded} onChange={() => setNoteExpanded(!noteExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Note</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -433,7 +444,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add notification (date) dropdown */}
             <Accordion expanded={dateExpanded} onChange={() => setDateExpanded(!dateExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Notification (Date)</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -477,7 +491,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add Notification (Price) Input */}
             <Accordion expanded={priceExpanded} onChange={() => setPriceExpanded(!priceExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Notification (Price)</Typography>
               </AccordionSummary>
               <AccordionDetails>
