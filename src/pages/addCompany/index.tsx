@@ -1,6 +1,5 @@
 import { Formik, FormikErrors } from "formik";
 import { useEffect, useState } from "react";
-import { tokens } from "../../theme";
 import * as yup from "yup";
 import dayjs from "dayjs";
 
@@ -25,7 +24,6 @@ import CircularProgress from "@mui/material/CircularProgress";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Accordion from "@mui/material/Accordion";
 import TextField from "@mui/material/TextField";
@@ -71,8 +69,6 @@ export interface AddCompanyFormValues {
 }
 
 const AddCompany = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:800px)");
   const [companyName, setCompanyName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -426,7 +422,6 @@ const AddCompany = () => {
                     handleChange={handleChange}
                     touched={touched}
                     errors={errors}
-                    colors={colors}
                     span={1}
                   />
                   {/* Note Description Input */}
@@ -482,7 +477,6 @@ const AddCompany = () => {
                     handleChange={handleChange}
                     touched={touched}
                     errors={errors}
-                    colors={colors}
                     disablePast
                     span={1}
                   />

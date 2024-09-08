@@ -249,13 +249,13 @@ const AddTrade = () => {
               />
               {/* Date Input */}
               <DatePicker
+                disableFuture
                 label="Date"
                 valueName="date"
                 value={values.date}
                 handleChange={handleChange}
                 touched={touched}
                 errors={errors}
-                colors={colors}
                 span={2}
               />
               {/* Show available units if type is SELL */}
