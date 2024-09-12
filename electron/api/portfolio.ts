@@ -245,7 +245,7 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
       // Calculate the value at the time of the historical entry
       const time = dayjs(historical.date);
       const units = countUnitsAtTime(company, filterValues.user, time);
-      const value = units * historical.adjClose;
+      const value = units * historical.adjclose;
 
       // Add value to the existing data point (if possible), otherwise make new data point
       const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
@@ -368,17 +368,21 @@ const getHistoricalData = async (asxcodes: string[]) => {
   // If no updates needed, can return early
   if (needUpdate.length === 0) return data;
 
-  // Query options for each historical request
+  // Query options for each chart request
   const queryOptions = { 
     period1: dayjs().subtract(5, "year").toDate(), 
     interval: "1d" as const,
   };
 
-  // Send historical requests in parallel (within concurrency limit)
+  // Send chart requests in parallel (within concurrency limit)
   const responseArray = await Promise.allSettled(needUpdate.map(async (asxcode) => {
-    const historical = await yahooFinance.historical(`${asxcode}.AX`, queryOptions);
+    const chart = await yahooFinance.chart(`${asxcode}.AX`, queryOptions);
+    const historical = chart.quotes;
     return { asxcode, historical };
   }));
+
+  // Last updated is right now
+  const lastUpdated = dayjs().format("DD/MM/YYYY hh:mm A");
 
   // Update data using responses
   for (const response of responseArray) {
@@ -386,9 +390,8 @@ const getHistoricalData = async (asxcodes: string[]) => {
       // Extract values from response
       // NOTE: Only keep weekly data for entries >6 months ago
       const asxcode = response.value.asxcode;
-      const lastUpdated = dayjs().format("DD/MM/YYYY hh:mm A");
       const historical = response.value.historical
-      .filter(entry => dayjs().diff(entry.date, "month") < 6 || entry.date.getDay() == 1);
+        .filter(entry => dayjs().diff(entry.date, "month") < 6 || entry.date.getDay() == 1);
       
       // Find the existing entry and update it (if possible), otherwise add a new entry
       const existingEntry = data.find(entry => entry.asxcode === response.value.asxcode);
