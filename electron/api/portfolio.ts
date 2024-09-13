@@ -282,26 +282,14 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
     }
   }
 
-  // 1, 3, and 6 month interval data
-  const oneMonth = graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day"));
-  const threeMonth = graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day"));
-  const sixMonth = graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day"));
-  
-  // 1 and 5 year interval data
-  // NOTE: Uses weekly data, not daily data
-  const oneYear = graphData.filter(entry => 
-    (entry.date.getDay() == 1 && dayjs().subtract(12, "month").isBefore(entry.date, "day")) || 
-    dayjs().isSame(entry.date, "day")
-  );
-  const fiveYear = graphData.filter(entry => entry.date.getDay() == 1 || dayjs().isSame(entry.date, "day"));
-
   // Return data for each graph range (in months)
+  // NOTE: Only use weekly data for 5 years interval
   return {
-    1: oneMonth,
-    3: threeMonth,
-    6: sixMonth,
-    12: oneYear,
-    60: fiveYear,
+    1: graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
+    3: graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
+    6: graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
+    12: graphData.filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
+    60: graphData.filter(entry => entry.date.getDay() == 1 || dayjs().isSame(entry.date, "day")),
   };
 }
 
@@ -388,10 +376,10 @@ const getHistoricalData = async (asxcodes: string[]) => {
   for (const response of responseArray) {
     if (response.status === "fulfilled") {
       // Extract values from response
-      // NOTE: Only keep weekly data for entries >6 months ago
+      // NOTE: Only keep weekly data for entries >1 year ago
       const asxcode = response.value.asxcode;
       const historical = response.value.historical
-        .filter(entry => dayjs().diff(entry.date, "month") < 6 || entry.date.getDay() == 1);
+        .filter(entry => dayjs().diff(entry.date, "year") < 1 || entry.date.getDay() == 1);
       
       // Find the existing entry and update it (if possible), otherwise add a new entry
       const existingEntry = data.find(entry => entry.asxcode === response.value.asxcode);
