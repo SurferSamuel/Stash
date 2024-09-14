@@ -5,7 +5,6 @@ body,
 .content {
   height: 100%;
   width: 100%;
-  font-family: "Inter", sans-serif;
 }
 
 .app {
@@ -16,30 +15,4 @@ body,
 .content {
   flex: 1;
   overflow-y: auto;
-}
-
-::-webkit-scrollbar {
-  width: 10px;
-}
-
-/* Track */
-::-webkit-scrollbar-track {
-  background: "inherit";
-}
-
-/* Handle */
-::-webkit-scrollbar-thumb {
-  background: #555;
-  border-radius: 2px;
-}
-
-/* Handle on hover */
-::-webkit-scrollbar-thumb:hover {
-  background: #ddd;
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    font-family: "InterVariable", sans-serif;
-  }
 }

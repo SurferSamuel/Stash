@@ -9,31 +9,24 @@ if (!fs.existsSync(dirPath)) {
   fs.mkdirSync(dirPath, { recursive: true });
 }
 
-// Rename existing 'latest.log' (if exists)
-const latestPath = path.join(dirPath, "latest.log");
-if (fs.existsSync(latestPath)) {
-  // Get the date of when 'latest.log' was made
-  const dateCreated = fs.statSync(latestPath).birthtime;
-  const dateString = dayjs(dateCreated).format("DD-MM-YYYY");
+const today = dayjs().format('DD-MM-YYYY');
+const pattern = new RegExp(`^${today}_(\\d{2}).log$`);
 
-  // Helper function that returns the path name given the number
-  // Eg. 05-07-2024_01
-  const newPath = (num: number) => {
-    return path.join(dirPath, `${dateString}_${String(num).padStart(2, '0')}.log`);
+// Find the highest number already used in the logs
+let maxNumber = 0;
+fs.readdirSync(dirPath).forEach((filename) => {
+  const match = filename.match(pattern);
+  if (match != null) {
+    const num = parseInt(match[1]) || 0;
+    if (num > maxNumber) {
+      maxNumber = num;
+    }
   }
-  
-  // Find the next avaliable number
-  let i = 1;
-  while (fs.existsSync(newPath(i))) {
-    i++;
-  }
-
-  // Rename the latest log
-  fs.renameSync(latestPath, newPath(i));
-}
+});
 
 // Setup the log file
-const logPath = path.join(dirPath, "latest.log");
+const logFilename = `${today}_${String(maxNumber + 1).padStart(2, '0')}.log`;
+const logPath = path.join(dirPath, logFilename);
 fs.writeFileSync(logPath, "");
 const stream = fs.createWriteStream(logPath, { flags: "a" });
 

@@ -1,6 +1,5 @@
 import { Formik, FormikErrors } from "formik";
 import { useEffect, useState } from "react";
-import { tokens } from "../../theme";
 import * as yup from "yup";
 import dayjs from "dayjs";
 
@@ -22,17 +21,21 @@ import {
 
 // Material UI
 import CircularProgress from "@mui/material/CircularProgress";
+import AccordionDetails from "@mui/material/AccordionDetails";
+import AccordionSummary from "@mui/material/AccordionSummary";
 import useMediaQuery from "@mui/material/useMediaQuery";
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
+import Accordion from "@mui/material/Accordion";
 import TextField from "@mui/material/TextField";
 import Snackbar from "@mui/material/Snackbar";
 import Button from "@mui/material/Button";
 import Alert from "@mui/material/Alert";
 import Box from "@mui/material/Box";
 
+// Icons
+import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown';
+
 // Components
-import { Accordion, AccordionSummary, AccordionDetails } from "../../components/accordion";
 import { PerformantTextField } from "../../components/PerformantTextField";
 import MultiSelectInput from "../../components/multiSelect";
 import DatePicker from "../../components/datePicker";
@@ -66,8 +69,6 @@ export interface AddCompanyFormValues {
 }
 
 const AddCompany = () => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const isNonMobile = useMediaQuery("(min-width:800px)");
   const [companyName, setCompanyName] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
@@ -260,7 +261,10 @@ const AddCompany = () => {
             </Box>
             {/* Company Details Dropdown */}
             <Accordion>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Company Details</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -380,7 +384,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add Note Dropdown */}
             <Accordion expanded={noteExpanded} onChange={() => setNoteExpanded(!noteExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Note</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -415,7 +422,6 @@ const AddCompany = () => {
                     handleChange={handleChange}
                     touched={touched}
                     errors={errors}
-                    colors={colors}
                     span={1}
                   />
                   {/* Note Description Input */}
@@ -433,7 +439,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add notification (date) dropdown */}
             <Accordion expanded={dateExpanded} onChange={() => setDateExpanded(!dateExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Notification (Date)</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -468,7 +477,6 @@ const AddCompany = () => {
                     handleChange={handleChange}
                     touched={touched}
                     errors={errors}
-                    colors={colors}
                     disablePast
                     span={1}
                   />
@@ -477,7 +485,10 @@ const AddCompany = () => {
             </Accordion>
             {/* Add Notification (Price) Input */}
             <Accordion expanded={priceExpanded} onChange={() => setPriceExpanded(!priceExpanded)}>
-              <AccordionSummary>
+              <AccordionSummary 
+                expandIcon={<ArrowDropDownIcon />}
+                sx={{ flexDirection: "row-reverse" }}
+              >
                 <Typography variant="h5">Add Notification (Price)</Typography>
               </AccordionSummary>
               <AccordionDetails>
@@ -537,7 +548,6 @@ const AddCompany = () => {
               <Button
                 id="submit"
                 type="submit"
-                color="secondary"
                 variant="contained"
                 // Open respective accordion's on input error
                 onClick={() => OpenAccordionOnError(errors)}

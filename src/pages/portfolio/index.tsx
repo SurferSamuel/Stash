@@ -13,7 +13,7 @@ import Box from "@mui/material/Box";
 
 // Types
 import { GraphRange, Option, PortfolioGraphData, PortfolioTableData } from "../../../electron/types";
-import PortfolioValueText from "./portfolioValueText";
+import PortfolioValueText, { loadingText } from "./portfolioValueText";
 
 export interface PortfolioFormValues {
   user: Option[];
@@ -49,10 +49,10 @@ const Portfolio = () => {
   // Data for table (and value text) component
   const [tableLoading, setTableLoading] = useState<boolean>(false);
   const [tableData, setTableData] = useState<PortfolioTableData>({
-    totalValue: "Loading",
-    dailyChange: "Loading",
+    totalValue: loadingText,
+    dailyChange: loadingText,
     dailyChangePerc: "",
-    totalChange: "Loading",
+    totalChange: loadingText,
     totalChangePerc: "",
     rows: [],
     skipped: [],
@@ -131,7 +131,7 @@ const Portfolio = () => {
             mt="-5px"
           >
             {/* Graph Range Button Group */}
-            {graphData !== null && <ButtonGroup color="secondary">
+            {graphData !== null && <ButtonGroup>
               <GraphRangeButton label="1M" range={graphRange} setRange={setGraphRange} />
               <GraphRangeButton label="3M" range={graphRange} setRange={setGraphRange}/>
               <GraphRangeButton label="6M" range={graphRange} setRange={setGraphRange}/>

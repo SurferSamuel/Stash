@@ -1,5 +1,9 @@
 import { GraphRange } from "../../../electron/types";
 import { Dispatch, SetStateAction } from "react";
+import { tokens } from "../../theme";
+
+// Material UI
+import useTheme from "@mui/material/styles/useTheme";
 import Button from "@mui/material/Button";
 
 type RangeLabel = "1M" | "3M" | "6M" | "1Y" | "5Y";
@@ -11,7 +15,14 @@ interface Props {
 }
 
 const GraphRangeButton = (props: Props) => {
-  const { label, range, setRange } = props;
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const { 
+    label, 
+    range, 
+    setRange
+  } = props;
+  
 
   const value: GraphRange = 
     label === "1M" ? 1 :
@@ -26,7 +37,7 @@ const GraphRangeButton = (props: Props) => {
       variant="text"
       onClick={() => setRange(value)}
       sx={{ 
-        color: range === value ? "white" : "primary",
+        color: range === value ? "white" : colors.blueAccent[600],
         zIndex: 1,
         '&:hover': {
           backgroundColor: 'transparent',

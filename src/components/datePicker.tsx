@@ -1,9 +1,12 @@
+import { FormikErrors, FormikTouched } from "formik";
+import { tokens } from "../theme";
+import { Dayjs } from "dayjs";
+
+// Material IU
 import { DesktopDateTimePicker } from '@mui/x-date-pickers/DesktopDateTimePicker';
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDayjs } from "@mui/x-date-pickers/AdapterDayjs";
-import { FormikErrors, FormikTouched } from "formik";
-import { ColorType } from "../theme";
-import { Dayjs } from "dayjs";
+import useTheme from "@mui/material/styles/useTheme";
 
 interface Props {
   label: string;
@@ -12,17 +15,31 @@ interface Props {
   handleChange: (e: { target: { name: string; value: Dayjs } }) => void;
   touched: FormikTouched<any>;
   errors: FormikErrors<any>;
-  colors: ColorType;
+  disableFuture?: boolean;
   disablePast?: boolean;
   span: number;
 }
 
 const DatePicker = (props: Props) => {
-  const { label, valueName, value, handleChange, touched, errors, colors, disablePast, span } = props;
+  const theme = useTheme();
+  const colors = tokens(theme.palette.mode);
+  const { 
+    label, 
+    valueName, 
+    value, 
+    handleChange, 
+    touched, 
+    errors, 
+    disableFuture,
+    disablePast, 
+    span 
+  } = props;
+
   return (
     <LocalizationProvider dateAdapter={AdapterDayjs}>
       <DesktopDateTimePicker
         {...(disablePast && { disablePast: true })}
+        {...(disableFuture && { disableFuture: true })}
         format="DD/MM/YYYY hh:mm A"
         value={value}
         onChange={(newValue) => {
@@ -33,6 +50,11 @@ const DatePicker = (props: Props) => {
             },
           });
         }}
+        viewRenderers={{
+          hours: null,
+          minutes: null,
+          seconds: null,
+        }}
         sx={{ gridColumn: `span ${span}` }}
         slotProps={{
           textField: {
@@ -42,26 +64,22 @@ const DatePicker = (props: Props) => {
             error: !!touched[valueName] && !!errors[valueName],
             helperText: touched[valueName] && errors[valueName] && String(errors[valueName]),
           },
-          layout: {
+          actionBar: {
+            actions: [],
+          },
+          desktopPaper: {
             sx: {
-              ".MuiDateCalendar-root": {
-                backgroundColor: colors.grey[900],
-              },
-              ".MuiMultiSectionDigitalClock-root": {
-                backgroundColor: colors.grey[900],
-              },
-              ".MuiDialogActions-root": {
-                backgroundColor: colors.grey[900],
-              },
-              ".MuiButtonBase-root.Mui-selected": {
-                backgroundColor: colors.blueAccent[400],
-              },
-              ".MuiButtonBase-root.Mui-selected:hover": {
-                backgroundColor: colors.blueAccent[400],
-                color: "black",
-              },
+              backgroundColor: colors.grey[900],
+              backgroundImage: "none",
+              boxShadow: "none",
+              marginTop: "4px",
+              border: `1px solid ${colors.grey[600]}`,
+            },
+          },
+          popper: {
+            sx: {
               ".MuiButtonBase-root.Mui-selected:focus": {
-                backgroundColor: colors.blueAccent[400],
+                backgroundColor: colors.grey[100],
               },
             },
           },

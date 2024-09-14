@@ -17,7 +17,7 @@ const OperatingCountriesInput = (props: Props) => {
       disableCloseOnSelect
       options={options}
       value={values}
-      sx={{ gridColumn: "span 4" }}
+      sx={{ gridColumn: "span 4", mr: "1px" }}
       isOptionEqualToValue={(option, value) => option.label === value.label}
       getOptionLabel={(option) => option.label}
       onChange={(event, newArray: Country[]) => {

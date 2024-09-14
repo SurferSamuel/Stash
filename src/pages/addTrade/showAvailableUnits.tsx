@@ -46,10 +46,10 @@ const ShowAvailableUnits = () => {
       ml="5px"
     >
       <InfoIcon
-        color="secondary"
+        color="primary"
       />
       <Typography
-        color="secondary"
+        color="primary"
         variant="h5"
       >
         {values.user} has {units.toString()} units of {values.asxcode} to sell.

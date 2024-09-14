@@ -1,9 +1,8 @@
-import { tokens } from "../../theme";
-
-// Material UI
-import useTheme from "@mui/material/styles/useTheme";
 import Typography from "@mui/material/Typography";
 import Box from "@mui/material/Box";
+
+// Loading text
+export const loadingText = "Loading";
 
 interface Props {
   totalValue: string;
@@ -14,8 +13,6 @@ interface Props {
 }
 
 const PortfolioValueText = (props: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const {
     totalValue,
     dailyChange,
@@ -26,7 +23,7 @@ const PortfolioValueText = (props: Props) => {
 
   // A helper function that determines the color based on the given string
   const getColor = (str: string): string => {
-    if (str === "+0.00" || str === "Loading") return "white";
+    if (str === loadingText || str === "+0.00") return "white";
     return (str[0] === "+") ? "success.main" : "error.main";
   }
 
@@ -47,7 +44,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Portfolio Value
         </Typography>
@@ -68,7 +65,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography 
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Today's Change
         </Typography>
@@ -89,7 +86,7 @@ const PortfolioValueText = (props: Props) => {
         <Typography 
           variant="h6"
           fontWeight={400}
-          color={colors.blueAccent[400]}
+          color="secondary"
         >
           Total Change
         </Typography>

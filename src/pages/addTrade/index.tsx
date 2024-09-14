@@ -205,9 +205,9 @@ const AddTrade = () => {
                 },
               }}
             >
-              {/* Type Header */}
+              {/* Details Header */}
               <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Type
+                Details
               </Typography>
               {/* Type Buttons */}
               <Button
@@ -216,6 +216,7 @@ const AddTrade = () => {
                 size="large"
                 onClick={() => handleChange({ target: { name: "type", value: "BUY" } })} 
                 sx={{ 
+                  borderColor: theme.palette.success.main,
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
                 }}
@@ -228,16 +229,13 @@ const AddTrade = () => {
                 size="large"
                 onClick={() => handleChange({ target: { name: "type", value: "SELL" } })}
                 sx={{ 
+                  borderColor: theme.palette.error.main,
                   gridColumn: isNonMobile ? "span 2" : "span 4",
                   height: "50px",
                 }}
               >
                 <Typography variant="h5" fontWeight={500}>SELL</Typography>
               </Button>
-              {/* Details Header */}
-              <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Details
-              </Typography>
               {/* User Input */}
               <SelectInput
                 label="User"
@@ -251,13 +249,13 @@ const AddTrade = () => {
               />
               {/* Date Input */}
               <DatePicker
+                disableFuture
                 label="Date"
                 valueName="date"
                 value={values.date}
                 handleChange={handleChange}
                 touched={touched}
                 errors={errors}
-                colors={colors}
                 span={2}
               />
               {/* Show available units if type is SELL */}
@@ -301,16 +299,13 @@ const AddTrade = () => {
                 helperText={touched.brokerage && errors.brokerage}
                 sx={{ gridColumn: "span 4" }}
               />
-              <Typography variant="h4" ml="6px" gridColumn="span 4">
-                Price Breakdown
-              </Typography>
               {/* Price Breakdown Box */}
               <Box display="flex" flexDirection="column" gridColumn="span 4">
                 <Divider />
                 {/* Share Value */}
                 <Box display="flex" justifyContent="space-between" p="16px 10px 12px 10px">
                   <Typography variant="h5">
-                    Shares <span style={{ color: 'grey' }}>
+                    Shares <span style={{ color: colors.grey[300] }}>
                       ({values.quantity ? values.quantity : 0} x ${values.unitPrice ? values.unitPrice : 0})
                     </span>
                   </Typography>
@@ -324,7 +319,7 @@ const AddTrade = () => {
                 {/* GST */}
                 <Box display="flex" justifyContent="space-between" p="0px 10px 16px 10px">
                   <Typography variant="h5">
-                    GST <span style={{ color: 'grey' }}>
+                    GST <span style={{ color: colors.grey[300] }}>
                       ({settings.gstPercent}%)
                     </span>
                   </Typography>
@@ -340,7 +335,7 @@ const AddTrade = () => {
               </Box>
             </Box>
             <Box display="flex" justifyContent="end" mt="20px">
-              <Button type="submit" color="secondary" variant="contained">
+              <Button type="submit" variant="contained">
                 Confirm
               </Button>
             </Box>

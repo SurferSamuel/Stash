@@ -1,11 +1,9 @@
 import { useFormikContext } from 'formik';
-import { tokens } from '../../theme';
 
 // Material UI
 import DialogContentText from '@mui/material/DialogContentText';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
-import useTheme from "@mui/material/styles/useTheme";
 import DialogTitle from '@mui/material/DialogTitle';
 import Dialog from '@mui/material/Dialog';
 import Button from '@mui/material/Button';
@@ -30,8 +28,6 @@ interface Props {
 }
 
 const FilterOptionsDialog = (props: Props) => {
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
   const { values, handleChange, setValues } = useFormikContext<PortfolioFormValues>();
   const {
     open,
@@ -74,11 +70,11 @@ const FilterOptionsDialog = (props: Props) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle variant="h5" fontWeight={500} sx={{ bgcolor: colors.primary[500] }}>
+      <DialogTitle variant="h4" fontWeight={500}>
         Filter Options
       </DialogTitle>
-      <DialogContent sx={{ bgcolor: colors.primary[500] }}>
-        <DialogContentText>
+      <DialogContent>
+        <DialogContentText fontSize="14px">
           Select options to filter your portfolio
         </DialogContentText>
         <Box
@@ -142,16 +138,16 @@ const FilterOptionsDialog = (props: Props) => {
           />
         </Box>
       </DialogContent>
-      <DialogActions sx={{ bgcolor: colors.primary[500] }}>
-        <Button 
+      <DialogActions>
+        <Button
+          variant="outlined"
           onClick={handleReset}
-          color="secondary"
         >
           Reset
         </Button>
-        <Button 
+        <Button
+          variant="contained"
           onClick={handleClose}
-          color="secondary"
         >
           Close
         </Button>
