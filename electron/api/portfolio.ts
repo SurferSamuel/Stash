@@ -32,7 +32,6 @@ yahooFinance.setGlobalConfig({ queue: { concurrency: 16 } });
 dayjs.extend(customParseFormat);
 
 /**
- * A helper function used to help filter using options arrays.
  * Searches the given searchArray and checks if all options in the optionsArray is found.
  */ 
 const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
@@ -40,7 +39,7 @@ const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
 }
 
 /**
- * A helper function that returns the companies that match the filter values.
+ * Returns the companies that match the filter values.
  */
 const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
   // Get existing data from storage

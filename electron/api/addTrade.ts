@@ -9,7 +9,7 @@ import {
 
 /**
  * Returns the number of available shares for the given asxcode and user.
- * Throws an error if the asxcode does not exist in the datastore
+ * Throws an error if the asxcode does not exist in the datastore.
  */
 export const availableShares = (asxcode: string, user: string) => {
   // Get existing data from storage
