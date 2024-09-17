@@ -31,15 +31,24 @@ yahooFinance.setGlobalConfig({ queue: { concurrency: 16 } });
 // Custom parse format for dayjs
 dayjs.extend(customParseFormat);
 
+
 /**
- * Searches the given searchArray and checks if all options in the optionsArray is found.
- */ 
-const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
-  return optionsArray.every(val => searchArray.some(obj => obj.label === val.label));
+ * Searches the given `arr` array and checks if all options in the
+ * `target` array is found.
+ *  * 
+ * @param target Array of targets
+ * @param arr Array to check for targets
+ * @returns Whether all targets were found
+ */
+const filterOption = (target: Option[], arr: Option[]) => {
+  return target.every(val => arr.some(obj => obj.label === val.label));
 }
 
 /**
  * Returns the companies that match the filter values.
+ * 
+ * @param filterValues Provided values for filtering
+ * @returns Array of companies matching all filter values
  */
 const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
   // Get existing data from storage
@@ -60,7 +69,10 @@ const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => 
 }
 
 /**
- * Gets the table rows for the portfolio page that match the given filter values.
+ * Gets the table data that match the given filter values.
+ * 
+ * @param filterValues Provided values for filtering
+ * @returns Rows matching all filter values
  */
 export const getPortfolioTableData = async (filterValues: PortfolioFilterValues): Promise<PortfolioTableData> => {
   // Get the filtered companies
@@ -198,7 +210,11 @@ export const getPortfolioTableData = async (filterValues: PortfolioFilterValues)
 }
 
 /**
- * Gets the data for the portfolio page graph, matching the given filter values.
+ * Gets the graph data that match the given filter values.
+ * 
+ * @param filterValues Provided values for filtering
+ * @returns Array of points matching all filter values, 
+ * for each graph range (1M, 3M, 6M, 1Y, 5Y)
  */
 export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues): Promise<PortfolioGraphData | null> => {
   // Get the filtered companies
@@ -296,6 +312,11 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
  * A helper function that counts the number of units the user(s) held at the given
  * time (assumed to be in the past). If the users array is empty, then will return
  * the number of units for all users.
+ * 
+ * @param company Object containing the company data
+ * @param users Which user to check
+ * @param time dayjs object of the required time (assumed to be in the past)
+ * @returns Number of units
  */
 const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
   // Calculate the number of units brought before the given time
@@ -322,7 +343,6 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
     return total;
   }, 0);
 
-  // The total units held at the time is just unitsBrought - unitsSold
   return unitsBrought - unitsSold;
 }
 
@@ -330,6 +350,9 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
  * A helper function that gets the historical data from storage, fetching new 
  * data if any asxcodes are outdated or missing from the data. The new data is 
  * saved to storage, and returned from this function.
+ * 
+ * @param asxcodes Array of ASX codes
+ * @returns Array containing historical adjusted close prices for all ASX codes
  */
 const getHistoricalData = async (asxcodes: string[]) => {
   // Get historical data from storage

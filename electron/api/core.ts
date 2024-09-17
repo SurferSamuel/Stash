@@ -17,6 +17,13 @@ import {
 /**
  * Gets the data for a specific key from the storage file.
  */
+
+/**
+ * Gets the data for a specific key from the storage file.
+ * 
+ * @param key Provided key
+ * @returns The data saved for the specific key
+ */
 export const getData: {
   (key: OptionKey): Option[];
   (key: "countries"): Country[];
@@ -53,6 +60,9 @@ export const getData: {
 
 /**
  * Saves the data for a specific key to the storage file.
+ * 
+ * @param key Provided key
+ * @param data The data to save
  */
 export const setData = (key: Key, data: Data) => {
   storage.set(key, data, (error) => {
@@ -62,6 +72,8 @@ export const setData = (key: Key, data: Data) => {
 
 /**
  * Gets the path to the storage folder.
+ * 
+ * @returns Full path to storage folder
  */
 export const getStoragePath = () => {
   return storage.getDataPath();
