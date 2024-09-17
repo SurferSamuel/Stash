@@ -31,7 +31,7 @@ yahooFinance.setGlobalConfig({ queue: { concurrency: 16 } });
 // Custom parse format for dayjs
 dayjs.extend(customParseFormat);
 
-/*
+/**
  * A helper function used to help filter using options arrays.
  * Searches the given searchArray and checks if all options in the optionsArray is found.
  */ 
@@ -39,7 +39,7 @@ const filterOption = (optionsArray: Option[], searchArray: Option[]) => {
   return optionsArray.every(val => searchArray.some(obj => obj.label === val.label));
 }
 
-/*
+/**
  * A helper function that returns the companies that match the filter values.
  */
 const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
@@ -60,7 +60,7 @@ const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => 
   );
 }
 
-/*
+/**
  * Gets the table rows for the portfolio page that match the given filter values.
  */
 export const getPortfolioTableData = async (filterValues: PortfolioFilterValues): Promise<PortfolioTableData> => {
@@ -198,7 +198,7 @@ export const getPortfolioTableData = async (filterValues: PortfolioFilterValues)
   };
 }
 
-/*
+/**
  * Gets the data for the portfolio page graph, matching the given filter values.
  */
 export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues): Promise<PortfolioGraphData | null> => {
@@ -293,7 +293,7 @@ export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues)
   };
 }
 
-/*
+/**
  * A helper function that counts the number of units the user(s) held at the given
  * time (assumed to be in the past). If the users array is empty, then will return
  * the number of units for all users.
@@ -327,7 +327,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
   return unitsBrought - unitsSold;
 }
 
-/*
+/**
  * A helper function that gets the historical data from storage, fetching new 
  * data if any asxcodes are outdated or missing from the data. The new data is 
  * saved to storage, and returned from this function.

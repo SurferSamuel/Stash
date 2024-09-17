@@ -7,7 +7,7 @@ import {
   CurrentShareEntry, 
 } from "../types";
 
-/*
+/**
  * Returns the number of available shares for the given asxcode and user.
  * Throws an error if the asxcode does not exist in the datastore
  */
@@ -27,7 +27,7 @@ export const availableShares = (asxcode: string, user: string) => {
     .reduce((acc, cur) => acc + Number(cur.quantity), 0);
 }
 
-/*
+/**
  * Saves form values for a BUY trade into the datastore.
  * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1 "BUY" history record of the trade. 
@@ -72,7 +72,7 @@ export const buyShare = (values: AddTradeValues, gstPercent: string) => {
   setData("companies", data);
 }
 
-/*
+/**
  * Saves form values for a SELL trade into the datastore.
  * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1, or more, "SELL" history records of the trade. 

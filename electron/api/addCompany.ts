@@ -8,7 +8,7 @@ import {
   OptionKey,
 } from "../types";
 
-/*
+/**
  * Saves add company form values into the datastore.
  */
 export const addCompany = (values: AddCompanyValues) => {
@@ -75,7 +75,7 @@ export const addCompany = (values: AddCompanyValues) => {
   setData("companies", data.concat(newCompany));
 }
 
-/*
+/**
  * A helper function. Provided a option key and the current options for that key, 
  * saves any new options into the datastore.
  */

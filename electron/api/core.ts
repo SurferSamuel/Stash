@@ -14,7 +14,7 @@ import {
   OptionKey,
 } from "../types";
 
-/*
+/**
  * Gets the data for a specific key
  */
 export const getData: {
@@ -51,7 +51,7 @@ export const getData: {
   return data;
 };
 
-/*
+/**
  * Saves the data for a specific key
  */
 export const setData = (key: Key, data: Data) => {
@@ -60,14 +60,14 @@ export const setData = (key: Key, data: Data) => {
   });
 };
 
-/*
+/**
  * Gets the path to the storage folder
  */
 export const getStoragePath = () => {
   return storage.getDataPath();
 };
 
-/*
+/**
  * Opens the storage folder in a new window
  */
 export const openStoragePath = () => {

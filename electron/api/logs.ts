@@ -30,7 +30,7 @@ const logPath = path.join(dirPath, logFilename);
 fs.writeFileSync(logPath, "");
 const stream = fs.createWriteStream(logPath, { flags: "a" });
 
-/*
+/**
  * Appends the given message to the log file
  */
 export const writeLog = (message: string) => {

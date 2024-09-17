@@ -2,7 +2,7 @@ import yahooFinance from "yahoo-finance2";
 import { writeLog } from "./logs";
 import { getData } from "./core";
 
-/*
+/**
  * Validates the ASX code without sending any requests to yahoo-finance. Used for
  * the "addCompany" page when the submit button is pressed. Faster, but has more
  * basic checking than validateASXCode(). 
@@ -27,7 +27,7 @@ export const quickValidateASXCode = (asxcode: string) => {
   return "Valid";
 }
 
-/*
+/**
   * Validates the given asxcode. If existing is true, then the provided asxcode
   * must be existing in the data. Otherwise, if existing is false, then the 
   * provided asxcode must not be existing (ie. a new asxcode).
