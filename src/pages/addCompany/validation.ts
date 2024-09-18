@@ -2,18 +2,27 @@ import { Dispatch, SetStateAction } from "react";
 import { TestContext } from "yup";
 import dayjs from "dayjs";
 
-// Global variables used in validateASXCode()
 let prevErrorMsg: string = undefined;
 let prevValue: string = undefined;
 let requestId = 0;
 
-// Clean up variables when page is unmounted
+/**
+ * Cleans up validation variables for all fields.
+ */
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
   prevValue = undefined;
   requestId = 0;
 };
 
+/**
+ * Validates the ASX code field in the yup validation schema for the
+ * "Add Company" page. Sets the company name (empty string if not valid).
+ * 
+ * @param setCompanyName Set company name function
+ * @param setLoading Set loading function
+ * @returns True/false if field is valid
+ */
 export const validateASXCode = (
   setCompanyName: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>
@@ -23,13 +32,8 @@ export const validateASXCode = (
 
     // If asxcode input is being actively edited and has changed since last call
     if (document.activeElement.id === "asxcode" && value !== prevValue) {
-      // Keep track of the current request id
       const currentRequestId = ++requestId;
-
-      // Update previous value
       prevValue = value;
-
-      // Update states
       setCompanyName("");
       setLoading(true);
 
@@ -52,17 +56,14 @@ export const validateASXCode = (
         return createError({ message: res.status });
       } 
       
-      // Otherwise if it is valid
+      // Otherwise, if it is valid...
       prevErrorMsg = undefined;
       return true;
     }
 
     // Use a quicker validation when pressing the submit button
     if (document.activeElement.id === "submit") {
-      // Keep track of the current request id
       const currentRequestId = ++requestId;
-
-      // Update previous value
       prevValue = value;
 
       // Wait for validation request to be processed
@@ -81,7 +82,7 @@ export const validateASXCode = (
         return createError({ message: res });
       } 
       
-      // Otherwise if it is valid
+      // Otherwise, if it is valid...
       prevErrorMsg = undefined;
       return true;
     }
@@ -91,86 +92,120 @@ export const validateASXCode = (
   };
 };
 
+/**
+ * Validates the note title field in the yup validation schema for the
+ * "Add Company" page. If description is not empty, then a title must be provided.
+ * 
+ * @param value Note title field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const noteTitleRequired = (value: string, context: TestContext) => {
   const { createError, parent } = context;
-
-  // If "note description" field is not empty, then a title must be provided
   if (parent.noteDescription && value === undefined) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the note date field in the yup validation schema for the
+ * "Add Company" page. Date is required if any "note" related field is not empty.
+ * 
+ * @param value Note date field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const noteDateRequired = (value: Date, context: TestContext) => {
   const { createError, parent } = context;
-
-  // Date is required if any "note" related field is not empty
-  const nonEmpty = parent.noteTitle || parent.noteDescription;
-  if (nonEmpty && value === undefined) {
+  if ((parent.noteTitle || parent.noteDescription) && value === undefined) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the notification date field in the yup validation schema for
+ * the "Add Company" page. Notification date is required if title is not empty.
+ * 
+ * @param value Notification date field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const notificationDateRequired = (value: Date, context: TestContext) => {
   const { createError, parent } = context;
-
-  // Notification date is required if title is not empty
   if (parent.notificationDateTitle && value === undefined) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the notification date field in the yup validation schema for
+ * the "Add Company" page. Notification date must be in the future. Returns
+ * true if no date is provided.
+ * 
+ * @param value Notification date field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const futureDate = (value: Date, context: TestContext) => {
   const { createError } = context;
-
-  // Ignore if date is not provided
-  if (value === undefined) return true;
-
-  // Notification date must be greater than or equal to today
-  if (dayjs().isAfter(value)) {
+  if (value !== undefined && dayjs().isAfter(value)) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the notification price fields in the yup validation schema for
+ * the "Add Company" page. Notification price is required if title is not empty.
+ * Returns true if title is empty.
+ * 
+ * @param value Notification price field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const missingPrice = (value: number, context: TestContext) => {
   const { createError, parent } = context;
-
-  // Ignore if title is empty
-  if (!parent.notificationPriceTitle) return true;
-
-  // If title is provided, then a price must be provided
-  if (!parent.notificationPriceHigh && !parent.notificationPriceLow) {
+  if (
+    parent.notificationPriceTitle !== undefined && 
+    !(parent.notificationPriceHigh || parent.notificationPriceLow)
+  ) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the notification price fields in the yup validation schema for
+ * the "Add Company" page. Checks if the upper price is above the lower price.
+ * 
+ * @param value Notification price field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const lessThanLowPrice = (value: number, context: TestContext) => {
   const { createError, parent } = context;
-
-  // Ignore if low price is invalid
   const lowPrice = parent.notificationPriceLow;
-  if (isNaN(lowPrice)) return true;
-
-  // Create error if value (high price) is less than low price
-  if (value < lowPrice) {
+  if (!isNaN(lowPrice) && value < lowPrice) {
     return createError();
   }
   return true;
 };
 
+/**
+ * Validates the notification price fields in the yup validation schema for
+ * the "Add Company" page. Checks if the lower price is below the upper price.
+ * 
+ * @param value Notification price field
+ * @param context Yup context
+ * @returns True/false if field is valid
+ */
 export const greaterThanHighPrice = (value: number, context: TestContext) => {
   const { createError, parent } = context;
-
-  // Ignore if high price is invalid
   const highPrice = parent.notificationPriceHigh;
-  if (isNaN(highPrice)) return true;
-
-  // Create error if value (low price) is greater than high price
-  if (value > highPrice) {
+  if (!isNaN(highPrice) && value > highPrice) {
     return createError();
   }
   return true;
