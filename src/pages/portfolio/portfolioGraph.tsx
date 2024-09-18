@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { tokens } from "../../theme";
 import dayjs from "dayjs";
 
@@ -30,6 +31,17 @@ const PortfolioGraph = (props: Props) => {
     range,
     data,
   } = props;
+
+  // Set width manually
+  // Fixed an issue where lines are not rendered when window is resized larger
+  const [rectWidth, setRectWidth] = useState<number>(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setRectWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    
+    // Clean up
+    return () => window.removeEventListener("resize", handleResize);  
+  }, []);
 
   // Currency formatter helper function
   // Note use USD format "$" instead of AUD format "A$"
@@ -132,6 +144,9 @@ const PortfolioGraph = (props: Props) => {
           loadingOverlay: Overlay("Loading data..."),
         }}
         sx={{
+          '& rect': {
+            width: rectWidth,
+          },
           '& .MuiChartsAxis-directionY .MuiChartsAxis-tick': {
             stroke: "none",
           },
