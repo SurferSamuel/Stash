@@ -1,8 +1,9 @@
+import { AddTradeFormValues } from "./index";
 import { useFormikContext } from "formik";
 import { useEffect } from "react";
 
 const LoadBrokerage = (): null => {
-  const { setFieldValue } = useFormikContext();
+  const { setFieldValue } = useFormikContext<AddTradeFormValues>();
 
   // On page render, pre-fill brokerage input with auto fill value from settings
   useEffect(() => {
