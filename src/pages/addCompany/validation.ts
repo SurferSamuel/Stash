@@ -7,7 +7,7 @@ let prevValue: string = undefined;
 let requestId = 0;
 
 /**
- * Cleans up validation variables for all fields.
+ * Cleans up validation variables for all fields. Call when page is unmounted.
  */
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
