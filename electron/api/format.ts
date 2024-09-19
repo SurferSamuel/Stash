@@ -25,7 +25,7 @@ export const currencyFormat = (value: number | null, decimals = 2) => {
  * 
  * @example
  *  12.3 -> "12.30%"
- * -12.3 -> "-$12.30%"
+ * -12.3 -> "-12.30%"
  * 
  * @param value The number to be formated
  * @param decimals Number of decimal places (default = 2)
