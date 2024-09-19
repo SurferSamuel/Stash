@@ -8,8 +8,10 @@ import {
   OptionKey,
 } from "../types";
 
-/*
+/**
  * Saves add company form values into the datastore.
+ * 
+ * @param values "Add Company" page form values
  */
 export const addCompany = (values: AddCompanyValues) => {
   // Save any new options that the user has inputted
@@ -75,16 +77,19 @@ export const addCompany = (values: AddCompanyValues) => {
   setData("companies", data.concat(newCompany));
 }
 
-/*
- * A helper function. Provided a option key and the current options for that key, 
- * saves any new options into the datastore.
+/**
+ * Provided a key and the current options for that key, 
+ * saves any new options into storage.
+ * 
+ * @param key Provided key
+ * @param options Current options for the provided key
  */
-const saveNewOptions = (key: OptionKey, currentOptions: Option[]) => {
+const saveNewOptions = (key: OptionKey, options: Option[]) => {
   // Get the existing options from the datastore
   const existingOptions = getData(key);
 
-  // Filter the current options to find any new options
-  const newOptions = currentOptions.filter((option) => {
+  // Filter the options to find any new ones
+  const newOptions = options.filter((option) => {
     return !existingOptions.some(value => value.label === option.label);
   });
 

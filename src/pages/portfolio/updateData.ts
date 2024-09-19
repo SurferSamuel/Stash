@@ -48,7 +48,7 @@ const UpdateData = (props: Props): null => {
   // bottom offset using the given data 
   const updateYAxisAndOffset = (graphData: PortfolioGraphData, graphRange: GraphRange) => {
     if (graphData === null || graphData[graphRange].length === 0) {
-      setGraphYAxis([0, 0]);
+      setGraphYAxis([null, null]);
       setGraphBottomOffset(1);
       return;
     }

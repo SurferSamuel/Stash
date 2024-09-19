@@ -30,8 +30,11 @@ const logPath = path.join(dirPath, logFilename);
 fs.writeFileSync(logPath, "");
 const stream = fs.createWriteStream(logPath, { flags: "a" });
 
-/*
- * Appends the given message to the log file
+/**
+ * Appends the given message to the current log file. 
+ * Each message is appended on a single line.
+ * 
+ * @param message The message to be appended
  */
 export const writeLog = (message: string) => {
   const time = dayjs().format("HH:mm:ss");

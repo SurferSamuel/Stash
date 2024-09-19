@@ -1,18 +1,29 @@
 import { Dispatch, SetStateAction } from "react";
 import { TestContext } from "yup";
 
-// Global variables used in validateASXCode()
 let prevErrorMsg: string = undefined;
 let prevValue: string = undefined;
 let requestId = 0;
 
-// Clean up variables when page is unmounted
+/**
+ * Cleans up validation variables for all fields. Call when page is unmounted.
+ */
 export const cleanUpValidation = () => {
   prevErrorMsg = undefined;
   prevValue = undefined;
   requestId = 0;
 };
 
+/**
+ * Validates the ASX code field in the yup validation schema for the
+ * "Add Trade" page. Sets the company name (empty string if not valid)
+ * and sets the unit price (not changed if not valid).
+ * 
+ * @param setCompanyName Set company name function
+ * @param setLoading Set loading function
+ * @param setUnitPrice Set unit price function
+ * @returns True/false if field is valid
+ */
 export const validateASXCode = (
   setCompanyName: Dispatch<SetStateAction<string>>,
   setLoading: Dispatch<SetStateAction<boolean>>,
@@ -23,13 +34,8 @@ export const validateASXCode = (
 
     // If asxcode input is being actively edited and has changed since last call
     if (document.activeElement.id === "asxcode" && value !== prevValue) {
-      // Keep track of the current request id
       const currentRequestId = ++requestId;
-
-      // Update previous value
       prevValue = value;
-
-      // Update states
       setCompanyName("");
       setLoading(true);
 
@@ -53,7 +59,7 @@ export const validateASXCode = (
         return createError({ message: res.status });
       } 
       
-      // Otherwise if it is valid
+      // Otherwise, if it is valid...
       prevErrorMsg = undefined;
       return true;
     }

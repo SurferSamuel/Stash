@@ -7,9 +7,13 @@ import {
   CurrentShareEntry, 
 } from "../types";
 
-/*
- * Returns the number of available shares for the given asxcode and user.
- * Throws an error if the asxcode does not exist in the datastore
+/**
+ * Returns the number of available shares the users own for the given asxcode.
+ * 
+ * @param asxcode ASX code to check
+ * @param user Provided user
+ * @returns Number of available shares
+ * @throws Throws an error if asxcode does not exist in the storage
  */
 export const availableShares = (asxcode: string, user: string) => {
   // Get existing data from storage
@@ -27,12 +31,14 @@ export const availableShares = (asxcode: string, user: string) => {
     .reduce((acc, cur) => acc + Number(cur.quantity), 0);
 }
 
-/*
+/**
  * Saves form values for a BUY trade into the datastore.
  * Assumes form values can be parsed as numbers (checked prior by validation).
- * Creates 1 "BUY" history record of the trade. 
- * Creates 1 "CURRENT" record of the trade.
- * Throws an error if unsuccessful.
+ * Creates 1 BUY history record of the trade, and 1 CURRENT record of the trade.
+ * 
+ * @param values "Add Trade" page form values
+ * @param gstPercent The GST % to use
+ * @throws Throws an error if asxcode does not exist in the storage
  */
 export const buyShare = (values: AddTradeValues, gstPercent: string) => {
   // Get existing data from storage
@@ -72,12 +78,15 @@ export const buyShare = (values: AddTradeValues, gstPercent: string) => {
   setData("companies", data);
 }
 
-/*
+/**
  * Saves form values for a SELL trade into the datastore.
  * Assumes form values can be parsed as numbers (checked prior by validation).
  * Creates 1, or more, "SELL" history records of the trade. 
  * May remove/modify multiple "CURRENT" records.
- * Throws an error if unsuccessful.
+ * 
+ * @param values "Add Trade" page form values
+ * @param gstPercent The GST % to use
+ * @throws Throws an error if asxcode does not exist in the storage
  */
 export const sellShare = (values: AddTradeValues, gstPercent: string) => {
   // Get existing data from storage

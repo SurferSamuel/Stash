@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { tokens } from "../../theme";
 import dayjs from "dayjs";
 
@@ -31,10 +32,25 @@ const PortfolioGraph = (props: Props) => {
     data,
   } = props;
 
-  // Currency formatter helper function
-  // Note use USD format "$" instead of AUD format "A$"
+  // Set width of rect manually
+  // Fixes an issue where lines are not rendered when window is resized larger
+  const [rectWidth, setRectWidth] = useState<number>(window.innerWidth);
+  useEffect(() => {
+    const handleResize = () => setRectWidth(window.innerWidth);
+    window.addEventListener("resize", handleResize);
+    // Clean up
+    return () => window.removeEventListener("resize", handleResize);  
+  }, []);
+
+  /**
+   * Currency formatter helper function.
+   * Note use USD format "$" instead of AUD format "A$"
+   */
   const currencyFormat = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format;
 
+  /**
+   * Formats the values for the x-axis (ie. dates).
+   */
   const xAxisValueFormatter = (id: number, context: AxisValueFormatterContext) => {
     // If data point could not be found (eg. if id was invalid)
     const dataPoint = data[range].find(entry => entry.id === id);
@@ -56,26 +72,31 @@ const PortfolioGraph = (props: Props) => {
     }
   }
 
-  // Determines whether the x-axis tick should be displayed
+  /**
+   * Determines whether the x-axis tick should be displayed.
+   */
   const xAxisTickInterval = (value: number, index: number) => {
     const frequency = Math.floor(data[range].length / 7);
     const offset = Math.ceil((frequency - (data[range].length % frequency)) / 2);
     return index % frequency === Math.max(frequency - offset, 0);
   }
 
+   /**
+   * Formats the values for the y-axis (ie. prices).
+   */
   const yAxisValueFormatter = (value: number) => {
     // Compact to "245K" or "1.2M" etc.
-    if (value < 1000) return `${value}`;
-    if (value < 1000000) return `${value / 1000}K`;
-    if (value < 1000000000) return `${value / 1000000}M`;
-    return `${value / 1000000000}B`;
+    if (value < 1e3) return `${value}`;
+    if (value < 1e6) return `${value / 1e3}K`;
+    if (value < 1e9) return `${value / 1e6}M`;
+    return `${value / 1e9}B`;
   }
 
   const OverlayText = styled('text')(({ theme }) => ({
     transform: 'translateX(-28px)',
-    fontSize: 14,
     fill: theme.palette.text.primary,
-    shapeRendering: 'crispEdges',
+    fontFamily: theme.typography.fontFamily,
+    fontSize: 15,
     textAnchor: 'middle',
     dominantBaseline: 'middle',
   }));
@@ -132,6 +153,9 @@ const PortfolioGraph = (props: Props) => {
           loadingOverlay: Overlay("Loading data..."),
         }}
         sx={{
+          '& rect': {
+            width: rectWidth,
+          },
           '& .MuiChartsAxis-directionY .MuiChartsAxis-tick': {
             stroke: "none",
           },

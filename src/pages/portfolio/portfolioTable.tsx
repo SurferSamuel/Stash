@@ -332,13 +332,22 @@ const PortfolioTable = (props: Props) => {
           '.MuiDataGrid-columnHeader:focus': {
             outline: 'none',
           },
-          '& .MuiDataGrid-topContainer::after': {
-            bgcolor: "transparent"
+          '& .MuiDataGrid-columnHeader .MuiDataGrid-columnSeparator': {
+            opacity: 0,
+          },
+          '& .MuiDataGrid-columnHeader--last .MuiDataGrid-columnSeparator': {
+            display: "none",
+          },
+          '& .MuiDataGrid-columnHeaders:hover .MuiDataGrid-columnSeparator': {
+            opacity: 1,
+          },
+          '& .MuiDataGrid-row--borderBottom .MuiDataGrid-columnHeader': {
+            borderBottom: "none",
           },
           '& .MuiDataGrid-filler': {
             '& > *': {
-              borderTopColor: "#ffffff1f"
-            }
+              borderTopColor: "#ffffff1f",
+            },
           },
           '& .MuiDataGrid-overlay': {
             fontSize: 14, 
