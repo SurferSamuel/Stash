@@ -42,12 +42,12 @@ export const getData: {
     } else {
       // Encase no file exists, set data to an empty array
       data = [];
-      writeLog(`WARNING: Failed to read default values from [${fileName}]`);
+      writeLog(`[getData]: Failed to read default values from [${fileName}]`);
     }
     
     // Save data to storage
     storage.set(key, data, (error) => {
-      if (error) writeLog(`Error in storage.set: ${error}`);
+      if (error) writeLog(`[storage.set]: ${error}`);
     });
   }
 
@@ -62,7 +62,7 @@ export const getData: {
  */
 export const setData = (key: Key, data: Data) => {
   storage.set(key, data, (error) => {
-    if (error) writeLog(`Error in storage.set: ${error}`);
+    if (error) writeLog(`[storage.set]: ${error}`);
   });
 };
 
