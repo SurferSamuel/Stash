@@ -16,10 +16,6 @@ import {
 
 /**
  * Gets the data for a specific key from the storage file.
- */
-
-/**
- * Gets the data for a specific key from the storage file.
  * 
  * @param key Provided key
  * @returns The data saved for the specific key
