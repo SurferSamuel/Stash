@@ -9,10 +9,18 @@ import {
   CompanyData, 
   Country, 
   Data, 
+  HistoricalEntry, 
   Key, 
   Option, 
   OptionKey,
 } from "../types";
+
+// Overload signatures
+export function getData(key: OptionKey): Option[];
+export function getData(key: "countries"): Country[];
+export function getData(key: "companies"): CompanyData[];
+export function getData(key: "historicals"): HistoricalEntry[];
+export function getData(key: "settings"): Settings;
 
 /**
  * Gets the data for a specific key from the storage file.
@@ -20,12 +28,7 @@ import {
  * @param key Provided key
  * @returns The data saved for the specific key
  */
-export const getData: {
-  (key: OptionKey): Option[];
-  (key: "countries"): Country[];
-  (key: "companies"): CompanyData[];
-  (key: "settings"): Settings;
-} = (key: Key): any => {
+export function getData(key: Key) {
   // Attempt to get data from storage
   let data = storage.getSync(key);
 
@@ -52,7 +55,7 @@ export const getData: {
   }
 
   return data;
-};
+}
 
 /**
  * Saves the data for a specific key to the storage file.
