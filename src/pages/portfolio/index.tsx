@@ -82,9 +82,7 @@ const Portfolio = () => {
   return (
     <Box m="25px 30px 15px 30px">
       <Formik
-        onSubmit={() => {
-          // Do nothing on submit
-        }}
+        onSubmit={() => { /* Do nothing on submit */ }}
         initialValues={initialValues}
       >
         <Box
