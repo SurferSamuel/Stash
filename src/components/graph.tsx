@@ -88,7 +88,7 @@ const Graph = (props: Props) => {
   const xAxisValueFormatter = (id: number, context: AxisValueFormatterContext) => {
     // If data point could not be found (eg. if id was invalid)
     const dataPoint = data[range].find(entry => entry.id === id);
-    if (dataPoint === undefined) return "";
+    if (dataPoint === undefined) return null;
 
     // Convert date to dayjs
     const date = dayjs(dataPoint.date);
@@ -208,9 +208,13 @@ const Graph = (props: Props) => {
         </ButtonGroup>}
       </Box>
       <LineChart
-        skipAnimation={true}
+        height={400}
         loading={loading}
+        dataset={dataset}
+        skipAnimation={true}
         margin={{ right: 5 }}
+        grid={{ horizontal: true }}
+        tooltip={{ trigger: data[range].length === 0 ? "none" : "axis" }}
         xAxis={[
           {
             dataKey: "id",
@@ -236,9 +240,6 @@ const Graph = (props: Props) => {
             area: true,
           }
         ]}
-        dataset={dataset}
-        height={400}
-        grid={{ horizontal: true }}
         slots={{ 
           noDataOverlay: Overlay("No data to display"),
           loadingOverlay: Overlay("Loading data..."),
