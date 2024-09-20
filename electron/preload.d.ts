@@ -8,8 +8,7 @@ import {
   Option, 
   OptionKey, 
   PortfolioFilterValues, 
-  PortfolioGraphData,
-  PortfolioTableData,
+  PortfolioData,
   Settings,
   ValidateASXReturn,
 } from "./types";
@@ -31,8 +30,7 @@ export interface IElectronAPI {
   availableShares: (asxcode: string, user: string) => Promise<number>;
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
-  getPortfolioTableData: (filterValues: PortfolioFilterValues) => Promise<PortfolioTableData>;
-  getPortfolioGraphData: (filterValues: PortfolioFilterValues) => Promise<PortfolioGraphData>;
+  getPortfolioData: (filterValues: PortfolioFilterValues) => Promise<PortfolioData>;
 }
 
 declare global {
