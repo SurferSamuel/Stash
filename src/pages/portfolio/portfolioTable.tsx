@@ -231,13 +231,17 @@ const PortfolioTable = (props: Props) => {
   useEffect(() => {
     const totalPages = Math.ceil(data.length / paginationModel.pageSize);
     setTotalPages(Math.max(totalPages, 1));
-    // Also reset page back to page 0 (to prevent a blank page being shown when totalPages is decreased)
+    // Go back to page 0
     setPaginationModel((prevModel) => ({ ...prevModel, page: 0 }));
   }, [data]);
 
   // Pagnation functions
-  const handleNextPage = () => setPaginationModel((prevModel) => ({ ...prevModel, page: Math.min(prevModel.page + 1, totalPages - 1) }));
-  const handlePrevPage = () => setPaginationModel((prevModel) => ({ ...prevModel, page: Math.max(prevModel.page - 1, 0) }));
+  const handleNextPage = () => setPaginationModel((prevModel) => (
+    { ...prevModel, page: Math.min(prevModel.page + 1, totalPages - 1) }
+  ));
+  const handlePrevPage = () => setPaginationModel((prevModel) => (
+    { ...prevModel, page: Math.max(prevModel.page - 1, 0) }
+  ));
 
   return (
     <Box
