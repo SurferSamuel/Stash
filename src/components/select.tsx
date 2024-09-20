@@ -41,7 +41,8 @@ const SelectInput = (props: Props) => {
       value={value}
       options={options}
       onKeyDown={(e) => {
-        e.key === "Enter" && e.preventDefault(); // Disable formik submit on enter
+        // Disable formik submit on enter
+        if (e.key === "Enter") e.preventDefault();
       }}
       onChange={(event, newValue) => {
         // Convert no new value into empty string

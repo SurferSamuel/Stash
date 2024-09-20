@@ -28,7 +28,7 @@ const ShowAvailableUnits = () => {
       try {
         setUnits(await window.electronAPI.availableShares(values.asxcode.toUpperCase(), values.user));
         setShow(true);
-      } catch (error) {
+      } catch {
         // If an error was caught (ie. asxcode was not found), then don't show available shares
         setShow(false);
       }
