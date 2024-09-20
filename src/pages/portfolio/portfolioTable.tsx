@@ -26,7 +26,7 @@ import { Option, PortfolioTableRow } from '../../../electron/types';
 
 interface Props {
   loading: boolean;
-  rows: PortfolioTableRow[];
+  data: PortfolioTableRow[];
   usersList: Option[];
   financialStatusList: Option[];
   miningStatusList: Option[];
@@ -197,7 +197,7 @@ const columns: GridColDef[] = [
 const PortfolioTable = (props: Props) => {
   const { 
     loading, 
-    rows,
+    data,
     usersList,
     financialStatusList,
     miningStatusList,
@@ -227,13 +227,13 @@ const PortfolioTable = (props: Props) => {
     pageSize: 6,
   });
 
-  // Update total pages when rows is changed
+  // Update total pages when data is changed
   useEffect(() => {
-    const totalPages = Math.ceil(rows.length / paginationModel.pageSize);
+    const totalPages = Math.ceil(data.length / paginationModel.pageSize);
     setTotalPages(Math.max(totalPages, 1));
     // Also reset page back to page 0 (to prevent a blank page being shown when totalPages is decreased)
     setPaginationModel((prevModel) => ({ ...prevModel, page: 0 }));
-  }, [rows]);
+  }, [data]);
 
   // Pagnation functions
   const handleNextPage = () => setPaginationModel((prevModel) => ({ ...prevModel, page: Math.min(prevModel.page + 1, totalPages - 1) }));
@@ -313,7 +313,7 @@ const PortfolioTable = (props: Props) => {
         paginationModel={paginationModel}
         loading={loading}
         columns={columns.filter(column => !hiddenColumns.includes(column.field))}
-        rows={rows}
+        rows={data}
         sx={{
           height: 385, 
           border: 0,
