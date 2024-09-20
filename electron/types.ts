@@ -17,7 +17,7 @@ export type OptionKey =
   | "users";
 
 // All valid keys
-export type Key = OptionKey | "countries" | "companies" | "settings";
+export type Key = OptionKey | "countries" | "companies" | "historicals" | "settings";
 
 // Dropdown option type
 export interface Option {
@@ -127,8 +127,15 @@ export interface Settings {
   brokerageAutoFill: string;
 }
 
+// Historical entry type
+export interface HistoricalEntry {
+  asxcode: string;
+  lastUpdated: string;
+  historical: ChartResultArrayQuote[];
+}
+
 // Any data type, returned from getData
-export type Data = Option[] | Country[] | CompanyData[] | Settings;
+export type Data = Option[] | Country[] | CompanyData[] | HistoricalEntry[] | Settings;
 
 // Values type for AddCompany()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
@@ -161,34 +168,28 @@ export interface PortfolioTableRow {
   weightPerc: number;        // Weight % using market value
 }
 
-// Return type of getPortfolioTableData()
-export interface PortfolioTableData {
-  totalValue: string,             // Total value of the portfolio (as of today)
-  dailyChange: string,            // Today's change in portfolio value
-  dailyChangePerc: string,        // Today's change in portfolio value %
-  totalChange: string,            // Total change in portfolio value
-  totalChangePerc: string,        // Total change in portfolio value %
-  rows: PortfolioTableRow[],      // Row data for the table
-  skipped: string[],              // Companies that were skipped when calculating
-}
-
-// Used in getPortfolioGraphData()
-export interface HistoricalEntry {
-  asxcode: string;
-  lastUpdated: string;
-  historical: ChartResultArrayQuote[];
-}
-
 // Data point type for the portfolio graph
-export interface PortfolioDataPoint {
+export type GraphDataPoint = {
   id: number;
   date: Date;
   value: number;
-  [key: string]: number | Date; // To keep TS happy
 }
 
 // Graph range in months
 export type GraphRange = 1 | 3 | 6 | 12 | 60;
 
-// Return type of getPortfolioGraphData()
-export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>
+// Prop types for portfolio value text component
+export interface PortfolioText {
+  totalValue: string,      // Total value of the portfolio (as of today)
+  dailyChange: string,     // Today's change in portfolio value
+  dailyChangePerc: string, // Today's change in portfolio value %
+  totalChange: string,     // Total change in portfolio value
+  totalChangePerc: string, // Total change in portfolio value %
+}
+
+// Return type of getPortfolioData()
+export interface PortfolioData {
+  graph: Record<GraphRange, GraphDataPoint[]>;
+  table: PortfolioTableRow[];
+  text: PortfolioText;
+}
