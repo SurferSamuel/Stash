@@ -16,20 +16,18 @@ const ShowAvailableUnits = () => {
   useEffect(() => {
     (async () => {
       // Show available shares only when trade type is SELL and asxcode/user is non-empty
-      const show = values.type === "SELL" && values.asxcode !== "" && values.user !== "";
-
-      // Skip API call if not going to show the available shares
-      if (!show) {
+      if (values.type !== "SELL" || values.asxcode === "" || values.user === "") {
         setShow(false);
         return;
       }
       
       // Attempt to set the units state using backend API call
       try {
-        setUnits(await window.electronAPI.availableShares(values.asxcode.toUpperCase(), values.user));
+        const asxcode = values.asxcode.toUpperCase();
+        setUnits(await window.electronAPI.availableShares(asxcode, values.user));
         setShow(true);
       } catch {
-        // If an error was caught (ie. asxcode was not found), then don't show available shares
+        // If error (ie. asxcode was not found), then don't show available shares
         setShow(false);
       }
       
@@ -45,13 +43,8 @@ const ShowAvailableUnits = () => {
       gap="6px"
       ml="5px"
     >
-      <InfoIcon
-        color="primary"
-      />
-      <Typography
-        color="primary"
-        variant="h5"
-      >
+      <InfoIcon color="primary"/>
+      <Typography color="primary" variant="h5">
         {values.user} has {units.toString()} units of {values.asxcode} to sell.
       </Typography>
     </Box>
