@@ -141,23 +141,6 @@ export const notificationDateRequired = (value: Date, context: TestContext) => {
 };
 
 /**
- * Validates the notification date field in the yup validation schema for
- * the "Add Company" page. Notification date must be in the future. Returns
- * true if no date is provided.
- * 
- * @param value Notification date field
- * @param context Yup context
- * @returns True/false if field is valid
- */
-export const futureDate = (value: Date, context: TestContext) => {
-  const { createError } = context;
-  if (value !== undefined && dayjs().isAfter(value)) {
-    return createError();
-  }
-  return true;
-};
-
-/**
  * Validates the notification price fields in the yup validation schema for
  * the "Add Company" page. Notification price is required if title is not empty.
  * Returns true if title is empty.

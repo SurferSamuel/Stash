@@ -9,7 +9,6 @@ import handleFormSubmit from "./handleFormSubmit";
 // Yup validation functions
 import {
   cleanUpValidation,
-  futureDate,
   greaterThanHighPrice,
   lessThanLowPrice,
   missingPrice,
@@ -153,25 +152,25 @@ const AddCompany = () => {
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("noteDate", "Required", noteDateRequired),
+        .test("date-required", "Required", noteDateRequired),
       notificationDate: yup
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("notifDate1", "Required", notificationDateRequired)
-        .test("notifDate2", "Date must be in the future", futureDate),
+        .test("date-required", "Required", notificationDateRequired)
+        .test("future-date", "Date must be in the future", (value) => dayjs().isBefore(value)),
       notificationPriceHigh: yup
         .number()
         .typeError("Invalid Price")
         .positive("Price must be positive")
-        .test("notifPriceH1", "Price is missing", missingPrice)
-        .test("notifPriceH1", "Upper limit must be above lower limit", lessThanLowPrice),
+        .test("price-missing", "Price is missing", missingPrice)
+        .test("price-limits", "Upper limit must be above lower limit", lessThanLowPrice),
       notificationPriceLow: yup
         .number()
         .typeError("Invalid Price")
         .positive("Price must be positive")
-        .test("notifPriceL1", "Price is missing", missingPrice)
-        .test("notifPriceL2", "Lower limit must be below upper limit", greaterThanHighPrice),
+        .test("price-missing", "Price is missing", missingPrice)
+        .test("price-limits", "Lower limit must be below upper limit", greaterThanHighPrice),
     });
 
   // A helper function. Open accordion's that have errors within them,
