@@ -71,9 +71,11 @@ const SelectInput = (props: Props) => {
             error: !!touched[valueName] && !!errors[valueName],
             helperText: touched[valueName] && (errors[valueName] as string)
           })}
-          inputProps={{
-            ...params.inputProps,
-            style: capitaliseInput ? { textTransform: "uppercase" } : undefined,
+          slotProps={{
+            htmlInput: {
+              ...params.inputProps,
+              style: capitaliseInput ? { textTransform: "uppercase" } : undefined,
+            }
           }}
         />
       )}
