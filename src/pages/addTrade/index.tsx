@@ -122,8 +122,15 @@ const AddTrade = () => {
         .string()
         .test("asxcode", "", validateASXCode(setCompanyName, setLoading, setUnitPrice)),
       user: yup.string().required("Required"),
-      date: yup.date().typeError("Invalid Date").required("Required"),
-      quantity: yup.number().required("Requried"),
+      date: yup
+        .date()
+        .typeError("Invalid Date")
+        .test("not-future", "Date cannot be in the future", (value) => dayjs().isAfter(value))
+        .required("Required"),
+      quantity: yup
+        .number()
+        .test("non-zero", "Quantity can't be 0", (value) => value !== 0)
+        .required("Requried"),
       unitPrice: yup.number().required("Requried"),
       brokerage: yup.number().required("Requried"),
     });
