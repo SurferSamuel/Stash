@@ -39,13 +39,7 @@ export const getPortfolioData = async (filterValues: PortfolioFilterValues): Pro
   // If no companies match the filter values
   if (companies.length === 0) {
     return {
-      graph: {
-        1: [],
-        3: [],
-        6: [],
-        12: [],
-        60: [],
-      },
+      graph: { 1: [], 3: [], 6: [], 12: [], 60: [] },
       table: [],
       text: {
         totalValue: "$0.00",
