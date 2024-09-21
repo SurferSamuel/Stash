@@ -46,7 +46,7 @@ const PortfolioValueText = (props: Props) => {
   }
 
   return (
-    <Box display="flex" alignItems="flex-end" gap="30px" ml="3px" gridColumn="span 4">
+    <Box display="flex" alignItems="flex-end" gap="30px" ml="3px">
       {/* Portfolio Value container */}
       <Box display="flex" flexDirection="column" gap="2px">
         <Typography variant="h6" fontWeight={400} color="secondary">
