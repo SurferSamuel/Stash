@@ -38,9 +38,9 @@ interface Settings {
 }
 
 export interface AddTradeFormValues {
-  asxcode: string;
+  asxcode: Option;
   type: "BUY" | "SELL";
-  user: string;
+  account: Option;
   date: dayjs.Dayjs;
   quantity: string;
   unitPrice: string;
@@ -66,7 +66,7 @@ const AddTrade = () => {
 
   // Dropdown data states
   const [asxCodeList, setAsxCodeList] = useState<Option[]>([]);
-  const [usersList, setUsersList] = useState<Option[]>([]);
+  const [accountsList, setAccountsList] = useState<Option[]>([]);
 
   // Price breakdown box states
   const [shareValue, setShareValue] = useState<number>(0);
@@ -87,16 +87,13 @@ const AddTrade = () => {
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      const data = await window.electronAPI.getData("companies");
-      const users = await window.electronAPI.getData("users");
       const settings = await window.electronAPI.getData("settings");
+      const accounts = await window.electronAPI.getData("accounts");
+      const data = await window.electronAPI.getData("companies");
       if (isMounted) {
-        setUsersList(users);
         setSettings(settings);
-        // If data is not empty...
-        if (data.constructor === Array) {
-          setAsxCodeList(data.map((element) => ({ label: element.asxcode })).sort(byLabel));
-        }
+        setAccountsList(accounts.map(element => ({ label: element.name, accountId: element.accountId })).sort(byLabel));
+        setAsxCodeList(data.map(element => ({ label: element.asxcode })).sort(byLabel));
       }
     })();
     // Clean up
@@ -107,9 +104,9 @@ const AddTrade = () => {
   }, []);
 
   const initialValues: AddTradeFormValues = {
-    asxcode: "",
+    asxcode: null,
     type: "BUY",
-    user: "",
+    account: null,
     date: dayjs(),
     quantity: "",
     unitPrice: "",
@@ -119,9 +116,12 @@ const AddTrade = () => {
   const validationSchema = () =>
     yup.object().shape({
       asxcode: yup
-        .string()
+        .object()
+        .nonNullable("Required")
         .test("asxcode", "", validateASXCode(setCompanyName, setLoading, setUnitPrice)),
-      user: yup.string().required("Required"),
+      account: yup
+        .object()
+        .nonNullable("Required"),
       date: yup
         .date()
         .typeError("Invalid Date")
@@ -166,7 +166,6 @@ const AddTrade = () => {
                 label="ASX Code"
                 valueName={"asxcode"}
                 value={values.asxcode}
-                handleChange={handleChange}
                 options={asxCodeList}
                 errors={errors}
                 touched={touched}
@@ -216,6 +215,27 @@ const AddTrade = () => {
               <Typography variant="h4" ml="6px" gridColumn="span 4">
                 Details
               </Typography>
+              {/* Account Input */}
+              <SelectInput
+                label="Account"
+                valueName={"account"}
+                value={values.account}
+                options={accountsList}
+                errors={errors}
+                touched={touched}
+                span={2}
+              />
+              {/* Date Input */}
+              <DatePicker
+                disableFuture
+                label="Date"
+                valueName="date"
+                value={values.date}
+                handleChange={handleChange}
+                touched={touched}
+                errors={errors}
+                span={2}
+              />
               {/* Type Buttons */}
               <Button
                 variant={values.type === "BUY" ? "contained" : "outlined"}
@@ -243,28 +263,6 @@ const AddTrade = () => {
               >
                 <Typography variant="h5" fontWeight={500}>SELL</Typography>
               </Button>
-              {/* User Input */}
-              <SelectInput
-                label="User"
-                valueName={"user"}
-                value={values.user}
-                handleChange={handleChange}
-                options={usersList}
-                errors={errors}
-                touched={touched}
-                span={2}
-              />
-              {/* Date Input */}
-              <DatePicker
-                disableFuture
-                label="Date"
-                valueName="date"
-                value={values.date}
-                handleChange={handleChange}
-                touched={touched}
-                errors={errors}
-                span={2}
-              />
               {/* Show available units if type is SELL */}
               <ShowAvailableUnits/>
               {/* Quantity Input */}
@@ -346,7 +344,7 @@ const AddTrade = () => {
                 Confirm
               </Button>
             </Box>
-            {/* Calculate price breakdown using form values (handled in ./costBreakdown.ts) */}
+            {/* Calculate price breakdown using form values */}
             <PriceBreakdownHandler
               gstPercent={settings.gstPercent}
               setShareValue={setShareValue}
