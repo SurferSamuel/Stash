@@ -226,7 +226,7 @@ const AddCompany = () => {
                 onChange={handleChange}
                 error={!!errors.asxcode}
                 helperText={errors.asxcode}
-                inputProps={{ style: { textTransform: "uppercase" } }}
+                slotProps={{ htmlInput: { style: { textTransform: "uppercase" }}}}
                 sx={{ gridColumn: isNonMobile ? "span 2" : "span 4" }}
               />
               {/* Loading Icon */}
@@ -281,7 +281,6 @@ const AddCompany = () => {
                   {/* Operating Countries Input */}
                   <OperatingCountriesInput
                     values={values.operatingCountries}
-                    handleChange={handleChange}
                     options={countriesList}
                   />
                   {/* Financial Status Input */}
@@ -290,7 +289,6 @@ const AddCompany = () => {
                     label="Financial Status"
                     valueName="financialStatus"
                     value={values.financialStatus}
-                    handleChange={handleChange}
                     options={financialStatusList}
                   />
                   {/* Mining Status Input */}
@@ -299,7 +297,6 @@ const AddCompany = () => {
                     label="Mining Status"
                     valueName="miningStatus"
                     value={values.miningStatus}
-                    handleChange={handleChange}
                     options={miningStatusList}
                   />
                   {/* Resources Input */}
@@ -308,7 +305,6 @@ const AddCompany = () => {
                     label="Resources"
                     valueName="resources"
                     value={values.resources}
-                    handleChange={handleChange}
                     options={resourcesList}
                   />
                   {/* Products Input */}
@@ -317,7 +313,6 @@ const AddCompany = () => {
                     label="Products"
                     valueName="products"
                     value={values.products}
-                    handleChange={handleChange}
                     options={productsList}
                   />
                   {/* Recommendations Input */}
@@ -326,7 +321,6 @@ const AddCompany = () => {
                     label="Recommendations"
                     valueName="recommendations"
                     value={values.recommendations}
-                    handleChange={handleChange}
                     options={recommendationList}
                   />
                   {/* Monitor Input */}
@@ -335,7 +329,6 @@ const AddCompany = () => {
                     label="Monitor"
                     valueName="monitor"
                     value={values.monitor}
-                    handleChange={handleChange}
                     options={monitorList}
                   />
                   {/* Reasons to Buy Input */}
