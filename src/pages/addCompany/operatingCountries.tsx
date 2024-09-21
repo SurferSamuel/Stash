@@ -1,16 +1,21 @@
+import { useFormikContext } from "formik";
+
+// Material UI
 import Autocomplete from "@mui/material/Autocomplete";
-import { Country } from "../../../electron/types";
 import TextField from "@mui/material/TextField";
 import Box from "@mui/material/Box";
 
+// Types
+import { Country } from "../../../electron/types";
+
 interface Props {
   values: Country[];
-  handleChange: (event: { target: { name: string; value: Country[] } }) => void;
   options: Country[];
 }
 
 const OperatingCountriesInput = (props: Props) => {
-  const { values, handleChange, options } = props;
+  const { setFieldValue } = useFormikContext();
+  const { values, options } = props;
   return (
     <Autocomplete
       multiple
@@ -20,14 +25,7 @@ const OperatingCountriesInput = (props: Props) => {
       sx={{ gridColumn: "span 4", mr: "1px" }}
       isOptionEqualToValue={(option, value) => option.label === value.label}
       getOptionLabel={(option) => option.label}
-      onChange={(event, newArray: Country[]) => {
-        handleChange({
-          target: {
-            name: "operatingCountries",
-            value: newArray,
-          },
-        });
-      }}
+      onChange={(event, newArray) => setFieldValue("operatingCountries", newArray)}
       renderOption={(props, option) => (
         <Box component="li" sx={{ "& > img": { mr: 2, flexShrink: 0 } }} {...props}>
           <img
@@ -40,15 +38,7 @@ const OperatingCountriesInput = (props: Props) => {
           {option.label}
         </Box>
       )}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label="Operating Countries"
-          inputProps={{
-            ...params.inputProps,
-          }}
-        />
-      )}
+      renderInput={(params) => <TextField {...params} label="Operating Countries"/>}
     />
   );
 };
