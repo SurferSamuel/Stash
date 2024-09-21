@@ -1,75 +1,107 @@
+import { FormikErrors, FormikTouched, useFormikContext } from "formik";
+import { SyntheticEvent } from "react";
+
+// Material UI
 import Autocomplete from "@mui/material/Autocomplete";
-import { FormikErrors, FormikTouched } from "formik";
 import TextField from "@mui/material/TextField";
 
-interface Option {
-  label: string;
-}
+// Types
+import { Option } from "../../electron/types";
+
 
 interface Props {
   label: string;
   valueName: string;
-  value: string;
-  handleChange: (e: { target: { name: string; value: string } }) => void;
+  value: Option;
   options: Option[];
   touched?: FormikTouched<any>;
   errors?: FormikErrors<any>;
   capitaliseInput?: boolean | undefined;
-  span: number;
+  width?: number;
+  span?: number;
+  small?: boolean;
 }
 
 const SelectInput = (props: Props) => {
+  const { setFieldValue } = useFormikContext();
   const { 
     label,
     valueName,
     value,
-    handleChange,
     options,
     errors,
     touched,
     capitaliseInput,
-    span
+    small,
+    span,
+    width,
   } = props;
+
+  /**
+   * Handle value change when input is updated.
+   * @param event Native event
+   * @param newValue Value from input
+   */
+  const handleChangeInput = (event: SyntheticEvent, newValue: string | Option) => {
+    if (newValue === null) {
+      setFieldValue(valueName, null);
+      return;
+    }
+
+    // Convert string into label 
+    if (typeof newValue === "string") {
+      newValue = { label: newValue };
+    }
+
+    // Capitalise value if necessary
+    if (capitaliseInput) {
+      newValue.label.toUpperCase();
+    }
+
+    // Update form value
+    setFieldValue(valueName, newValue);
+  }
 
   return (
     <Autocomplete
-      freeSolo
       clearOnBlur
       handleHomeEndKeys
       disableCloseOnSelect
       id={valueName}
       value={value}
       options={options}
-      onKeyDown={(e) => {
+      onChange={handleChangeInput}
+      onKeyDown={(event) => {
         // Disable formik submit on enter
-        if (e.key === "Enter") e.preventDefault();
+        if (event.key === "Enter") event.preventDefault();
       }}
-      onChange={(event, newValue) => {
-        // Convert no new value into empty string
-        if (newValue === null) newValue = "";
-
-        // Convert label object into string
-        if (typeof newValue !== "string") {
-          newValue = newValue.label;
-        }
-
-        handleChange({
-          target: {
-            name: valueName,
-            value: capitaliseInput ? newValue.toUpperCase() : newValue,
-          },
-        });
+      sx={{ 
+        gridColumn: span ? `span ${span}` : undefined,
+        width: width ?? "auto",
       }}
-      sx={{ gridColumn: `span ${span}` }}
-      renderOption={(props, option) => <li {...props}>{option.label}</li>}
+      getOptionLabel={(option) => {
+        if (typeof option === "string") return option;
+        return option.label;
+      }}
+      isOptionEqualToValue={(option, value) => {
+        if (typeof option !== "string") option = option.label;
+        if (typeof value !== "string") value = value.label;
+        return option === value;
+      }}
+      renderOption={(props, option) => (
+        <li {...props}>
+          {typeof option === "string" ? option : option.label}
+        </li>
+      )}
       renderInput={(params) => (
         <TextField
           {...params}
           label={label}
+          {...(small && { size: "small" })}
           // If touched and errors were given...
           {...(touched && errors && { 
             error: !!touched[valueName] && !!errors[valueName],
-            helperText: touched[valueName] && (errors[valueName] as string)
+            helperText: touched[valueName] && (errors[valueName] as string),
           })}
           slotProps={{
             htmlInput: {
@@ -79,12 +111,6 @@ const SelectInput = (props: Props) => {
           }}
         />
       )}
-      getOptionLabel={(option) => {
-        if (typeof option === "string") {
-          return option;
-        }
-        return option.label;
-      }}
     />
   );
 };
