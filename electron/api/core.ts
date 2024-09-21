@@ -6,6 +6,7 @@ import fs from "fs";
 
 // Types
 import { 
+  Account,
   CompanyData, 
   Country, 
   Data, 
@@ -18,13 +19,13 @@ import {
 // Overload signatures
 export function getData(key: OptionKey): Option[];
 export function getData(key: "countries"): Country[];
+export function getData(key: "accounts"): Account[];
 export function getData(key: "companies"): CompanyData[];
 export function getData(key: "historicals"): HistoricalEntry[];
 export function getData(key: "settings"): Settings;
 
 /**
  * Gets the data for a specific key from the storage file.
- * 
  * @param key Provided key
  * @returns The data saved for the specific key
  */
