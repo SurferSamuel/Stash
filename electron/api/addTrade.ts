@@ -8,7 +8,8 @@ import {
 } from "../types";
 
 /**
- * Returns the number of available shares the users own for the given asxcode.
+ * Returns the number of available shares the account id owns for the given asxcode.
+ * Returns 0 if the account id doesn't exist.
  * 
  * @param asxcode ASX code to check
  * @param accountId Account id to check
@@ -25,7 +26,6 @@ export const availableShares = (asxcode: string, accountId: string) => {
     throw new Error(`ERROR: Could not find data for ${asxcode}`);
   }
 
-  // Return the number of available shares for the user (0 if the user does not exist)
   return companyData.currentShares
     .filter(entry => entry.accountId === accountId)
     .reduce((acc, cur) => acc + Number(cur.quantity), 0);
@@ -108,18 +108,18 @@ export const sellShare = (values: AddTradeValues, gstPercent: string) => {
     throw new Error("ERROR: AccountId is missing.");
   }
 
-  // Retrieve all of the current shares for the user, removing any entries with buy dates
-  // after the sell date, sorted in date ascending order
+  // Retrieve all of the current shares for the account id, removing any entries with
+  // buy dates after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
     .filter(entry => entry.accountId === values.account.accountId && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
     .sort((a, b) => dayjsDate(a.date).isBefore(dayjsDate(b.date)) ? -1 : 1);
 
-  // If the user has no shares
+  // If the account id owns no shares
   if (currentShares.length === 0) {
     throw new Error(`ERROR: ${values.account.label} has no units for ${values.asxcode.label}`);
   }
 
-  // Check that the user owns enough shares for the trade
+  // Check that the account id owns enough shares for the trade
   const totalOwned = currentShares.reduce((acc, cur) => acc + Number(cur.quantity), 0);
   if (totalOwned < Number(values.quantity)) {
     throw new Error(`ERROR: Insufficient quantity. Required: ${values.quantity}. Owned: ${totalOwned}`);

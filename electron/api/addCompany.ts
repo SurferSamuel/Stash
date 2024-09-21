@@ -14,7 +14,7 @@ import {
  * @param values "Add Company" page form values
  */
 export const addCompany = (values: AddCompanyValues) => {
-  // Save any new options that the user has inputted
+  // Save any new options that were created
   saveNewOptions("miningStatus", values.miningStatus);
   saveNewOptions("financialStatus", values.financialStatus);
   saveNewOptions("resources", values.resources);
