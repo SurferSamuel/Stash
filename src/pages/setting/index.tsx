@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { SetStateAction, useEffect, useState } from "react";
 import { Formik } from "formik";
 import * as yup from "yup";
 
@@ -21,7 +21,7 @@ import CustomTextField from "../../components/customTextField";
 import Header from "../../components/header";
 
 const Settings = () => {
-  const [storagePath, setStoragePath] = useState<string>("Loading...");
+  const [storagePath, setStoragePath] = useState<string>("");
 
   // Success alert states
   const [openSnackbar, setOpenSnackbar] = useState<boolean>(false);
