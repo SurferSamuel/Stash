@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { Formik } from "formik";
 
-// Page Components
+// Components
+import SelectInput from "../../components/select";
 import PortfolioTable from "./portfolioTable";
 import Graph from "../../components/graph";
 import UpdateData from "./updateData";
@@ -14,7 +15,7 @@ import { Option, PortfolioData } from "../../../electron/types";
 import PortfolioValueText from "./portfolioValueText";
 
 export interface PortfolioFormValues {
-  user: Option[];
+  account: Option;
   financialStatus: Option[];
   miningStatus: Option[];
   resources: Option[];
@@ -24,7 +25,7 @@ export interface PortfolioFormValues {
 
 const Portfolio = () => {
   // Dropdown data states
-  const [usersList, setUsersList] = useState<Option[]>([]);
+  const [accountsList, setAccountsList] = useState<Option[]>([]);
   const [financialStatusList, setFinancialStatusList] = useState<Option[]>([]);
   const [miningStatusList, setMiningStatusList] = useState<Option[]>([]);
   const [resourcesList, setResourcesList] = useState<Option[]>([]);
@@ -45,19 +46,34 @@ const Portfolio = () => {
     }
   });
 
-  
+  // "All Accounts" option
+  const allAccountsOption = { label: "All Accounts" };
+
+  // A helper function. Used to sort an array by label, alphabetically.
+  const byLabel = (a: { label: string }, b: { label: string }) => a.label.localeCompare(b.label);
+
   // On page render, get dropdown data from API
   useEffect(() => {
     let isMounted = true;
     (async () => {
-      const users = await window.electronAPI.getData("users");
+      const accounts = await window.electronAPI.getData("accounts");
       const financialStatus = await window.electronAPI.getData("financialStatus");
       const miningStatus = await window.electronAPI.getData("miningStatus");
       const resources = await window.electronAPI.getData("resources");
       const products = await window.electronAPI.getData("products");
       const recommendations = await window.electronAPI.getData("recommendations");
       if (isMounted) {
-        setUsersList(users);
+        // Format accounts as options
+        const newAccountsList: Option[] = accounts.map(element => ({ 
+          label: element.name, 
+          accountId: element.accountId
+        })).sort(byLabel);
+
+        // Add "All Accounts" option to top of list
+        newAccountsList.unshift(allAccountsOption);
+
+        // Update states
+        setAccountsList(newAccountsList);
         setFinancialStatusList(financialStatus);
         setMiningStatusList(miningStatus);
         setResourcesList(resources);
@@ -71,7 +87,7 @@ const Portfolio = () => {
 
   // Formik initial values
   const initialValues: PortfolioFormValues = {
-    user: [],
+    account: allAccountsOption,
     financialStatus: [],
     miningStatus: [],
     resources: [],
@@ -85,38 +101,55 @@ const Portfolio = () => {
         onSubmit={() => { /* Do nothing on submit */ }}
         initialValues={initialValues}
       >
-        <Box
-          display="grid"
-          pb="30px"
-          gridTemplateColumns="repeat(4, minmax(0, 1fr))"
-        >
-          {/* Update data when form values change */}
-          <UpdateData
-            setLoading={setLoading}
-            setData={setData}
-          />
-          {/* Portfolio value, today's change and total change */}
-          <PortfolioValueText
-            loading={loading}
-            data={data.text}
-          />
-          {/* Graph of portfolio value over time */}
-          <Graph
-            loading={loading}
-            data={data.graph}
-          />
-          {/* Table showing current shares */}
-          <PortfolioTable 
-            loading={loading}
-            data={data.table}
-            usersList={usersList}
-            financialStatusList={financialStatusList}
-            miningStatusList={miningStatusList}
-            resourcesList={resourcesList}
-            productsList={productsList}
-            recommendationList={recommendationList}
-          />
-        </Box>
+        {({ values }) => (
+          <Box
+            display="grid"
+            pb="30px"
+            gridTemplateColumns="repeat(4, minmax(0, 1fr))"
+          >
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              gridColumn="span 4"
+            >
+              {/* Portfolio value, today's change and total change */}
+              <PortfolioValueText
+                loading={loading}
+                data={data.text}
+              />
+              {/* Account select */}
+              <SelectInput
+                small
+                label={null}
+                valueName={"account"}
+                value={values.account}
+                options={accountsList}
+                width={220}
+              />
+            </Box>
+            {/* Graph of portfolio value over time */}
+            <Graph
+              loading={loading}
+              data={data.graph}
+            />
+            {/* Table showing current shares */}
+            <PortfolioTable 
+              loading={loading}
+              data={data.table}
+              financialStatusList={financialStatusList}
+              miningStatusList={miningStatusList}
+              resourcesList={resourcesList}
+              productsList={productsList}
+              recommendationList={recommendationList}
+            />
+            {/* Update data when form values change */}
+            <UpdateData
+              setLoading={setLoading}
+              setData={setData}
+            />
+          </Box>
+        )}
       </Formik>
     </Box>
   )

@@ -27,7 +27,6 @@ import { Option, PortfolioTableRow } from '../../../electron/types';
 interface Props {
   loading: boolean;
   data: PortfolioTableRow[];
-  usersList: Option[];
   financialStatusList: Option[];
   miningStatusList: Option[];
   resourcesList: Option[];
@@ -198,7 +197,6 @@ const PortfolioTable = (props: Props) => {
   const { 
     loading, 
     data,
-    usersList,
     financialStatusList,
     miningStatusList,
     resourcesList,
@@ -253,7 +251,6 @@ const PortfolioTable = (props: Props) => {
       <FilterOptionsDialog 
         open={openFilterDialog}
         handleClose={handleFilterDialogClose}
-        usersList={usersList}
         financialStatusList={financialStatusList}
         miningStatusList={miningStatusList}
         resourcesList={resourcesList}

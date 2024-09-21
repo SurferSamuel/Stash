@@ -1,25 +1,24 @@
-import { useFormikContext } from 'formik';
+import { useFormikContext } from "formik";
 
 // Material UI
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogTitle from '@mui/material/DialogTitle';
-import Dialog from '@mui/material/Dialog';
-import Button from '@mui/material/Button';
-import Box from '@mui/material/Box';
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogTitle from "@mui/material/DialogTitle";
+import Dialog from "@mui/material/Dialog";
+import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 // Components
-import MultiSelectInput from '../../components/multiSelect';
+import MultiSelectInput from "../../components/multiSelect";
 
 // Types
-import { Option } from '../../../electron/types';
-import { PortfolioFormValues } from './index';
+import { Option } from "../../../electron/types";
+import { PortfolioFormValues } from "./index";
 
 interface Props {
   open: boolean;
   handleClose: () => void;
-  usersList: Option[];
   financialStatusList: Option[];
   miningStatusList: Option[];
   resourcesList: Option[];
@@ -28,11 +27,10 @@ interface Props {
 }
 
 const FilterOptionsDialog = (props: Props) => {
-  const { values, handleChange, setValues } = useFormikContext<PortfolioFormValues>();
+  const { values, setValues } = useFormikContext<PortfolioFormValues>();
   const {
     open,
     handleClose,
-    usersList,
     financialStatusList,
     miningStatusList,
     resourcesList,
@@ -43,7 +41,6 @@ const FilterOptionsDialog = (props: Props) => {
   const handleReset = () => {
     // Skip if values are already all empty
     const alreadyEmpty = (
-      values.user.length === 0 &&
       values.financialStatus.length === 0 &&
       values.miningStatus.length === 0 &&
       values.resources.length === 0 &&
@@ -52,9 +49,9 @@ const FilterOptionsDialog = (props: Props) => {
     );
     if (alreadyEmpty) return;
 
-    // Otherwise, set all values to empty
+    // Otherwise, set all values to empty (except for account)
     setValues({
-      user: [],
+      account: values.account,
       financialStatus: [],
       miningStatus: [],
       resources: [],
@@ -88,20 +85,11 @@ const FilterOptionsDialog = (props: Props) => {
             },
           }}
         >
-          {/* User Input */}
-          <MultiSelectInput
-            label="Specifc User(s)"
-            valueName={"user"}
-            value={values.user}
-            handleChange={handleChange}
-            options={usersList}
-          />
           {/* Financial Status Input */}
           <MultiSelectInput
             label="Financial Status"
             valueName="financialStatus"
             value={values.financialStatus}
-            handleChange={handleChange}
             options={financialStatusList}
           />
           {/* Mining Status Input */}
@@ -109,7 +97,6 @@ const FilterOptionsDialog = (props: Props) => {
             label="Mining Status"
             valueName="miningStatus"
             value={values.miningStatus}
-            handleChange={handleChange}
             options={miningStatusList}
           />
           {/* Resources Input */}
@@ -117,7 +104,6 @@ const FilterOptionsDialog = (props: Props) => {
             label="Resources"
             valueName="resources"
             value={values.resources}
-            handleChange={handleChange}
             options={resourcesList}
           />
           {/* Products Input */}
@@ -125,7 +111,6 @@ const FilterOptionsDialog = (props: Props) => {
             label="Products"
             valueName="products"
             value={values.products}
-            handleChange={handleChange}
             options={productsList}
           />
           {/* Recommendations Input */}
@@ -133,12 +118,11 @@ const FilterOptionsDialog = (props: Props) => {
             label="Recommendations"
             valueName="recommendations"
             value={values.recommendations}
-            handleChange={handleChange}
             options={recommendationList}
           />
         </Box>
       </DialogContent>
-      <DialogActions>
+      <DialogActions sx={{ mt: "-60px" }}>
         <Button
           variant="outlined"
           onClick={handleReset}
