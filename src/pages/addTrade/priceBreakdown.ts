@@ -12,8 +12,8 @@ interface Props {
 
 // Updates the price breakdown values with the form values
 const PriceBreakdownHandler = (props: Props): null => {
-  const { gstPercent, setShareValue, setBrokerage, setGst, setTotal } = props;
   const { values } = useFormikContext<AddTradeFormValues>();
+  const { gstPercent, setShareValue, setBrokerage, setGst, setTotal } = props;
 
   useEffect(() => {
     let total = 0;
