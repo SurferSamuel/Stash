@@ -5,11 +5,11 @@ import dayjs from "dayjs";
 
 // Material UI
 import { AxisValueFormatterContext } from "@mui/x-charts/models/axis";
-import { useDrawingArea, useYScale } from '@mui/x-charts';
+import { useDrawingArea, useYScale } from "@mui/x-charts/hooks";
 import useTheme from "@mui/material/styles/useTheme";
-import { LineChart } from '@mui/x-charts/LineChart';
 import ButtonGroup from "@mui/material/ButtonGroup";
-import { styled } from '@mui/material/styles';
+import { styled } from "@mui/material/styles";
+import { LineChart } from "@mui/x-charts";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
@@ -55,6 +55,7 @@ const Graph = (props: Props) => {
     if (data[range].length === 0) {
       setYAxis([null, null]);
       setBottomOffset(1);
+      setDataset([]);
       return;
     }
 
