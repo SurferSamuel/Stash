@@ -6,22 +6,29 @@ export { PortfolioFormValues as PortfolioFilterValues } from "../src/pages/portf
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { ChartResultArrayQuote } from "yahoo-finance2/dist/esm/src/modules/chart";
 
-// Valid option keys, used for company details and users
+// Valid option keys, used for company details
 export type OptionKey =
   | "financialStatus"
   | "miningStatus"
   | "monitor"
   | "products"
   | "recommendations"
-  | "resources"
-  | "users";
+  | "resources";
 
 // All valid keys
-export type Key = OptionKey | "countries" | "companies" | "historicals" | "settings";
+export type Key = 
+  | OptionKey 
+  | "countries"
+  | "accounts"
+  | "companies"
+  | "historicals"
+  | "settings";
 
 // Dropdown option type
 export interface Option {
-  label: string;
+  label: string;        // Displayed on dropdown
+  inputValue?: string;  // For dynamically made options "Add [inputValue]"
+  accountId?: string;   // Optional for account dropdown
 }
 
 // Dropdown country type
@@ -30,6 +37,12 @@ export interface Country {
   code: string;
   phone: string;
   suggested?: boolean;
+}
+
+// Account type
+export interface Account {
+  name: string;
+  accountId: string;
 }
 
 // Written note type
@@ -61,7 +74,7 @@ export interface ValidateASXReturn {
 
 // CURRENT share entry type
 export interface CurrentShareEntry {
-  user: string;                 // User who brought the shares
+  accountId: string;            // Account id that owns the share
   date: string;                 // Date of when the shares were originally brought
   quantity: string;             // Number of current outstanding shares
   unitPrice: string;            // Price paid for 1 share at the time of purchase
@@ -71,7 +84,7 @@ export interface CurrentShareEntry {
 
 // BUY history entry type
 export interface BuyHistoryEntry {
-  user: string;                 // User who brought the shares
+  accountId: string;            // Account id that brought the share
   date: string;                 // Date of when the shares were brought
   quantity: string;             // Number of shares brought
   unitPrice: string;            // Price paid for 1 share at the time of purchase
@@ -82,7 +95,7 @@ export interface BuyHistoryEntry {
 
 // SELL history entry type
 export interface SellHistoryEntry {
-  user: string;                 // User who sold the shares
+  accountId: string;            // Account id that sold the share
   buyDate: string;              // Date of when the shares were brought
   sellDate: string;             // Date of when the shares were sold
   quantity: string;             // Number of shares sold

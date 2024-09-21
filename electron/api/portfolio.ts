@@ -112,7 +112,7 @@ export const getPortfolioData = async (filterValues: PortfolioFilterValues): Pro
 
       // Calculate the value at the time of the historical entry
       const time = dayjs(historical.date);
-      const units = countUnitsAtTime(company, filterValues.user, time);
+      const units = countUnitsAtTime(company, filterValues.account, time);
       const value = units * historical.adjclose;
 
       // Add value to the existing data point (if possible), otherwise make new data point
@@ -135,8 +135,8 @@ export const getPortfolioData = async (filterValues: PortfolioFilterValues): Pro
 
     // Calculate total quantity and cost for the portfolio
     for (const shareEntry of company.currentShares) {
-      // Only add entry if user matches filtered values. Note: Empty user array = show all users
-      if (filterValues.user.length === 0 || filterValues.user.some(obj => obj.label === shareEntry.user)) {
+      // Only add entry if account matches filtered values.
+      if (filterValues.account.label === "All Accounts" || filterValues.account.accountId === shareEntry.accountId) {
         const quantity = Number(shareEntry.quantity);
         const unitPrice = Number(shareEntry.unitPrice);
         const fees = Number(shareEntry.brokerage) + Number(shareEntry.gst);
@@ -159,7 +159,7 @@ export const getPortfolioData = async (filterValues: PortfolioFilterValues): Pro
     if (totalQuantity > 0) {
       const currentPrice = quote.regularMarketPrice;
       const previousPrice = quote.regularMarketPreviousClose;
-      const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day"));
+      const previousUnits = countUnitsAtTime(company, filterValues.account, dayjs().subtract(1, "day"));
 
       // Update combined totals
       combinedPreviousValue += previousPrice * previousUnits;
@@ -254,6 +254,9 @@ const filterOption = (target: Option[], arr: Option[]) => {
  * @returns Array of companies matching all filter values
  */
 const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
+  // Check account is provided
+  if (filterValues.account === null) return [];
+
   // Get existing data from storage
   const data = getData("companies");
 
@@ -264,28 +267,26 @@ const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => 
     filterOption(filterValues.resources, entry.resources) &&
     filterOption(filterValues.products, entry.products) &&
     filterOption(filterValues.recommendations, entry.recommendations) && (
-      // Note: Empty user array = show all users
-      filterValues.user.length === 0 || 
-      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
+      filterValues.account.label === "All Accounts" || 
+      entry.currentShares.some(obj => obj.accountId === filterValues.account.accountId)
     )
   );
 }
 
 /**
- * A helper function that counts the number of units the user(s) held at the given
- * time (assumed to be in the past). If the users array is empty, then will return
- * the number of units for all users.
+ * A helper function that counts the number of units the account held at the given
+ * time (assumed to be in the past). 
  * 
  * @param company Object containing the company data
- * @param users Which user to check
+ * @param account Which account to check
  * @param time dayjs object of the required time (assumed to be in the past)
  * @returns Number of units
  */
-const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
+const countUnitsAtTime = (company: CompanyData, account: Option, time: Dayjs) => {
   // Calculate the number of units brought before the given time
   const unitsBrought = company.buyHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+    // If the account id is correct
+    if (account.label === "All Accounts" || account.accountId === entry.accountId) {
       // If the entry buy date was before the given time
       if (dayjsDate(entry.date).isBefore(time)) {
         total += Number(entry.quantity);
@@ -296,8 +297,8 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
 
   // Calculate the number of units sold before the given time
   const unitsSold = company.sellHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+    // If the account id is correct
+    if (account.label === "All Accounts" || account.accountId === entry.accountId) {
       // If the entry sell date was before the given time
       if (dayjsDate(entry.sellDate).isBefore(time)) {
         total += Number(entry.quantity);

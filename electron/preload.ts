@@ -9,7 +9,7 @@ contextBridge.exposeInMainWorld("electronAPI", {
   quickValidateASXCode: (asxcode: string) => ipcRenderer.invoke("quickValidateASXCode", asxcode),
   validateASXCode: (asxcode: string, existing: boolean) => ipcRenderer.invoke("validateASXCode", asxcode, existing),
   addCompany: (values: AddCompanyValues) => ipcRenderer.invoke("addCompany", values),
-  availableShares: (asxcode: string, user: string) => ipcRenderer.invoke("availableShares", asxcode, user),
+  availableShares: (asxcode: string, accountId: string) => ipcRenderer.invoke("availableShares", asxcode, accountId),
   buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
   sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
   getPortfolioData: (filterValues: PortfolioFilterValues) => ipcRenderer.invoke("getPortfolioData", filterValues),
