@@ -1,3 +1,4 @@
+export * from "./accounts";
 export * from "./addCompany";
 export * from "./addTrade";
 export * from "./core";
