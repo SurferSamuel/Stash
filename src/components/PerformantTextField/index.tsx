@@ -76,12 +76,12 @@ export const PerformantTextField: React.FC<PerformantTextFieldProps> = memo((pro
     if (field.value !== fieldValue) {
       setFieldValue(field.value);
     }
-    // eslint-disable-next-line
   }, [field.value]);
 
   const onChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
     setFieldValue(evt.target.value);
   };
+  
   const onBlur = (evt: React.FocusEvent<HTMLInputElement>) => {
     const val = evt.target.value || "";
     window.setTimeout(() => {
@@ -112,16 +112,18 @@ export const PerformantTextField: React.FC<PerformantTextFieldProps> = memo((pro
     <>
       <TextField
         {...otherProps}
-        InputProps={{
-          ...((props.type === "number" && {
-            inputProps: { min: props?.min, max: props?.max },
-          }) ||
-            undefined),
-          startAdornment: currencyInput && <InputAdornment position="start">$</InputAdornment>,
-          inputComponent: (currencyInput || numberInput) && (NumericFormatCustom as any),
-        }}
         error={error}
         helperText={meta.touched && meta.error}
+        slotProps={{
+          input: {
+            ...((props.type === "number" && {
+              inputProps: { min: props?.min, max: props?.max },
+            }) ||
+              undefined),
+            startAdornment: currencyInput && <InputAdornment position="start">$</InputAdornment>,
+            inputComponent: (currencyInput || numberInput) && (NumericFormatCustom as any),
+          }
+        }}
         {...performanceProps}
       />
     </>
