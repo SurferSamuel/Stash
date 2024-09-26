@@ -1,8 +1,8 @@
 # Stash
 
-A stock management application written in TypeScript, using Electron and React.
+A stock management application written in TypeScript, using Electron, React & Material UI.
 
-![image](https://github.com/user-attachments/assets/a4613299-3daf-4c85-9f33-fe2b8e1c943f)
+![Stash-Portfolio-Screenshot](https://github.com/user-attachments/assets/4e67a295-06cb-4be0-8f2f-9940a84a34a4)
 
 ## Installation
 
