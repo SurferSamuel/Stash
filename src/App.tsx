@@ -12,7 +12,7 @@ import AddCompany from "./pages/addCompany";
 import Portfolio from "./pages/portfolio";
 import AddTrade from "./pages/addTrade";
 import Accounts from "./pages/accounts";
-import Settings from "./pages/setting";
+import Settings from "./pages/settings";
 
 type UseMode = [Theme, { toggleColorMode: () => void }];
 
