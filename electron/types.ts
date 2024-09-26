@@ -43,6 +43,7 @@ export interface Country {
 export interface Account {
   name: string;
   accountId: string;
+  created: string;
 }
 
 // Written note type
@@ -146,9 +147,6 @@ export interface HistoricalEntry {
   lastUpdated: string;
   historical: ChartResultArrayQuote[];
 }
-
-// Any data type, returned from getData
-export type Data = Option[] | Country[] | CompanyData[] | HistoricalEntry[] | Settings;
 
 // Values type for AddCompany()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
