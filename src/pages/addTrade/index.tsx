@@ -137,7 +137,7 @@ const AddTrade = () => {
 
   return (
     <Box m="25px 30px 15px 30px">
-      <Header title="Add Trade" subtitle="Record a share trade for a company" />
+      <Header title="Add Trade" subtitle="Record a new trade for an existing company" />
       <Formik
         onSubmit={(values: AddTradeFormValues) => {
           handleFormSubmit(
