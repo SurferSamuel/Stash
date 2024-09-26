@@ -1,9 +1,9 @@
 import { contextBridge, ipcRenderer } from "electron";
-import { Data, Key, AddCompanyValues, AddTradeValues, PortfolioFilterValues } from "./types";
+import { Key, AddCompanyValues, AddTradeValues, PortfolioFilterValues } from "./types";
 
 contextBridge.exposeInMainWorld("electronAPI", {
   getData: (key: Key) => ipcRenderer.invoke("getData", key),
-  setData: (key: Key, data: Data) => ipcRenderer.invoke("setData", key, data),
+  setData: (key: Key, data: object) => ipcRenderer.invoke("setData", key, data),
   getStoragePath: () => ipcRenderer.invoke("getStoragePath"),
   openStoragePath: () => ipcRenderer.invoke("openStoragePath"),
   quickValidateASXCode: (asxcode: string) => ipcRenderer.invoke("quickValidateASXCode", asxcode),
@@ -13,4 +13,8 @@ contextBridge.exposeInMainWorld("electronAPI", {
   buyShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("buyShare", values, gstPercent),
   sellShare: (values: AddTradeValues, gstPercent: string) => ipcRenderer.invoke("sellShare", values, gstPercent),
   getPortfolioData: (filterValues: PortfolioFilterValues) => ipcRenderer.invoke("getPortfolioData", filterValues),
+  generateAccountId: () => ipcRenderer.invoke("generateAccountId"),
+  createAccount: (name: string, accountId: string) => ipcRenderer.invoke("createAccount", name, accountId),
+  renameAccount: (newName: string, accountId: string) => ipcRenderer.invoke("renameAccount", newName, accountId),
+  deleteAccount: (accountId: string) => ipcRenderer.invoke("deleteAccount", accountId),
 });

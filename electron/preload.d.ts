@@ -16,7 +16,6 @@ import {
 } from "./types";
 
 export interface IElectronAPI {
-  // Overload function definitions
   getData: {
     (key: OptionKey): Promise<Option[]>;
     (key: "countries"): Promise<Country[]>;
@@ -25,7 +24,14 @@ export interface IElectronAPI {
     (key: "historicals"): Promise<HistoricalEntry[]>;
     (key: "settings"): Promise<Settings>;
   };
-  setData: (key: Key, data: Data) => Promise<void>;
+  setData: {
+    (key: OptionKey, data: Option[]): Promise<void>;
+    (key: "countries", data: Country[]): Promise<void>;
+    (key: "accounts", data: Account[]): Promise<void>;
+    (key: "companies", data: CompanyData[]): Promise<void>;
+    (key: "historicals", data: HistoricalEntry[]): Promise<void>;
+    (key: "settings", data: Settings): Promise<void>;
+  };
   getStoragePath: () => Promise<string>;
   openStoragePath: () => Promise<void>;
   quickValidateASXCode: (asxcode: string) => Promise<string>;
@@ -35,6 +41,10 @@ export interface IElectronAPI {
   buyShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   sellShare: (values: AddTradeValues, gstPercent: string) => Promise<void>;
   getPortfolioData: (filterValues: PortfolioFilterValues) => Promise<PortfolioData>;
+  generateAccountId: () => Promise<string>;
+  createAccount: (name: string, accountId: string) => Promise<Account[]>;
+  renameAccount: (newName: string, accountId: string) => Promise<Account[]>;
+  deleteAccount: (accountId: string) => Promise<Account[]>;
 }
 
 declare global {
