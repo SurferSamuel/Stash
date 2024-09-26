@@ -9,7 +9,6 @@ import {
   Account,
   CompanyData, 
   Country, 
-  Data, 
   HistoricalEntry, 
   Key, 
   Option, 
@@ -58,17 +57,25 @@ export function getData(key: Key) {
   return data;
 }
 
+// Overload signatures
+export function setData(key: OptionKey, data: Option[]): void;
+export function setData(key: "countries", data: Country[]): void;
+export function setData(key: "accounts", data: Account[]): void;
+export function setData(key: "companies", data: CompanyData[]): void;
+export function setData(key: "historicals", data: HistoricalEntry[]): void;
+export function setData(key: "settings", data: Settings): void;
+
 /**
  * Saves the data for a specific key to the storage file.
  * 
  * @param key Provided key
  * @param data The data to save
  */
-export const setData = (key: Key, data: Data) => {
+export function setData(key: Key, data: object): void {
   storage.set(key, data, (error) => {
     if (error) writeLog(`[storage.set]: ${error}`);
   });
-};
+}
 
 /**
  * Gets the path to the storage folder.
