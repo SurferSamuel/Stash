@@ -1,7 +1,6 @@
-import storage from "electron-json-storage";
 import yahooFinance from "yahoo-finance2";
 import { writeLog } from "./logs";
-import { getData } from "./core";
+import { getData, setData } from "./core";
 import { 
   changeFormat, 
   currencyFormat, 
@@ -16,12 +15,10 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 // Types
 import { 
   CompanyData, 
-  HistoricalEntry,
+  GraphDataPoint, 
   Option, 
-  PortfolioDataPoint,
+  PortfolioData, 
   PortfolioFilterValues,
-  PortfolioGraphData,
-  PortfolioTableData,
   PortfolioTableRow,
 } from "../types";
 
@@ -31,6 +28,212 @@ yahooFinance.setGlobalConfig({ queue: { concurrency: 16 } });
 // Custom parse format for dayjs
 dayjs.extend(customParseFormat);
 
+/**
+ * Gets the data for the graph, table and text components using the given filter values.
+ * @param filterValues Provided values for filtering
+ * @returns Data for each component
+ */
+export const getPortfolioData = async (filterValues: PortfolioFilterValues): Promise<PortfolioData> => {
+  const companies = getFilteredData(filterValues);
+
+  // If no companies match the filter values
+  if (companies.length === 0) {
+    return {
+      graph: { 1: [], 3: [], 6: [], 12: [], 60: [] },
+      table: [],
+      text: {
+        totalValue: "$0.00",
+        dailyChange: "+0.00",
+        dailyChangePerc: "0.00%",
+        totalChange: "+0.00",
+        totalChangePerc: "0.00%",
+      }
+    }
+  }
+
+  // Array of asxcodes ["CBA", ...] and symbols ["CBA.AX", ...]
+  const asxcodeArray = companies.map(entry => entry.asxcode); 
+  const symbolArray = companies.map(entry => `${entry.asxcode}.AX`);
+
+  // Specify only required fields to save on bandwidth and latency
+  const fields = [
+    "symbol",
+    "regularMarketChangePercent",
+    "regularMarketPrice",
+    "regularMarketPreviousClose",
+  ];
+
+  // Get the quotes and historical data for all the filtered companies
+  const quoteArray = await yahooFinance.quote(symbolArray, { fields });
+  const historicalData = await getHistoricalData(asxcodeArray);
+
+  let graphId = 1;
+  let tableId = 1;
+  const graphData: GraphDataPoint[] = [];
+  const tableData: PortfolioTableRow[] = [];
+
+  let combinedValue = 0;
+  let combinedPreviousValue = 0;
+  let combinedCost = 0;
+
+  for (const company of companies) {
+    // Get the quote for this company
+    const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
+    if (quote === undefined) {
+      writeLog(`[getPortfolioData]: Skipped ${company.asxcode}. Could not fetch quote.`);
+      continue;
+    } 
+    
+    // Check that all fields were received
+    const missingFields = fields.filter(field => !Object.prototype.hasOwnProperty.call(quote, field));
+    if (missingFields.length > 0) {
+      writeLog(`[getPortfolioData]: Skipped ${company.asxcode}. Missing following fields [${missingFields.join(", ")}].`);
+      continue;
+    }
+
+    // Get the historicals for this company
+    const historicalEntry = historicalData.find(entry => entry.asxcode === company.asxcode);
+    if (historicalEntry === undefined) {
+      writeLog(`[getPortfolioData]: Skipped ${company.asxcode}. Could not fetch historical data.`);
+      continue;
+    }
+
+    // Calculate graph data using historical prices
+    for (const historical of historicalEntry.historical) {
+      // Skip is historical entry is missing adjusted close price
+      if (historical.adjclose === undefined) {
+        writeLog(`[getPortfolioData]: Skipped a historical entry for ${company.asxcode}. Missing adjclose field.`);
+        continue;
+      }
+
+      // If historical date is today, don't add an entry as one 
+      // will be added later using more recent quote data instead
+      if (dayjs().isSame(historical.date, "day")) continue;
+
+      // Calculate the value at the time of the historical entry
+      const time = dayjs(historical.date);
+      const units = countUnitsAtTime(company, filterValues.account, time);
+      const value = units * historical.adjclose;
+
+      // Add value to the existing data point (if possible), otherwise make new data point
+      const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
+      if (graphEntry === undefined) {
+        graphData.push({ 
+          id: graphId++, 
+          date: time.toDate(), 
+          value,
+        });
+      } else {
+        graphEntry.value += value;
+      }
+    }
+
+    let totalQuantity = 0;
+    let totalCost = 0;
+    let firstPurchaseDate = null;
+    let lastPurchaseDate = null;
+
+    // Calculate total quantity and cost for the portfolio
+    for (const shareEntry of company.currentShares) {
+      // Only add entry if account matches filtered values.
+      if (filterValues.account.label === "All Accounts" || filterValues.account.accountId === shareEntry.accountId) {
+        const quantity = Number(shareEntry.quantity);
+        const unitPrice = Number(shareEntry.unitPrice);
+        const fees = Number(shareEntry.brokerage) + Number(shareEntry.gst);
+
+        // Update totals
+        totalQuantity += quantity;
+        totalCost += (quantity * unitPrice) + fees;
+
+        // Update dates
+        if (firstPurchaseDate === null || dayjsDate(shareEntry.date).isBefore(firstPurchaseDate)) {
+          firstPurchaseDate = shareEntry.date;
+        }
+        if (lastPurchaseDate === null || dayjsDate(shareEntry.date).isAfter(lastPurchaseDate)) {
+          lastPurchaseDate = shareEntry.date;
+        }
+      }
+    }
+
+    // Don't add a row if no quantity
+    if (totalQuantity > 0) {
+      const currentPrice = quote.regularMarketPrice;
+      const previousPrice = quote.regularMarketPreviousClose;
+      const previousUnits = countUnitsAtTime(company, filterValues.account, dayjs().subtract(1, "day"));
+
+      // Update combined totals
+      combinedPreviousValue += previousPrice * previousUnits;
+      combinedValue += currentPrice * totalQuantity;
+      combinedCost += totalCost;
+
+      // Calculate row values
+      const avgBuyPrice = totalCost / totalQuantity;
+      const marketValue = currentPrice * totalQuantity;
+      const profitOrLoss = marketValue - totalCost;
+      const profitOrLossPerc = profitOrLoss / totalCost * 100;
+      const dailyProfit = totalQuantity * (currentPrice - previousPrice);
+
+      // Add row to table data
+      tableData.push({
+        id: tableId++,
+        asxcode: company.asxcode,
+        units: totalQuantity,
+        avgBuyPrice,
+        currentPrice,
+        marketValue,
+        purchaseCost: totalCost,
+        dailyChangePerc: quote.regularMarketChangePercent,
+        dailyProfit,
+        profitOrLoss,
+        profitOrLossPerc,
+        firstPurchaseDate,
+        lastPurchaseDate,
+        weightPerc: null, // Calculated later
+      });
+
+      // Add today's value to the graph data 
+      const graphEntry = graphData.find(entry => dayjs().isSame(entry.date, "day"));
+      if (graphEntry === undefined) {
+        graphData.push({ 
+          id: graphId++, 
+          date: dayjs().toDate(), 
+          value: marketValue,
+        });
+      } else {
+        graphEntry.value += marketValue;
+      }
+    }
+  }
+
+  // Once all table rows have been added, calculate the weight of each row
+  for (const row of tableData) {
+    row.weightPerc = row.marketValue / combinedValue * 100;
+  }
+
+  // Calculate text component fields
+  const dailyChange = combinedValue - combinedPreviousValue;
+  const dailyChangePerc = (combinedPreviousValue !== 0) ? dailyChange / combinedPreviousValue * 100 : null;
+  const totalChange = combinedValue - combinedCost;
+  const totalChangePerc = (combinedCost !== 0) ? totalChange / combinedCost * 100 : null;
+
+  return {
+    graph: {
+      1: graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
+      3: graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
+      6: graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
+      12: graphData.filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
+      60: graphData.filter(entry => entry.date.getDay() == 1 || dayjs().isSame(entry.date, "day")),
+    },
+    table: tableData,
+    text: {
+      totalValue: currencyFormat(combinedValue),
+      dailyChange: changeFormat(dailyChange),
+      dailyChangePerc: precentFormat(dailyChangePerc).replace("-", ""),
+      totalChange: changeFormat(totalChange),
+      totalChangePerc: precentFormat(totalChangePerc).replace("-", ""),
+    }
+  }
+}
 
 /**
  * Searches the given `arr` array and checks if all options in the
@@ -51,6 +254,9 @@ const filterOption = (target: Option[], arr: Option[]) => {
  * @returns Array of companies matching all filter values
  */
 const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => {
+  // Check account is provided
+  if (filterValues.account === null) return [];
+
   // Get existing data from storage
   const data = getData("companies");
 
@@ -61,268 +267,26 @@ const getFilteredData = (filterValues: PortfolioFilterValues): CompanyData[] => 
     filterOption(filterValues.resources, entry.resources) &&
     filterOption(filterValues.products, entry.products) &&
     filterOption(filterValues.recommendations, entry.recommendations) && (
-      // Note: Empty user array = show all users
-      filterValues.user.length === 0 || 
-      filterValues.user.some(val => entry.currentShares.some(obj => obj.user === val.label))
+      filterValues.account.label === "All Accounts" || 
+      entry.currentShares.some(obj => obj.accountId === filterValues.account.accountId)
     )
   );
 }
 
 /**
- * Gets the table data that match the given filter values.
- * 
- * @param filterValues Provided values for filtering
- * @returns Rows matching all filter values
- */
-export const getPortfolioTableData = async (filterValues: PortfolioFilterValues): Promise<PortfolioTableData> => {
-  // Get the filtered companies
-  const filteredData = getFilteredData(filterValues);
-
-  // If no companies match the filter values
-  if (filteredData.length === 0) {
-    return {
-      totalValue: "$0.00",
-      dailyChange: "+0.00",
-      dailyChangePerc: "0.00%",
-      totalChange: "+0.00",
-      totalChangePerc: "0.00%",
-      rows: [],
-      skipped: [],
-    };
-  }
-
-  // Only ask for these fields to save on bandwidth and latency
-  const fields = [
-    "symbol",
-    "regularMarketPrice",
-    "regularMarketChangePercent",
-    "regularMarketPreviousClose",
-  ];
-
-  // Get the quotes for all the filtered companies
-  const symbols = filteredData.map(entry => `${entry.asxcode}.AX`);
-  const quoteArray = await yahooFinance.quote(symbols, { fields });
-  
-  const rows: PortfolioTableRow[] = [];
-  const skipped: string[] = [];
-
-  let id = 1;
-  let combinedValue = 0;
-  let combinedPreviousValue = 0;
-  let combinedCost = 0; 
-
-  // Loop for each filtered company
-  for (const company of filteredData) {
-    // Find the quote for this company
-    const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
-    if (quote === undefined) {
-      skipped.push(company.asxcode);
-      continue;
-    }
-
-    // Extract the required info from the quote
-    const currentPrice = quote.regularMarketPrice ?? null;
-    const dailyChangePerc = quote.regularMarketChangePercent ?? null;
-    const previousPrice = quote.regularMarketPreviousClose ?? null;
-
-    let totalQuantity = 0;
-    let totalCost = 0;
-    let firstPurchaseDate = "-";
-    let lastPurchaseDate = "-";
-
-    // Loop for all current shares in this company
-    for (const shareEntry of company.currentShares) {
-      // Only add entry if user matches filtered values. Note: Empty user array = show all users
-      if (filterValues.user.length === 0 || filterValues.user.some(obj => obj.label === shareEntry.user)) {
-        // Update totals
-        const quantity = Number(shareEntry.quantity);
-        const unitPrice = Number(shareEntry.unitPrice);
-        totalQuantity += quantity;
-        totalCost += quantity * unitPrice;
-
-        // Update dates
-        if (firstPurchaseDate === "-" || dayjsDate(shareEntry.date).isBefore(firstPurchaseDate)) {
-          firstPurchaseDate = shareEntry.date;
-        }
-        if (lastPurchaseDate === "-" || dayjsDate(shareEntry.date).isAfter(lastPurchaseDate)) {
-          lastPurchaseDate = shareEntry.date;
-        }
-      }
-    }
-
-    // If no quantity, don't add row
-    if (totalQuantity === 0) continue;
-
-    // Update totals, using the number of units yesterday to calculate yesterday's total value
-    const previousUnits = countUnitsAtTime(company, filterValues.user, dayjs().subtract(1, "day"));
-    combinedPreviousValue += (previousPrice != null) ? previousPrice * previousUnits : 0;
-    combinedValue += (currentPrice != null) ? currentPrice * totalQuantity : 0;
-    combinedCost += totalCost;
-
-    // Calculate row values
-    const avgBuyPrice = totalCost / totalQuantity;
-    const marketValue = (currentPrice != null) ? currentPrice * totalQuantity : null;
-    const profitOrLoss = (currentPrice != null) ? currentPrice * totalQuantity - totalCost : null;
-    const profitOrLossPerc = (profitOrLoss != null) ? profitOrLoss / totalCost * 100 : null;
-    const dailyProfit = (currentPrice != null && previousPrice != null) ? totalQuantity * (currentPrice - previousPrice) : null;
-
-    // Add the row into the array
-    rows.push({
-      id: id++,
-      asxcode: company.asxcode,
-      units: totalQuantity,
-      avgBuyPrice,
-      currentPrice,
-      marketValue,
-      purchaseCost: totalCost,
-      dailyChangePerc,
-      dailyProfit,
-      profitOrLoss,
-      profitOrLossPerc,
-      firstPurchaseDate,
-      lastPurchaseDate,
-      weightPerc: null,
-    });
-  }
-
-  // Once all rows have been added, calculate the weighting of each row
-  for (const row of rows) {
-    // Skip if invalid market value
-    if (row.marketValue === null) continue;
-    row.weightPerc = row.marketValue / combinedValue * 100;
-  }
-
-  // Calculate changes
-  const dailyChange = combinedValue - combinedPreviousValue;
-  const dailyChangePerc = (combinedPreviousValue !== 0) ? dailyChange / combinedPreviousValue * 100 : null;
-  const totalChange = combinedValue - combinedCost;
-  const totalChangePerc = (combinedCost !== 0) ? totalChange / combinedCost * 100 : null;
-
-  return {
-    totalValue: currencyFormat(combinedValue),
-    dailyChange: changeFormat(dailyChange),
-    dailyChangePerc: precentFormat(dailyChangePerc).replace("-", ""),
-    totalChange: changeFormat(totalChange),
-    totalChangePerc: precentFormat(totalChangePerc).replace("-", ""),
-    rows,
-    skipped,
-  };
-}
-
-/**
- * Gets the graph data that match the given filter values.
- * 
- * @param filterValues Provided values for filtering
- * @returns Array of points matching all filter values, 
- * for each graph range (1M, 3M, 6M, 1Y, 5Y)
- */
-export const getPortfolioGraphData = async (filterValues: PortfolioFilterValues): Promise<PortfolioGraphData | null> => {
-  // Get the filtered companies
-  const filteredData = getFilteredData(filterValues);
-
-  // If no companies match the filter values
-  if (filteredData.length === 0) {
-    return null;
-  }
-
-  // Array of asxcodes ["CBA", ...] and symbols ["CBA.AX", ...]
-  const asxcodeArray = filteredData.map(entry => entry.asxcode); 
-  const symbolArray = filteredData.map(entry => `${entry.asxcode}.AX`);
-
-  // Get the quotes for all filtered companies
-  const fields = [ "symbol", "regularMarketPrice" ];
-  const quoteArray = await yahooFinance.quote(symbolArray, { fields });
-
-  // Get the historical data for the filtered companies
-  const historicalData = await getHistoricalData(asxcodeArray);
-
-  // Object containing the graph data points
-  const graphData: PortfolioDataPoint[] = [];
-
-  // Each graphData entry needs to have an id
-  let id = 1;
-
-  // Portfolio value is made up of all filtered companies
-  for (const company of filteredData) {
-    // Try to get the historical result for the company, otherwise skip if not received
-    const historicalResult = historicalData.find(entry => entry.asxcode === company.asxcode);
-    if (historicalResult === undefined) {
-      writeLog(`WARNING: Could not find historical data for ${company.asxcode}`);
-      continue;
-    }
-
-    // Loop for each entry of the company's historical data
-    for (const historical of historicalResult.historical) {
-      // If historical date is today, don't add an entry as one 
-      // will be added later using more recent quote data instead
-      if (dayjs().isSame(historical.date, "day")) continue;
-
-      // Calculate the value at the time of the historical entry
-      const time = dayjs(historical.date);
-      const units = countUnitsAtTime(company, filterValues.user, time);
-      const value = units * historical.adjclose;
-
-      // Add value to the existing data point (if possible), otherwise make new data point
-      const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
-      if (graphEntry === undefined) {
-        graphData.push({ id: id++, date: time.toDate(), value });
-      } else {
-        graphEntry.value += value;
-      }
-    }
-  }
-
-  // Add/update the historical entry for today using the quote data instead of the historical data
-  for (const company of filteredData) {
-    // Find the quote for this company
-    const quote = quoteArray.find(entry => entry.symbol === `${company.asxcode}.AX`);
-
-    // Check that the quote was found and contains the market price
-    if (quote === undefined || quote.regularMarketPrice === undefined) {
-      writeLog(`WARNING: Quote/market price not found for ${company.asxcode}`);
-      continue;
-    }
-
-    // Calculate the value as of today
-    const time = dayjs();
-    const units = countUnitsAtTime(company, filterValues.user, time);
-    const value = units * quote.regularMarketPrice;
-
-    // Add value to the existing data point (if possible), otherwise make new data point
-    const graphEntry = graphData.find(entry => time.isSame(entry.date, "day"));
-    if (graphEntry === undefined) {
-      graphData.push({ id: id++, date: time.toDate(), value });
-    } else {
-      graphEntry.value += value;
-    }
-  }
-
-  // Return data for each graph range (in months)
-  // NOTE: Only use weekly data for 5 years interval
-  return {
-    1: graphData.filter(entry => dayjs().subtract(1, "month").isBefore(entry.date, "day")),
-    3: graphData.filter(entry => dayjs().subtract(3, "month").isBefore(entry.date, "day")),
-    6: graphData.filter(entry => dayjs().subtract(6, "month").isBefore(entry.date, "day")),
-    12: graphData.filter(entry => dayjs().subtract(12, "month").isBefore(entry.date, "day")),
-    60: graphData.filter(entry => entry.date.getDay() == 1 || dayjs().isSame(entry.date, "day")),
-  };
-}
-
-/**
- * A helper function that counts the number of units the user(s) held at the given
- * time (assumed to be in the past). If the users array is empty, then will return
- * the number of units for all users.
+ * A helper function that counts the number of units the account held at the given
+ * time (assumed to be in the past). 
  * 
  * @param company Object containing the company data
- * @param users Which user to check
+ * @param account Which account to check
  * @param time dayjs object of the required time (assumed to be in the past)
  * @returns Number of units
  */
-const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) => {
+const countUnitsAtTime = (company: CompanyData, account: Option, time: Dayjs) => {
   // Calculate the number of units brought before the given time
   const unitsBrought = company.buyHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+    // If the account id is correct
+    if (account.label === "All Accounts" || account.accountId === entry.accountId) {
       // If the entry buy date was before the given time
       if (dayjsDate(entry.date).isBefore(time)) {
         total += Number(entry.quantity);
@@ -333,8 +297,8 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
 
   // Calculate the number of units sold before the given time
   const unitsSold = company.sellHistory.reduce((total, entry) => {
-    // If the user of the entry is correct
-    if (users.length === 0 || users.some(obj => obj.label === entry.user)) {
+    // If the account id is correct
+    if (account.label === "All Accounts" || account.accountId === entry.accountId) {
       // If the entry sell date was before the given time
       if (dayjsDate(entry.sellDate).isBefore(time)) {
         total += Number(entry.quantity);
@@ -356,12 +320,7 @@ const countUnitsAtTime = (company: CompanyData, users: Option[], time: Dayjs) =>
  */
 const getHistoricalData = async (asxcodes: string[]) => {
   // Get historical data from storage
-  let data = storage.getSync("historicalData") as HistoricalEntry[];
-
-  // If data is empty (ie. file doesn't exist or file is empty), set data as empty array
-  if (data.constructor !== Array && Object.keys(data).length === 0) {
-    data = [];
-  }
+  const data = getData("historicals");
 
   // Missing asxcodes (not found in the storage file)
   const existing = new Set(data.map(entry => entry.asxcode));
@@ -411,16 +370,14 @@ const getHistoricalData = async (asxcodes: string[]) => {
         existingEntry.lastUpdated = lastUpdated;
         existingEntry.historical = historical;
       }
-      writeLog(`Successfully updated historical data for [${asxcode}.AX]`);
+      writeLog(`[getHistoricalData]: Successfully updated historical data for ${asxcode}.AX.`);
     } else {
-      writeLog(`WARNING: A historical request could not be fulfilled: ${response.reason}`);
+      writeLog(`[getHistoricalData]: A historical request could not be fulfilled [${response.reason}].`);
     }
   }
 
   // Save the updated data
-  storage.set("historicalData", data, (error) => {
-    if (error) writeLog(`Error in storage.set: ${error}`);
-  });
+  setData("historicals", data);
 
   return data;
 }

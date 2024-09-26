@@ -20,12 +20,12 @@ import NotificationsIcon from "@mui/icons-material/NotificationsRounded";
 import SettingsOutlinedIcon from "@mui/icons-material/SettingsOutlined";
 import AddchartIcon from "@mui/icons-material/AddchartRounded";
 import NoteAddIcon from "@mui/icons-material/NoteAddRounded";
-import HomeIcon from "@mui/icons-material/HomeRounded";
+import PeopleAltIcon from "@mui/icons-material/PeopleAlt";
 
 // Custom logo icon
 import LogoIcon from "../../assets/logo.svg"
 
-interface Props {
+interface ItemProps {
   title: string;
   to: string;
   icon: ReactNode;
@@ -33,31 +33,31 @@ interface Props {
   setSelected: Dispatch<SetStateAction<string>>;
 }
 
-// Helper function for menu items
-const Item = (props: Props) => {
-  const { title, to, icon, selected, setSelected } = props;
-
-  const theme = useTheme();
-  const colors = tokens(theme.palette.mode);
-
-  return (
-    <MenuItem
-      active={selected === title}
-      style={{ color: colors.grey[100] }}
-      onClick={() => setSelected(title)}
-      icon={icon}
-    >
-      <Typography fontSize={16}>{title}</Typography>
-      <Link to={to} />
-    </MenuItem>
-  );
-};
-
 const Sidebar = () => {
   const theme = useTheme();
   const colors = tokens(theme.palette.mode);
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [selected, setSelected] = useState("Dashboard");
+  const [selected, setSelected] = useState("Portfolio");
+
+  /**
+   * A helper function for menu items.
+   * @param props Item props
+   * @returns 
+   */
+  const Item = (props: ItemProps) => {
+    const { title, to, icon, selected, setSelected } = props;
+    return (
+      <MenuItem
+        active={selected === title}
+        style={{ color: colors.grey[100] }}
+        onClick={() => setSelected(title)}
+        icon={icon}
+      >
+        <Typography fontSize={16}>{title}</Typography>
+        <Link to={to} />
+      </MenuItem>
+    );
+  };
 
   // Override specific themes
   const overrideTheme = {
@@ -132,18 +132,26 @@ const Sidebar = () => {
         <SidebarContent>
           <Menu>
             <Box pt="8px">
-              {/* Dashboard Button */}
+              {/* Portfolio Button */}
               <Item
-                title="Dashboard"
-                to="/"
-                icon={<HomeIcon />}
+                title="Portfolio"
+                to="/portfolio"
+                icon={<AccountBalanceIcon />}
+                selected={selected}
+                setSelected={setSelected}
+              />
+              {/* Accounts Button */}
+              <Item
+                title="Accounts"
+                to="/accounts"
+                icon={<PeopleAltIcon />}
                 selected={selected}
                 setSelected={setSelected}
               />
               {/* Notifications Button */}
               <Item
                 title="Notifications"
-                to="/"
+                to="/notifications"
                 icon={<NotificationsIcon />}
                 selected={selected}
                 setSelected={setSelected}
@@ -164,15 +172,6 @@ const Sidebar = () => {
                 selected={selected}
                 setSelected={setSelected}
               />
-              {/* Portfolio Button */}
-              <Item
-                title="Portfolio"
-                to="/portfolio"
-                icon={<AccountBalanceIcon />}
-                selected={selected}
-                setSelected={setSelected}
-              />
-              {/* TODO: Add more menu items here */}
             </Box>
           </Menu>
         </SidebarContent>

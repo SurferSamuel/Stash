@@ -7,7 +7,7 @@ const handleFormSubmit = async (
   setOpenSnackbar: Dispatch<SetStateAction<boolean>>,
   setTransition: Dispatch<any>
 ) => {
-  // Convert dates Dayjs objects to strings (since can't send "Dayjs" types over IPC)
+  // Convert Dayjs objects to strings (since can't send "Dayjs" types over IPC)
   const sendValues = {
     ...values,
     noteDate: values.noteDate.format("DD/MM/YYYY hh:mm A"),

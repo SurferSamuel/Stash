@@ -1,6 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
 import { TestContext } from "yup";
-import dayjs from "dayjs";
 
 let prevErrorMsg: string = undefined;
 let prevValue: string = undefined;
@@ -135,23 +134,6 @@ export const noteDateRequired = (value: Date, context: TestContext) => {
 export const notificationDateRequired = (value: Date, context: TestContext) => {
   const { createError, parent } = context;
   if (parent.notificationDateTitle && value === undefined) {
-    return createError();
-  }
-  return true;
-};
-
-/**
- * Validates the notification date field in the yup validation schema for
- * the "Add Company" page. Notification date must be in the future. Returns
- * true if no date is provided.
- * 
- * @param value Notification date field
- * @param context Yup context
- * @returns True/false if field is valid
- */
-export const futureDate = (value: Date, context: TestContext) => {
-  const { createError } = context;
-  if (value !== undefined && dayjs().isAfter(value)) {
     return createError();
   }
   return true;

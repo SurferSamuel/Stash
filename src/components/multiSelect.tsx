@@ -1,15 +1,18 @@
+import { useFormikContext } from "formik";
+import { SyntheticEvent } from "react";
+
+// Material UI
 import Autocomplete, { createFilterOptions } from "@mui/material/Autocomplete";
+import { FilterOptionsState } from "@mui/material";
 import TextField from "@mui/material/TextField";
 
-interface Option {
-  label: string;
-}
+// Types
+import { Option } from "../../electron/types";
 
 interface Props {
   label: string;
   valueName: string;
   value: Option[];
-  handleChange: (e: { target: { name: string; value: Option[] } }) => void;
   options: Option[];
   allowNewOptions?: boolean;
 }
@@ -17,18 +20,23 @@ interface Props {
 const filter = createFilterOptions();
 
 const MultiSelectInput = (props: Props) => {
-  const { label, valueName, value, handleChange, options, allowNewOptions } = props;
+  const { setFieldValue } = useFormikContext();
+  const { label, valueName, value, options, allowNewOptions } = props;
 
-  const handleChangeInput = (event, newValues) => {
+  /**
+   * Handles value change when input is updated.
+   * @param event Native event
+   * @param newValue Value from input
+   */
+  const handleChangeInput = (event: SyntheticEvent, newValues: (Option | string)[]) => {
     // If newArray is empty, then set value as empty array
     if (newValues.length === 0) {
-      handleChange({ target: { name: valueName, value: [] } });
+      setFieldValue(valueName, []);
       return;
     }
 
     // New value will always be the last value in the array
-    const lastIndex = newValues.length - 1;
-    const newValue = newValues[lastIndex];
+    const newValue = newValues[newValues.length - 1];
   
     // If new value was created by pressing enter
     if (typeof newValue === "string") {
@@ -37,27 +45,59 @@ const MultiSelectInput = (props: Props) => {
 
       // If the new value is an existing option that is not currently selected
       if (existingOption && !selected) {
-        const updatedValues = [...value, existingOption];
-        handleChange({ target: { name: valueName, value: updatedValues } });
+        setFieldValue(valueName, [...value, existingOption]);
       } 
       // If allowing new options
       else if (allowNewOptions && !existingOption) {
-        const updatedValues = [...value, { label: newValue }];
-        handleChange({ target: { name: valueName, value: updatedValues } });
+        setFieldValue(valueName, [...value, { label: newValue }]);
       }
     }
-    // If new value created dynamically on dropdown ("Add [value]")
-    else if (newValue && newValue.inputValue) {
+    // If new value created dynamically on dropdown "Add [inputValue]"
+    else if (newValue.inputValue !== undefined) {
       const newOption = { label: newValue.inputValue };
       const updatedValues = [...value, newOption];
-      handleChange({ target: { name: valueName, value: updatedValues } });
+      setFieldValue(valueName, updatedValues);
     } 
     // If the new value was from clicking a normal option on dropdown
     else {
-      handleChange({ target: { name: valueName, value: newValues } });
+      setFieldValue(valueName, newValues);
+    }
+  };
+
+  /**
+   * Handles filtering which options to render in the dropdown.
+   * @param options All options of the component
+   * @param params The state of the component
+   * @returns The options to render
+   */
+  const handleFilterOptions = (options: (Option | string)[], state: FilterOptionsState<Option | string>) => {
+    const filtered = filter(options, state) as (Option | string)[];
+    const { inputValue } = state;
+
+    // Check if option already exists
+    const existingOption = options.some(option => {
+      return (typeof option === "string")
+        ? inputValue === option
+        : inputValue === option.label
+    });
+
+    // Check if option is already selected
+    const selectedOption = value.some(option => {
+      return (typeof option === "string")
+        ? inputValue === option
+        : inputValue === option.label
+    });
+    
+    // Suggest the creation of a new value
+    if (allowNewOptions && inputValue !== "" && !existingOption && !selectedOption) {
+      filtered.push({
+        inputValue,
+        label: `Add "${inputValue}"`,
+      });
     }
 
-  };
+    return filtered;
+  }
 
   return (
     <Autocomplete
@@ -66,46 +106,28 @@ const MultiSelectInput = (props: Props) => {
       clearOnBlur
       handleHomeEndKeys
       disableCloseOnSelect
+      value={value}
       options={options}
       onChange={handleChangeInput}
-      value={value}
+      filterOptions={handleFilterOptions}
       sx={{ gridColumn: "span 2" }}
-      renderOption={(props, option) => <li {...props}>{option.label}</li>}
-      renderInput={(params) => (
-        <TextField
-          {...params}
-          label={label}
-          inputProps={{
-            ...params.inputProps,
-          }}
-        />
+      renderOption={(props, option) => (
+        <li {...props}>
+          {typeof option === "string" ? option : option.label}
+        </li>
       )}
+      renderInput={(params) => <TextField {...params} label={label} />}
       getOptionLabel={(option) => {
-        // Value selected with enter, right from the input
+        // Value selected with enter from the input
         if (typeof option === "string") {
           return option;
         }
-        // Add option created dynamically
-        if (option.inputValue) {
+        // Add option created dynamically on dropdown
+        if (option.inputValue !== undefined) {
           return option.inputValue;
         }
         // Regular option
         return option.label;
-      }}
-      filterOptions={(options, params) => {
-        const filtered = filter(options, params);
-        const { inputValue } = params;
-        // Suggest the creation of a new value
-        const isExisting =
-          options.some((option) => inputValue === option.label) ||
-          value.some((option) => inputValue === option.label);
-        if (allowNewOptions && inputValue !== "" && !isExisting) {
-          filtered.push({
-            inputValue,
-            label: `Add "${inputValue}"`,
-          });
-        }
-        return filtered;
       }}
     />
   );

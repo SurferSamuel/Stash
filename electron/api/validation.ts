@@ -76,7 +76,7 @@ export const validateASXCode = async (asxcode: string, existing: boolean) => {
     const unitPrice = quote.regularMarketPrice.toString();
     return { status: "Valid", companyName, unitPrice };
   } catch (error) {
-    writeLog(error);
+    writeLog(`[validateASXCode]: ${error}`);
     return { status: "ERROR: Could not fetch quote", companyName: "", unitPrice: undefined };
   }
 }

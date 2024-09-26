@@ -38,7 +38,7 @@ const stream = fs.createWriteStream(logPath, { flags: "a" });
  */
 export const writeLog = (message: string) => {
   const time = dayjs().format("HH:mm:ss");
-  stream.write(`[${time}]: ${message} \n`);
+  stream.write(`[${time}] ${message} \n`);
 }
 
 // Write when the log was made

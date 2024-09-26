@@ -1,4 +1,5 @@
 import { Dispatch, SetStateAction } from "react";
+import { Option } from "../../../electron/types";
 import { TestContext } from "yup";
 
 let prevErrorMsg: string = undefined;
@@ -29,7 +30,8 @@ export const validateASXCode = (
   setLoading: Dispatch<SetStateAction<boolean>>,
   setUnitPrice: Dispatch<SetStateAction<string>>
 ) => {
-  return async (value: string, context: TestContext) => {
+  return async (currentOption: Option, context: TestContext) => {
+    const value = currentOption.label;
     const { createError } = context;
 
     // If asxcode input is being actively edited and has changed since last call

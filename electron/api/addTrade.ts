@@ -8,14 +8,15 @@ import {
 } from "../types";
 
 /**
- * Returns the number of available shares the users own for the given asxcode.
+ * Returns the number of available shares the account id owns for the given asxcode.
+ * Returns 0 if the account id doesn't exist.
  * 
  * @param asxcode ASX code to check
- * @param user Provided user
+ * @param accountId Account id to check
  * @returns Number of available shares
  * @throws Throws an error if asxcode does not exist in the storage
  */
-export const availableShares = (asxcode: string, user: string) => {
+export const availableShares = (asxcode: string, accountId: string) => {
   // Get existing data from storage
   const data = getData("companies");
 
@@ -25,9 +26,8 @@ export const availableShares = (asxcode: string, user: string) => {
     throw new Error(`ERROR: Could not find data for ${asxcode}`);
   }
 
-  // Return the number of available shares for the user (0 if the user does not exist)
   return companyData.currentShares
-    .filter(entry => entry.user === user)
+    .filter(entry => entry.accountId === accountId)
     .reduce((acc, cur) => acc + Number(cur.quantity), 0);
 }
 
@@ -45,9 +45,14 @@ export const buyShare = (values: AddTradeValues, gstPercent: string) => {
   const data = getData("companies");
 
   // If the company's data could not be found...
-  const companyData = data.find(entry => entry.asxcode === values.asxcode);
+  const companyData = data.find(entry => entry.asxcode === values.asxcode.label);
   if (companyData === undefined) {
-    throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
+    throw new Error(`ERROR: Could not find data for ${values.asxcode.label}.`);
+  }
+
+  // Ensure accountId was given
+  if (values.account.accountId === undefined) {
+    throw new Error("ERROR: AccountId is missing.");
   }
 
   // Calculate values
@@ -59,7 +64,7 @@ export const buyShare = (values: AddTradeValues, gstPercent: string) => {
 
   // Construct new share entry
   const shareEntry: CurrentShareEntry = {
-    user: values.user,
+    accountId: values.account.accountId,
     date: values.date,
     quantity: values.quantity,
     unitPrice: values.unitPrice,
@@ -93,23 +98,28 @@ export const sellShare = (values: AddTradeValues, gstPercent: string) => {
   const data = getData("companies");
 
   // If the company's data could not be found...
-  const companyData = data.find(entry => entry.asxcode === values.asxcode);
+  const companyData = data.find(entry => entry.asxcode === values.asxcode.label);
   if (companyData === undefined) {
-    throw new Error(`ERROR: Could not find data for ${values.asxcode}`);
+    throw new Error(`ERROR: Could not find data for ${values.asxcode}.`);
   }
 
-  // Retrieve all of the current shares for the user, removing any entries with buy dates
-  // after the sell date, sorted in date ascending order
+  // Ensure accountId was given
+  if (values.account.accountId === undefined) {
+    throw new Error("ERROR: AccountId is missing.");
+  }
+
+  // Retrieve all of the current shares for the account id, removing any entries with
+  // buy dates after the sell date, sorted in date ascending order
   const currentShares = companyData.currentShares
-    .filter(entry => entry.user === values.user && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
+    .filter(entry => entry.accountId === values.account.accountId && !dayjsDate(entry.date).isAfter(dayjsDate(values.date)))
     .sort((a, b) => dayjsDate(a.date).isBefore(dayjsDate(b.date)) ? -1 : 1);
 
-  // If the user has no shares
+  // If the account id owns no shares
   if (currentShares.length === 0) {
-    throw new Error(`ERROR: ${values.user} has no units for ${values.asxcode}`);
+    throw new Error(`ERROR: ${values.account.label} has no units for ${values.asxcode.label}`);
   }
 
-  // Check that the user owns enough shares for the trade
+  // Check that the account id owns enough shares for the trade
   const totalOwned = currentShares.reduce((acc, cur) => acc + Number(cur.quantity), 0);
   if (totalOwned < Number(values.quantity)) {
     throw new Error(`ERROR: Insufficient quantity. Required: ${values.quantity}. Owned: ${totalOwned}`);
@@ -155,7 +165,7 @@ export const sellShare = (values: AddTradeValues, gstPercent: string) => {
 
     // Add new entry into sell history
     companyData.sellHistory.push({
-      user: values.user,
+      accountId: values.account.accountId,
       buyDate: entry.date,
       sellDate: values.date,
       quantity: sellQuantity.toString(),

@@ -27,7 +27,7 @@ export const tokens = (mode: PaletteMode): ColorType => ({
           100: "#ffffff", // Primary text
           200: "#bbbbbb", 
           300: "#aaaab2", // Secondary text
-          400: "#4a4a4a",
+          400: "#7a7a7f",
           500: "#3a3a3f", // Scrollbar hover, Borders & Input Outline
           600: "#27272a", // Sidebar selected bg, Scrollbar handle, Dialog Outline
           700: "#212124", // Sidebar hover bg & card UI 
@@ -188,6 +188,13 @@ export const themeSettings = (mode: PaletteMode) => {
           },
         },
       },
+      MuiAlert: {
+        styleOverrides: {
+          root: {
+            fontSize: 14,
+          },
+        },
+      },
       MuiAutocomplete: {
         styleOverrides: {
           paper: {
@@ -265,6 +272,8 @@ export const themeSettings = (mode: PaletteMode) => {
         styleOverrides: {
           root: {
             color: colors.grey[300],
+            fontSize: 15,
+            fontWeight: 400,
           },
         },
       },
@@ -281,6 +290,14 @@ export const themeSettings = (mode: PaletteMode) => {
         styleOverrides: {
           root: {
             borderColor: colors.grey[500],
+          },
+        },
+      },
+      MuiFormHelperText: {
+        styleOverrides: {
+          root: {
+            fontSize: 12,
+            fontWeight: 600,
           },
         },
       },

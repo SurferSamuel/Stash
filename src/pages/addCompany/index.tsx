@@ -9,7 +9,6 @@ import handleFormSubmit from "./handleFormSubmit";
 // Yup validation functions
 import {
   cleanUpValidation,
-  futureDate,
   greaterThanHighPrice,
   lessThanLowPrice,
   missingPrice,
@@ -153,25 +152,25 @@ const AddCompany = () => {
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("noteDate", "Required", noteDateRequired),
+        .test("date-required", "Required", noteDateRequired),
       notificationDate: yup
         .date()
         .typeError("Invalid Date")
         .nullable()
-        .test("notifDate1", "Required", notificationDateRequired)
-        .test("notifDate2", "Date must be in the future", futureDate),
+        .test("date-required", "Required", notificationDateRequired)
+        .test("future-date", "Date must be in the future", (value) => dayjs().isBefore(value)),
       notificationPriceHigh: yup
         .number()
         .typeError("Invalid Price")
         .positive("Price must be positive")
-        .test("notifPriceH1", "Price is missing", missingPrice)
-        .test("notifPriceH1", "Upper limit must be above lower limit", lessThanLowPrice),
+        .test("price-missing", "Price is missing", missingPrice)
+        .test("price-limits", "Upper limit must be above lower limit", lessThanLowPrice),
       notificationPriceLow: yup
         .number()
         .typeError("Invalid Price")
         .positive("Price must be positive")
-        .test("notifPriceL1", "Price is missing", missingPrice)
-        .test("notifPriceL2", "Lower limit must be below upper limit", greaterThanHighPrice),
+        .test("price-missing", "Price is missing", missingPrice)
+        .test("price-limits", "Lower limit must be below upper limit", greaterThanHighPrice),
     });
 
   // A helper function. Open accordion's that have errors within them,
@@ -227,7 +226,7 @@ const AddCompany = () => {
                 onChange={handleChange}
                 error={!!errors.asxcode}
                 helperText={errors.asxcode}
-                inputProps={{ style: { textTransform: "uppercase" } }}
+                slotProps={{ htmlInput: { style: { textTransform: "uppercase" }}}}
                 sx={{ gridColumn: isNonMobile ? "span 2" : "span 4" }}
               />
               {/* Loading Icon */}
@@ -282,7 +281,6 @@ const AddCompany = () => {
                   {/* Operating Countries Input */}
                   <OperatingCountriesInput
                     values={values.operatingCountries}
-                    handleChange={handleChange}
                     options={countriesList}
                   />
                   {/* Financial Status Input */}
@@ -291,7 +289,6 @@ const AddCompany = () => {
                     label="Financial Status"
                     valueName="financialStatus"
                     value={values.financialStatus}
-                    handleChange={handleChange}
                     options={financialStatusList}
                   />
                   {/* Mining Status Input */}
@@ -300,7 +297,6 @@ const AddCompany = () => {
                     label="Mining Status"
                     valueName="miningStatus"
                     value={values.miningStatus}
-                    handleChange={handleChange}
                     options={miningStatusList}
                   />
                   {/* Resources Input */}
@@ -309,7 +305,6 @@ const AddCompany = () => {
                     label="Resources"
                     valueName="resources"
                     value={values.resources}
-                    handleChange={handleChange}
                     options={resourcesList}
                   />
                   {/* Products Input */}
@@ -318,7 +313,6 @@ const AddCompany = () => {
                     label="Products"
                     valueName="products"
                     value={values.products}
-                    handleChange={handleChange}
                     options={productsList}
                   />
                   {/* Recommendations Input */}
@@ -327,7 +321,6 @@ const AddCompany = () => {
                     label="Recommendations"
                     valueName="recommendations"
                     value={values.recommendations}
-                    handleChange={handleChange}
                     options={recommendationList}
                   />
                   {/* Monitor Input */}
@@ -336,7 +329,6 @@ const AddCompany = () => {
                     label="Monitor"
                     valueName="monitor"
                     value={values.monitor}
-                    handleChange={handleChange}
                     options={monitorList}
                   />
                   {/* Reasons to Buy Input */}

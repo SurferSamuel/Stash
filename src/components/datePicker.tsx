@@ -62,7 +62,7 @@ const DatePicker = (props: Props) => {
             name: valueName,
             label: label,
             error: !!touched[valueName] && !!errors[valueName],
-            helperText: touched[valueName] && errors[valueName] && String(errors[valueName]),
+            helperText: touched[valueName] && (errors[valueName] as string),
           },
           actionBar: {
             actions: [],

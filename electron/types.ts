@@ -6,22 +6,29 @@ export { PortfolioFormValues as PortfolioFilterValues } from "../src/pages/portf
 export { HistoricalOptionsEventsHistory } from "yahoo-finance2/dist/esm/src/modules/historical";
 import { ChartResultArrayQuote } from "yahoo-finance2/dist/esm/src/modules/chart";
 
-// Valid option keys, used for company details and users
+// Valid option keys, used for company details
 export type OptionKey =
   | "financialStatus"
   | "miningStatus"
   | "monitor"
   | "products"
   | "recommendations"
-  | "resources"
-  | "users";
+  | "resources";
 
 // All valid keys
-export type Key = OptionKey | "countries" | "companies" | "settings";
+export type Key = 
+  | OptionKey 
+  | "countries"
+  | "accounts"
+  | "companies"
+  | "historicals"
+  | "settings";
 
 // Dropdown option type
 export interface Option {
-  label: string;
+  label: string;        // Displayed on dropdown
+  inputValue?: string;  // For dynamically made options "Add [inputValue]"
+  accountId?: string;   // Optional for account dropdown
 }
 
 // Dropdown country type
@@ -30,6 +37,13 @@ export interface Country {
   code: string;
   phone: string;
   suggested?: boolean;
+}
+
+// Account type
+export interface Account {
+  name: string;
+  accountId: string;
+  created: string;
 }
 
 // Written note type
@@ -61,7 +75,7 @@ export interface ValidateASXReturn {
 
 // CURRENT share entry type
 export interface CurrentShareEntry {
-  user: string;                 // User who brought the shares
+  accountId: string;            // Account id that owns the share
   date: string;                 // Date of when the shares were originally brought
   quantity: string;             // Number of current outstanding shares
   unitPrice: string;            // Price paid for 1 share at the time of purchase
@@ -71,7 +85,7 @@ export interface CurrentShareEntry {
 
 // BUY history entry type
 export interface BuyHistoryEntry {
-  user: string;                 // User who brought the shares
+  accountId: string;            // Account id that brought the share
   date: string;                 // Date of when the shares were brought
   quantity: string;             // Number of shares brought
   unitPrice: string;            // Price paid for 1 share at the time of purchase
@@ -82,7 +96,7 @@ export interface BuyHistoryEntry {
 
 // SELL history entry type
 export interface SellHistoryEntry {
-  user: string;                 // User who sold the shares
+  accountId: string;            // Account id that sold the share
   buyDate: string;              // Date of when the shares were brought
   sellDate: string;             // Date of when the shares were sold
   quantity: string;             // Number of shares sold
@@ -127,8 +141,12 @@ export interface Settings {
   brokerageAutoFill: string;
 }
 
-// Any data type, returned from getData
-export type Data = Option[] | Country[] | CompanyData[] | Settings;
+// Historical entry type
+export interface HistoricalEntry {
+  asxcode: string;
+  lastUpdated: string;
+  historical: ChartResultArrayQuote[];
+}
 
 // Values type for AddCompany()
 // Override dates with type "string" instead of type "Dayjs" (since can't send "Dayjs" types over IPC)
@@ -161,34 +179,28 @@ export interface PortfolioTableRow {
   weightPerc: number;        // Weight % using market value
 }
 
-// Return type of getPortfolioTableData()
-export interface PortfolioTableData {
-  totalValue: string,             // Total value of the portfolio (as of today)
-  dailyChange: string,            // Today's change in portfolio value
-  dailyChangePerc: string,        // Today's change in portfolio value %
-  totalChange: string,            // Total change in portfolio value
-  totalChangePerc: string,        // Total change in portfolio value %
-  rows: PortfolioTableRow[],      // Row data for the table
-  skipped: string[],              // Companies that were skipped when calculating
-}
-
-// Used in getPortfolioGraphData()
-export interface HistoricalEntry {
-  asxcode: string;
-  lastUpdated: string;
-  historical: ChartResultArrayQuote[];
-}
-
 // Data point type for the portfolio graph
-export interface PortfolioDataPoint {
+export type GraphDataPoint = {
   id: number;
   date: Date;
   value: number;
-  [key: string]: number | Date; // To keep TS happy
 }
 
 // Graph range in months
 export type GraphRange = 1 | 3 | 6 | 12 | 60;
 
-// Return type of getPortfolioGraphData()
-export type PortfolioGraphData = Record<GraphRange, PortfolioDataPoint[]>
+// Prop types for portfolio value text component
+export interface PortfolioText {
+  totalValue: string,      // Total value of the portfolio (as of today)
+  dailyChange: string,     // Today's change in portfolio value
+  dailyChangePerc: string, // Today's change in portfolio value %
+  totalChange: string,     // Total change in portfolio value
+  totalChangePerc: string, // Total change in portfolio value %
+}
+
+// Return type of getPortfolioData()
+export interface PortfolioData {
+  graph: Record<GraphRange, GraphDataPoint[]>;
+  table: PortfolioTableRow[];
+  text: PortfolioText;
+}

@@ -6,26 +6,29 @@ import fs from "fs";
 
 // Types
 import { 
+  Account,
   CompanyData, 
   Country, 
-  Data, 
+  HistoricalEntry, 
   Key, 
   Option, 
   OptionKey,
 } from "../types";
 
+// Overload signatures
+export function getData(key: OptionKey): Option[];
+export function getData(key: "countries"): Country[];
+export function getData(key: "accounts"): Account[];
+export function getData(key: "companies"): CompanyData[];
+export function getData(key: "historicals"): HistoricalEntry[];
+export function getData(key: "settings"): Settings;
+
 /**
  * Gets the data for a specific key from the storage file.
- * 
  * @param key Provided key
  * @returns The data saved for the specific key
  */
-export const getData: {
-  (key: OptionKey): Option[];
-  (key: "countries"): Country[];
-  (key: "companies"): CompanyData[];
-  (key: "settings"): Settings;
-} = (key: Key): any => {
+export function getData(key: Key) {
   // Attempt to get data from storage
   let data = storage.getSync(key);
 
@@ -42,17 +45,25 @@ export const getData: {
     } else {
       // Encase no file exists, set data to an empty array
       data = [];
-      writeLog(`WARNING: Failed to read default values from [${fileName}]`);
+      writeLog(`[getData]: Failed to read default values from [${fileName}]`);
     }
     
     // Save data to storage
     storage.set(key, data, (error) => {
-      if (error) writeLog(`Error in storage.set: ${error}`);
+      if (error) writeLog(`[storage.set]: ${error}`);
     });
   }
 
   return data;
-};
+}
+
+// Overload signatures
+export function setData(key: OptionKey, data: Option[]): void;
+export function setData(key: "countries", data: Country[]): void;
+export function setData(key: "accounts", data: Account[]): void;
+export function setData(key: "companies", data: CompanyData[]): void;
+export function setData(key: "historicals", data: HistoricalEntry[]): void;
+export function setData(key: "settings", data: Settings): void;
 
 /**
  * Saves the data for a specific key to the storage file.
@@ -60,11 +71,11 @@ export const getData: {
  * @param key Provided key
  * @param data The data to save
  */
-export const setData = (key: Key, data: Data) => {
+export function setData(key: Key, data: object): void {
   storage.set(key, data, (error) => {
-    if (error) writeLog(`Error in storage.set: ${error}`);
+    if (error) writeLog(`[storage.set]: ${error}`);
   });
-};
+}
 
 /**
  * Gets the path to the storage folder.
