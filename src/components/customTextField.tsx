@@ -43,11 +43,12 @@ const CurrencyTextField = (props: Props) => {
   return (
     <TextField
       {...otherProps}
-      InputProps={{
-        startAdornment: currencyInput && <InputAdornment position="start">$</InputAdornment>,
-        endAdornment: percentInput && <InputAdornment position="end">%</InputAdornment>,
-        inputComponent:
-          (currencyInput || numberInput || percentInput) && (NumericFormatCustom as any),
+      slotProps={{
+        input: {
+          startAdornment: currencyInput && <InputAdornment position="start">$</InputAdornment>,
+          endAdornment: percentInput && <InputAdornment position="end">%</InputAdornment>,
+          inputComponent: (currencyInput || numberInput || percentInput) && (NumericFormatCustom as any),
+        }
       }}
     />
   );
