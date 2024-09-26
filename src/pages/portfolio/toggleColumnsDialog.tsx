@@ -60,7 +60,7 @@ const ToggleColumnsDialog = (props: Props) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle variant="h4" fontWeight={600}>
+      <DialogTitle variant="h3" fontWeight={600}>
         Toggle Columns
       </DialogTitle>
       <DialogContent>

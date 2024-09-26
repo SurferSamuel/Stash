@@ -67,7 +67,7 @@ const FilterOptionsDialog = (props: Props) => {
       open={open}
       onClose={handleClose}
     >
-      <DialogTitle variant="h4" fontWeight={500}>
+      <DialogTitle variant="h3" fontWeight={500}>
         Filter Options
       </DialogTitle>
       <DialogContent>
