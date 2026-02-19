@@ -30,7 +30,7 @@
     "electron-squirrel-startup": "^1.0.1",
     "kbar": "^0.1.0-beta.48",
     "lightweight-charts": "^5.0.8",
-    "non.geist": "^1.0.4",
+    "non.geist": "^2.0.1",
     "notistack": "^3.0.2",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
