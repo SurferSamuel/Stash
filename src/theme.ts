@@ -93,7 +93,7 @@ const theme = createTheme({
           200: '#292929',
           300: '#3d3d3d',
           400: '#424242',
-          500: '#bdbdbd',
+          500: '#646464',
           600: '#cecece',
           700: '#dfdfdf',
           800: '#efefef',
