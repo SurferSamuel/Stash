@@ -28,7 +28,7 @@
     "dayjs": "^1.11.13",
     "electron-json-storage": "^4.6.0",
     "electron-squirrel-startup": "^1.0.1",
-    "kbar": "^0.1.0-beta.46",
+    "kbar": "^0.1.0-beta.48",
     "lightweight-charts": "^5.0.8",
     "non.geist": "^1.0.4",
     "notistack": "^3.0.2",
@@ -39,7 +39,7 @@
     "react-pro-sidebar": "^1.1.0",
     "react-router-dom": "^7.6.3",
     "use-debounce": "^10.0.5",
-    "yahoo-finance2": "^2.13.3",
+    "yahoo-finance2": "^3.13.0",
     "zod": "^3.25.75"
   },
   "devDependencies": {

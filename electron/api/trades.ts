@@ -1,7 +1,8 @@
 import { getData, setData } from '@storage';
 import { Holding, Security } from '@types';
-import yahooFinance from 'yahoo-finance2';
 import { dayjsParse } from '@utils';
+
+import { QuoteService } from '../quotes';
 
 export interface TradeData {
   accountId: string;
@@ -21,13 +22,14 @@ export interface TradeData {
  * @throws If `yahooFinance.quote()` failed or the price was not found
  */
 export const lastPrice = async (symbol: string) => {
-  const quoteResult = await yahooFinance.quote(symbol);
+  const quoteService = new QuoteService();
+  await quoteService.init();
 
-  if (!('regularMarketPrice' in quoteResult)) {
-    throw new Error(`ERROR: Could not find regularMarketPrice for ${symbol}.`);
-  }
+  await quoteService.requestQuoteData([symbol], []);
+  const { quote } = quoteService.getQuote(symbol);
 
-  return quoteResult.regularMarketPrice;
+  // Safe deconstruction (fields checked inside .getQuote())
+  return quote.regularMarketPrice!;
 };
 
 /**

@@ -1,9 +1,10 @@
-import { Quote, QuoteField } from 'yahoo-finance2/dist/esm/src/modules/quote';
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
 import { getData } from '@storage';
 import { writeLog } from '@logs';
+import { Quote } from '@types';
 
-const quoteFields: QuoteField[] = ['regularMarketPrice', 'regularMarketPreviousClose', 'currency', 'exchange'];
+const yahooFinance = new YahooFinance();
+const quoteFields = ['regularMarketPrice', 'regularMarketPreviousClose', 'currency', 'exchange'];
 
 /**
  * A helper class that handles fetching quote data.
