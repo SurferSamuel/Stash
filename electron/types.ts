@@ -84,7 +84,7 @@ export type SecurityOption = {
   type: string;
 };
 
-import { Quote } from "yahoo-finance2/script/src/modules/quote";
+import { Quote } from 'yahoo-finance2/script/src/modules/quote';
 export type { Quote };
 
 export type Settings = {
