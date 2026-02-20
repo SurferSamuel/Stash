@@ -253,6 +253,7 @@ const theme = createTheme({
           border: 'none',
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
+          backgroundColor: theme.palette.grey[900],
           '--DataGrid-rowBorderColor': theme.palette.grey[500],
           '& .MuiDataGrid-columnHeader--last .MuiDataGrid-columnSeparator': {
             display: 'none',
