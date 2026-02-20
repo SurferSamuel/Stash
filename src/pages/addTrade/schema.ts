@@ -6,7 +6,7 @@ const schemaForQuantity = z
     accountId: z.string().min(1, { message: 'Required' }),
     symbol: z.string().min(1, { message: 'Required' }),
     type: z.enum(['BUY', 'SELL']),
-    quantity: z.number().positive(),
+    quantity: z.number({ message: 'Required' }).positive(),
   })
   .refine(
     async ({ symbol, accountId, type, quantity }) => {
@@ -26,8 +26,8 @@ const schemaForRest = z.object({
   date: z
     .custom<Dayjs>((val) => val instanceof dayjs, 'Invalid date')
     .refine((val) => !val.isAfter(dayjs(), 'day'), { message: 'Date can\'t be in the future' }),
-  price: z.number().positive(),
-  brokerage: z.number().nonnegative(),
+  price: z.number({ message: 'Required' }).positive(),
+  brokerage: z.number({ message: 'Required' }).nonnegative(),
 });
 
 export const schema = z.intersection(schemaForQuantity, schemaForRest);

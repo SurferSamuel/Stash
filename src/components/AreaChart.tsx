@@ -52,7 +52,7 @@ const Chart = ({ data = [], currency = 'AUD', defaultRange, loading }: ChartProp
       height: 350,
       layout: {
         background: { color: 'transparent' },
-        fontFamily: 'Geist Variable',
+        fontFamily: 'Geist-Variable',
         textColor: palette.primary.main,
       },
       timeScale: {

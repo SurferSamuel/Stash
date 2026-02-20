@@ -1,7 +1,6 @@
-import { Quote } from 'yahoo-finance2/dist/esm/src/modules/quote';
 import dayjs from 'dayjs';
 
-import { Account, AccountData, Historical, Security } from '@types';
+import { Account, AccountData, Historical, Quote, Security } from '@types';
 import { getData, getHistoricalData, setData } from '@storage';
 import { dayjsParse } from '@utils';
 import { writeLog } from '@logs';
@@ -196,7 +195,7 @@ class AccountDataAssembler {
         continue;
       }
 
-      // Safe deconstruction (fields checked prior in this.getQuote())
+      // Safe deconstruction (fields checked prior in .getQuote())
       const previousPrice = quote.regularMarketPreviousClose!;
       const lastPrice = quote.regularMarketPrice!;
 

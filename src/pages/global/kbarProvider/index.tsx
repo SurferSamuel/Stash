@@ -50,7 +50,7 @@ const CommandBar = () => {
     border: 'none',
     background: 'transparent',
     color: palette.grey[100],
-    fontFamily: 'Geist Variable, Arial, sans-serif',
+    fontFamily: 'Geist-Variable, Arial, sans-serif',
   };
 
   return (

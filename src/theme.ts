@@ -93,7 +93,7 @@ const theme = createTheme({
           200: '#292929',
           300: '#3d3d3d',
           400: '#424242',
-          500: '#bdbdbd',
+          500: '#646464',
           600: '#cecece',
           700: '#dfdfdf',
           800: '#efefef',
@@ -138,30 +138,30 @@ const theme = createTheme({
     },
   },
   typography: {
-    fontFamily: 'Geist Variable, Arial, sans-serif',
+    fontFamily: 'Geist-Variable, Arial, sans-serif',
     fontSize: 12,
     h1: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 40,
     },
     h2: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 32,
     },
     h3: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 24,
     },
     h4: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 20,
     },
     h5: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 16,
     },
     h6: {
-      fontFamily: 'Geist Variable, Arial, sans-serif',
+      fontFamily: 'Geist-Variable, Arial, sans-serif',
       fontSize: 15,
     },
   },
@@ -253,6 +253,7 @@ const theme = createTheme({
           border: 'none',
           borderBottomLeftRadius: 0,
           borderBottomRightRadius: 0,
+          backgroundColor: theme.palette.grey[900],
           '--DataGrid-rowBorderColor': theme.palette.grey[500],
           '& .MuiDataGrid-columnHeader--last .MuiDataGrid-columnSeparator': {
             display: 'none',

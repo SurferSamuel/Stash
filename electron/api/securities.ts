@@ -1,8 +1,18 @@
+import YahooFinance from 'yahoo-finance2';
+import { z } from 'zod';
+
+import { Quote, SecurityOption } from '@types';
 import { getData, setData } from '@storage';
-import yahooFinance from 'yahoo-finance2';
-import { SecurityOption } from '@types';
-import { Quote } from 'yahoo-finance2/dist/esm/src/modules/quote';
 import { writeLog } from '@logs';
+
+const yahooFinance = new YahooFinance();
+
+const YahooQuoteSchema = z.object({
+  symbol: z.string(),
+  longname: z.string(),
+  typeDisp: z.string(),
+  exchange: z.string(),
+});
 
 /**
  * Returns securities that match the given search query from Yahoo Finance.
@@ -20,13 +30,21 @@ export const searchSecurities = async (query: string) => {
   const returnArray: SecurityOption[] = [];
 
   for (const quote of searchResults.quotes) {
-    // Ensure fields are present and remove any quotes already added
-    if ('symbol' in quote && 'longname' in quote && !securities.has(quote.symbol)) {
+    // Validate that the quote matches the expected schema
+    const parsed = YahooQuoteSchema.safeParse(quote);
+    if (!parsed.success) {
+      writeLog(`[searchSecurities]: Skipping quote due to schema validation failure: ${JSON.stringify(quote)}}`);
+      continue;
+    }
+
+    const { symbol, longname, typeDisp, exchange } = parsed.data;
+
+    if (!securities.has(symbol)) {
       returnArray.push({
-        symbol: quote.symbol,
-        name: (quote.longname as string).toUpperCase(),
-        type: quote.typeDisp,
-        exchange: quote.exchange,
+        symbol,
+        name: longname.toUpperCase(),
+        type: typeDisp,
+        exchange,
       });
     }
   }
@@ -50,7 +68,7 @@ export const addSecurity = async (data: SecurityOption) => {
   }
 
   // We still need to fetch the currency for the security
-  // (since it doesn't come with yahooFinance.search() results)
+  // since it doesn't come with yahooFinance.search() results
   let quote: Quote;
   try {
     quote = await yahooFinance.quote(symbol, { fields: ['currency', 'exchange'] });

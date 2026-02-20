@@ -1,5 +1,5 @@
 import storage from 'electron-json-storage';
-import yahooFinance from 'yahoo-finance2';
+import YahooFinance from 'yahoo-finance2';
 import { app, shell } from 'electron';
 import dayjs from 'dayjs';
 
@@ -27,6 +27,8 @@ export type Data = {
   exchangeRates: Map<string, ExchangeRate>; // K = currency
   settings: Settings;
 };
+
+const yahooFinance = new YahooFinance();
 
 let data: Data;
 

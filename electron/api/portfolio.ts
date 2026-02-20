@@ -1,4 +1,3 @@
-import { Quote } from 'yahoo-finance2/dist/esm/src/modules/quote';
 import dayjs from 'dayjs';
 
 import { getData, getExchangeRateData, getHistoricalData } from '@storage';
@@ -13,6 +12,7 @@ import {
   HistoricalEntry,
   PortfolioData,
   PortfolioFilterValues,
+  Quote,
   Security,
   TradeRow,
 } from '@types';
@@ -299,7 +299,7 @@ class PortfolioDataAssembler {
         continue;
       }
 
-      // Safe deconstruction (fields checked prior in this.getQuote())
+      // Safe deconstruction (fields checked inside .getQuote())
       const previousPrice = quote.regularMarketPreviousClose!;
       const lastPrice = quote.regularMarketPrice!;
 
