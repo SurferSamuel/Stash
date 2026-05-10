@@ -1,15 +1,7 @@
-<p align="center">
-  <a href="https://github.com/samuel-johnston/Stash">
-    <img src="src/assets/icons/icon.svg" width="120px" align="center" alt="Stash logo">
-  </a>
-  <h1 align="center">Stash</h1>
-  <h3 align="center">An Investment Tracker App</h3>
-</p>
+# Tauri + React + Typescript
 
-Stash is a desktop investment tracker app built with [Electron](https://electronjs.org) and [React](https://react.dev). Stash empowers individuals to track their investment portfolios, including stocks, ETFs, and cryptocurrencies, helping them to make data-driven decisions.
+This template should help get you started developing with Tauri, React and Typescript in Vite.
 
-This software is designed for personal use only.
+## Recommended IDE Setup
 
-![image](https://github.com/user-attachments/assets/f8f5e29a-07a4-4bdb-b076-863564894416)
-
-Executables for MacOS and Windows can be found under [releases](https://github.com/samuel-johnston/Stash/releases).
+- [VS Code](https://code.visualstudio.com/) + [Tauri](https://marketplace.visualstudio.com/items?itemName=tauri-apps.tauri-vscode) + [rust-analyzer](https://marketplace.visualstudio.com/items?itemName=rust-lang.rust-analyzer)

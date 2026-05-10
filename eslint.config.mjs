@@ -1,39 +1,34 @@
-import stylistic from '@stylistic/eslint-plugin';
-import reactLint from 'eslint-plugin-react';
-import tsLint from 'typescript-eslint';
-import jsLint from '@eslint/js';
-import globals from 'globals';
+import stylistic from "@stylistic/eslint-plugin";
+import reactLint from "eslint-plugin-react";
+import eslint from "@eslint/js";
+import tseslint from "typescript-eslint";
+import { defineConfig } from "eslint/config";
 
-export default [
+export default defineConfig(
   {
-    files: ['**/*.{ts,tsx}'],
-  },
-  {
-    languageOptions: {
-      globals: { ...globals.browser, ...globals.node },
-    },
+    files: ["**/*.{ts,tsx}"],
   },
   stylistic.configs.customize({
     indent: 2,
-    quotes: 'single',
+    quotes: "double",
     semi: true,
     jsx: true,
-    quoteProps: 'as-needed',
-    arrowParens: 'as-needed',
-    braceStyle: '1tbs',
+    quoteProps: "as-needed",
+    arrowParens: "as-needed",
+    braceStyle: "1tbs",
   }),
-  jsLint.configs.recommended,
-  ...tsLint.configs.recommended,
-  reactLint.configs.flat['jsx-runtime'],
+  eslint.configs.recommended,
+  ...tseslint.configs.recommended,
+  reactLint.configs.flat["jsx-runtime"],
   {
-    ignores: ['node_modules/', '.vite/'],
+    ignores: ["node_modules/", "src-tauri/", "dist/"],
   },
   {
     rules: {
-      '@stylistic/jsx-one-expression-per-line': 'off',
-      '@stylistic/no-multi-spaces': ['error', { ignoreEOLComments: true }],
-      '@typescript-eslint/no-unused-vars': 'off',
-      '@typescript-eslint/no-empty-object-type': 'off',
+      "@stylistic/jsx-one-expression-per-line": "off",
+      "@stylistic/no-multi-spaces": ["error", { ignoreEOLComments: true }],
+      "@typescript-eslint/no-unused-vars": "off",
+      "@typescript-eslint/no-empty-object-type": "off",
     },
   },
-];
+);

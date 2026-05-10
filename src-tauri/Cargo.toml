@@ -1,0 +1,35 @@
+[package]
+name = "stash"
+version = "2.0.0"
+description = "An investment tracker app"
+authors = ["Samuel Johnston"]
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+# The `_lib` suffix may seem redundant but it is necessary
+# to make the lib name unique and wouldn't conflict with the bin name.
+# This seems to be only an issue on Windows, see https://github.com/rust-lang/cargo/issues/8519
+name = "stash_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+tauri-typegen = "0.5.0"
+
+[dependencies]
+tauri = { version = "2", features = [] }
+tauri-plugin-opener = "2"
+tauri-plugin-store = "2.4.2"
+tauri-plugin-log = "2"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+time = "0.3.47"
+rand = "0.10.0"
+tokio = "1.50.0"
+chrono = "0.4.44"
+log = "0.4.29"
+uuid = { version = "1.23.0", features = ["v4"] }
+tauri-plugin-os = "2"
+yahoo_finance_api = "4.1.0"
